@@ -9,4 +9,4 @@ java -Dcom.ibm.msg.client.commonservices.log.status=OFF -Dcom.ibm.msg.client.com
 
 
 
-#rem -Dlog4j.configuration=file:C://Wakkir//Workspaces//intelij//home//wrapper//WrapperServcies//src//main//resources//log4j.properties -Dmq-converter-config-dir=C://Wakkir//Workspaces//intelij//home//wrapper//WrapperServcies//src//main//resources -Dmq-converter-log-dir=C://Wakkir//Workspaces//intelij//home//wrapper//WrapperServcies//logs
+#rem -Dlog4j.configuration=file:C://Wakkir//W3Repo//Workspaces//intelij//home//wrapper//WrapperServcies//src//main//resources//log4j.properties -Dmq-converter-config-dir=C://Wakkir//W3Repo//Workspaces//intelij//home//wrapper//WrapperServcies//src//main//resources -Dmq-converter-log-dir=C://Wakkir//W3Repo//Workspaces//intelij//home//wrapper//WrapperServcies//logs
