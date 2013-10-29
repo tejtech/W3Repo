@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+	<!-- Loads common property placeholders -->
+    <bean
+       id="commonPropertyConfigurer"
+       class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:common.properties</value>
+                <value>classpath:filehandler_master.properties</value>
+            </list>
+        </property>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    </bean>
+
+	<!-- Loads container specific property placeholders-->
+    <bean id="configurer" class="net.aconite.service.config.ContainerSpecificPlaceholderConfigurer"
+          depends-on="commonPropertyConfigurer">
+        <property name="location" value="classpath:filehandler.properties"/>
+    </bean>
+
+    <!-- This Config bean is given access to the Spring ApplicationContext at bootstrap time -->
+    <bean id="contextApplicationContextProvider" class="com.platform7.standardinfrastructure.appconfig.AppConfig"/>
+
+    <!-- WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW -->
+    <!-- MQ Connection factory and common destinations -->
+    <bean id="connectionFactory" class="com.ibm.mq.jms.MQTopicConnectionFactory" depends-on="configurer">
+        <property name="hostName" value="${jms.hostName}"/>
+        <property name="queueManager" value="${jms.queueManager}"/>
+        <property name="transportType" value="${jms.transportType}"/>
+        <property name="port" value="${jms.port}"/>
+        <property name="channel" value="${jms.channel}"/>
+        <property name="useConnectionPooling" value="true"/>
+        <property name="SSLCipherSuite" value="${jms.ciphersuite}"/>
+    </bean>
+
+    <bean id="net.aconite.affina.progress" class="org.springframework.jms.core.JmsTemplate" depends-on="configurer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="defaultDestinationName" value="${destName.progress}"/>
+        <property name="pubSubDomain" value="true"/>
+    </bean>
+
+    <bean id="net.aconite.affina.alarms" class="org.springframework.jms.core.JmsTemplate" depends-on="configurer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="defaultDestinationName" value="${destName.alarms}"/>
+        <property name="pubSubDomain" value="true"/>
+    </bean>
+
+    <!-- WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW -->
+    <!-- Listener on Affina response queue -->
+	<bean id="responseListener" class="net.aconite.service.filehandler.jms.AffinaResponseListener" />
+
+	<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    	<property name="connectionFactory" ref="queueConnectionFactory"/>
+    	<property name="destinationName" value="${affinaResponseQueue}"/>
+    	<property name="messageListener" ref="responseListener" />
+	</bean>
+
+    <!-- WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW -->
+    <!-- DirectoryScanner and dependent beans -->
+	<bean id="timerFactory" class="org.springframework.scheduling.commonj.TimerManagerFactoryBean">
+      <property name="resourceRef" value="true"/>
+      <property name="timerManagerName" value="TimerManagerRef"/>
+      <property name="scheduledTimerListeners">
+         <list>
+            <ref bean="runnableListener"/>
+         </list>
+      </property>
+	</bean>
+
+	<bean id="dirScanner" class="net.aconite.service.scheduling.DirectoryScanner" depends-on="configurer">
+   		<constructor-arg value="${embossDir}"/>
+   		<constructor-arg ref="msgCreator"/>
+	</bean>
+
+	<bean id="msgCreator" class="net.aconite.service.filehandler.MessageCreator" depends-on="configurer">
+   		<constructor-arg ref="msgSender"/>
+   		<constructor-arg value="${templateFile}"/>
+   		<constructor-arg value="${ftpDir}"/>
+   		<constructor-arg ref="counterProvider"/>
+	</bean>
+
+	<bean id="counterProvider" class="net.aconite.service.filehandler.SystemTimeCounterProv">
+	</bean>
+
+    <bean id="msgSender" class="net.aconite.common.util.MessageSenderServiceImpl">
+		<property name="jmsTemplate">
+			<ref bean="jmsTemplate"/>
+		</property>
+	</bean>
+
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate" depends-on="configurer">
+		<property name="connectionFactory" ref="queueConnectionFactory" />
+		<property name="defaultDestinationName" value="${fileHandlerDestinationQueue}"/>
+	</bean>
+
+    <bean id="queueConnectionFactory" class="com.ibm.mq.jms.MQQueueConnectionFactory" depends-on="configurer">
+        <property name="hostName" value="${jms.hostName}"/>
+        <property name="queueManager" value="${jms.queueManager}"/>
+        <property name="transportType" value="${jms.transportType}"/>
+        <property name="port" value="${jms.port}"/>
+        <property name="channel" value="${jms.channel}"/>
+        <property name="useConnectionPooling" value="true"/>
+        <property name="SSLCipherSuite" value="${jms.ciphersuite}"/>
+    </bean>
+
+	<bean id="runnableListener" class="org.springframework.scheduling.commonj.ScheduledTimerListener">
+      <!-- Wait 10 seconds before starting first execution -->
+      <property name="delay" value="10000"/>
+      <!-- Run every 30 seconds -->
+      <property name="period" value="30000"/>
+      <property name="runnable" ref="dirScanner"/>
+	</bean>
+
+
+    <!-- WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW -->
+
+    <!-- The below part is only used for shutdown time of filehandler container AF-1544
+
+    <bean id="dataSource_pma" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="java:comp/env/AffinaDataSourceAlias_pma"/>
+    </bean>
+
+    <bean id="sessionManager_pma"
+          class="com.platform7.standardinfrastructure.database.AffinaTOPLinkSessionManager"
+          init-method="initialize">
+        <property name="user" value="${database.pma.user}"/>
+        <property name="password" value="${database.pma.password}"/>
+        <property name="topLinkMappingClassName" value="${database.pmaProject}"/>
+        <property name="dataSource" ref="dataSource_pma"/>
+        <property name="showSQL" value="${database.showSQL}"/>
+    </bean>
+
+    <bean id="sessionManager_pma_Tx"
+          class="com.platform7.standardinfrastructure.database.AffinaTOPLinkSessionManager"
+          init-method="initialize">
+        <property name="user" value="${database.pma.user}"/>
+        <property name="password" value="${database.pma.password}"/>
+        <property name="topLinkMappingClassName" value="${database.pmaProject}"/>
+        <property name="externalTransactionController">
+            <bean class="com.platform7.standardinfrastructure.database.ToplinkWAS6_1ExternalTransactionController"/>
+        </property>
+        <property name="dataSource" ref="dataSource_pma"/>
+        <property name="showSQL" value="${database.showSQL}"/>
+    </bean>
+
+    <alias name="sessionManager_pma" alias="sessionManager_default"/>
+    <alias name="sessionManager_pma_Tx" alias="sessionManager_default_Tx"/>
+-->
+</beans>

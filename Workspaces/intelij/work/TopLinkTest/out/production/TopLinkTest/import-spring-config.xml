@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+    <!-- This Config bean is given access to the Spring ApplicationContext at bootstrap time -->
+    <bean id="contextApplicationContextProvider" class="com.platform7.standardinfrastructure.appconfig.AppConfig"/>
+
+    <!-- Datasource for PMA -->
+    <bean id="dataSource_pma" class="oracle.jdbc.pool.OracleDataSource">
+		<property name="connectionCachingEnabled" value="true"/>
+		<property name="URL" value="jdbc:oracle:thin:@///AffinaDB"/>
+    </bean>
+
+    <!-- Datasource for SDS -->
+    <bean id="dataSource_sds" class="oracle.jdbc.pool.OracleDataSource">
+		<property name="connectionCachingEnabled" value="true"/>
+		<property name="URL" value="jdbc:oracle:thin:@///AffinaDB"/>
+    </bean>
+
+    <!-- Session Manager for PMA -->
+    <bean id="sessionManager_pma"
+          class="com.platform7.standardinfrastructure.database.AffinaTOPLinkSessionManager">
+        <property name="user" value="pma"/>
+        <property name="topLinkMappingClassName" value="com.platform7.stdpma.databaseproject.toplinkproject"/>
+        <property name="dataSource" ref="dataSource_pma"/>
+    </bean>
+
+    <!-- Session Manager for SDS -->
+    <bean id="sessionManager_sds"
+          class="com.platform7.standardinfrastructure.database.AffinaTOPLinkSessionManager">
+        <property name="user" value="sds"/>
+        <property name="topLinkMappingClassName" value="com.platform7.sds.databaseproject.toplinkproject"/>
+        <property name="dataSource" ref="dataSource_sds"/>
+    </bean>
+</beans>

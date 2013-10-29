@@ -1,0 +1,58 @@
+^2012-02-13 10:10:40,043	  TRACE	net.aconite.toplink.util.SDSMediator	[main]	Loading spring config file: c:\affina\conf\import-spring-config.xml
+^2012-02-13 10:10:40,741	  TRACE	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	enter: getBean(String beanId)
+^2012-02-13 10:10:40,741	  DEBUG	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	Attempting to lookup bean: sessionManager_pma
+^2012-02-13 10:10:40,741	  DEBUG	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	Got bean for beanId = sessionManager_pma
+^2012-02-13 10:10:40,741	  TRACE	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	exit: getBean(String beanId)
+^2012-02-13 10:10:41,260	  DEBUG	com.platform7.standardinfrastructure.multiissuer.DataSet	[main]	enter createLocateByDataSetQueryName
+^2012-02-13 10:10:41,260	  DEBUG	com.platform7.standardinfrastructure.multiissuer.DataSet	[main]	exit createLocateByDataSetQueryName
+^2012-02-13 10:10:41,267	  TRACE	net.aconite.toplink.util.SDSMediator	[main]	creating Toplink DB login and setting properties
+^2012-02-13 10:11:26,214	  TRACE	net.aconite.toplink.util.SDSMediator	[main]	Loading spring config file: c:\affina\conf\import-spring-config.xml
+^2012-02-13 10:11:26,914	  TRACE	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	enter: getBean(String beanId)
+^2012-02-13 10:11:26,914	  DEBUG	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	Attempting to lookup bean: sessionManager_pma
+^2012-02-13 10:11:26,914	  DEBUG	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	Got bean for beanId = sessionManager_pma
+^2012-02-13 10:11:26,915	  TRACE	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	exit: getBean(String beanId)
+^2012-02-13 10:11:27,442	  DEBUG	com.platform7.standardinfrastructure.multiissuer.DataSet	[main]	enter createLocateByDataSetQueryName
+^2012-02-13 10:11:27,443	  DEBUG	com.platform7.standardinfrastructure.multiissuer.DataSet	[main]	exit createLocateByDataSetQueryName
+^2012-02-13 10:11:27,449	  TRACE	net.aconite.toplink.util.SDSMediator	[main]	creating Toplink DB login and setting properties
+^2012-02-13 10:12:03,228	  TRACE	net.aconite.toplink.util.SDSMediator	[main]	Loading spring config file: c:\affina\conf\import-spring-config.xml
+^2012-02-13 10:12:04,027	  TRACE	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	enter: getBean(String beanId)
+^2012-02-13 10:12:04,027	  DEBUG	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	Attempting to lookup bean: sessionManager_pma
+^2012-02-13 10:12:04,027	  DEBUG	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	Got bean for beanId = sessionManager_pma
+^2012-02-13 10:12:04,027	  TRACE	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	exit: getBean(String beanId)
+^2012-02-13 10:12:04,576	  DEBUG	com.platform7.standardinfrastructure.multiissuer.DataSet	[main]	enter createLocateByDataSetQueryName
+^2012-02-13 10:12:04,576	  DEBUG	com.platform7.standardinfrastructure.multiissuer.DataSet	[main]	exit createLocateByDataSetQueryName
+^2012-02-13 10:12:04,583	  TRACE	net.aconite.toplink.util.SDSMediator	[main]	creating Toplink DB login and setting properties
+^2012-02-13 10:27:55,206	  TRACE	net.aconite.toplink.util.SDSMediator	[main]	Loading spring config file: c:\affina\conf\import-spring-config.xml
+^2012-02-13 10:27:55,957	  TRACE	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	enter: getBean(String beanId)
+^2012-02-13 10:27:55,958	  DEBUG	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	Attempting to lookup bean: sessionManager_pma
+^2012-02-13 10:27:55,958	  DEBUG	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	Got bean for beanId = sessionManager_pma
+^2012-02-13 10:27:55,958	  TRACE	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	exit: getBean(String beanId)
+^2012-02-13 10:27:56,511	  DEBUG	com.platform7.standardinfrastructure.multiissuer.DataSet	[main]	enter createLocateByDataSetQueryName
+^2012-02-13 10:27:56,511	  DEBUG	com.platform7.standardinfrastructure.multiissuer.DataSet	[main]	exit createLocateByDataSetQueryName
+^2012-02-13 10:27:56,519	  TRACE	net.aconite.toplink.util.SDSMediator	[main]	creating Toplink DB login and setting properties
+^2012-02-13 10:30:27,739	  TRACE	net.aconite.toplink.util.SDSMediator	[main]	Loading spring config file: c:\affina\conf\import-spring-config.xml
+^2012-02-13 11:04:51,455	  TRACE	net.aconite.toplink.util.SDSMediator	[main]	Loading spring config file: c:\affina\conf\import-spring-config.xml
+^2012-02-13 11:04:52,254	  TRACE	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	enter: getBean(String beanId)
+^2012-02-13 11:04:52,254	  DEBUG	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	Attempting to lookup bean: sessionManager_pma
+^2012-02-13 11:04:52,254	  DEBUG	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	Got bean for beanId = sessionManager_pma
+^2012-02-13 11:04:52,255	  TRACE	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	exit: getBean(String beanId)
+^2012-02-13 11:04:52,827	  DEBUG	com.platform7.standardinfrastructure.multiissuer.DataSet	[main]	enter createLocateByDataSetQueryName
+^2012-02-13 11:04:52,828	  DEBUG	com.platform7.standardinfrastructure.multiissuer.DataSet	[main]	exit createLocateByDataSetQueryName
+^2012-02-13 11:04:52,834	  TRACE	net.aconite.toplink.util.SDSMediator	[main]	creating Toplink DB login and setting properties
+^2012-02-13 13:27:27,261	  TRACE	net.aconite.toplink.util.SDSMediator	[main]	Loading spring config file: c:\affina\conf\import-spring-config.xml
+^2012-02-13 13:27:37,806	  TRACE	net.aconite.toplink.util.SDSMediator	[main]	Loading spring config file: c:\affina\conf\import-spring-config.xml
+^2012-02-13 13:27:38,555	  TRACE	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	enter: getBean(String beanId)
+^2012-02-13 13:27:38,555	  DEBUG	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	Attempting to lookup bean: sessionManager_pma
+^2012-02-13 13:27:38,555	  DEBUG	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	Got bean for beanId = sessionManager_pma
+^2012-02-13 13:27:38,556	  TRACE	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	exit: getBean(String beanId)
+^2012-02-13 13:27:39,105	  DEBUG	com.platform7.standardinfrastructure.multiissuer.DataSet	[main]	enter createLocateByDataSetQueryName
+^2012-02-13 13:27:39,105	  DEBUG	com.platform7.standardinfrastructure.multiissuer.DataSet	[main]	exit createLocateByDataSetQueryName
+^2012-02-13 13:27:39,112	  TRACE	net.aconite.toplink.util.SDSMediator	[main]	creating Toplink DB login and setting properties
+^2012-02-13 13:27:53,567	  TRACE	com.platform7.standardinfrastructure.distributedworkflow.WorkflowServices	[main]	Enter getUnitOfWork()
+^2012-02-13 13:27:53,567	  DEBUG	com.platform7.standardinfrastructure.database.SessionManagerTx	[main]	Class initializing: SessionManagerTx
+^2012-02-13 13:27:53,567	  TRACE	com.platform7.standardinfrastructure.database.SessionManagerTx	[main]	About to get sessionManager_default_Tx bean...
+^2012-02-13 13:27:53,568	  TRACE	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	enter: getBean(String beanId)
+^2012-02-13 13:27:53,568	  DEBUG	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	Attempting to lookup bean: sessionManager_default_Tx
+^2012-02-13 13:27:53,568	   INFO	com.platform7.standardinfrastructure.appconfig.AppConfig	[main]	Shutting down uninitialised bean - sessionManager_default_Tx
+^2012-02-13 13:27:53,579	  TRACE	com.platform7.standardinfrastructure.distributedworkflow.WorkflowServices	[main]	Enter getUnitOfWork()
+^2012-02-13 13:27:54,896	  TRACE	com.platform7.standardinfrastructure.distributedworkflow.WorkflowServices	[main]	Enter getUnitOfWork()

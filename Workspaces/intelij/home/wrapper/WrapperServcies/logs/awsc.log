@@ -1,0 +1,135 @@
+2013-10-22 12:08:54,467 [main] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@78105738: startup date [Tue Oct 22 12:08:54 BST 2013]; root of context hierarchy
+2013-10-22 12:08:54,541 [main] INFO  org.springframework.beans.factory.xml.XmlBeanDefinitionReader - Loading XML bean definitions from class path resource [spring-wrapper-services.xml]
+2013-10-22 12:08:54,840 [main] INFO  org.springframework.beans.factory.config.PropertyPlaceholderConfigurer - Loading properties file from URL [file:/C://Wakkir//Workspaces//intelij//home//wrapper//WrapperServcies//src//main//resources//wrapper.properties]
+2013-10-22 12:08:54,850 [main] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@4f4db0e3: defining beans [org.springframework.beans.factory.config.PropertyPlaceholderConfigurer#0,wrapperService,startServiceHandler,stopServiceHandler]; root of factory hierarchy
+2013-10-22 12:08:54,899 [pool-1-thread-1] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@70d05c13: startup date [Tue Oct 22 12:08:54 BST 2013]; root of context hierarchy
+2013-10-22 12:08:54,902 [pool-1-thread-1] INFO  org.springframework.beans.factory.xml.XmlBeanDefinitionReader - Loading XML bean definitions from class path resource [Spring-Convertor-Quartz.xml]
+2013-10-22 12:08:54,961 [pool-1-thread-1] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@20b40ec4: defining beans [runMeTask,runMeJob,simpleTrigger,cronTrigger,org.springframework.scheduling.quartz.SchedulerFactoryBean#0]; root of factory hierarchy
+2013-10-22 12:08:55,133 [pool-1-thread-1] INFO  org.quartz.impl.StdSchedulerFactory - Using default implementation for ThreadExecutor
+2013-10-22 12:08:55,156 [pool-1-thread-1] INFO  org.quartz.core.SchedulerSignalerImpl - Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2013-10-22 12:08:55,157 [pool-1-thread-1] INFO  org.quartz.core.QuartzScheduler - Quartz Scheduler v.1.8.6 created.
+2013-10-22 12:08:55,159 [pool-1-thread-1] INFO  org.quartz.simpl.RAMJobStore - RAMJobStore initialized.
+2013-10-22 12:08:55,160 [pool-1-thread-1] INFO  org.quartz.core.QuartzScheduler - Scheduler meta-data: Quartz Scheduler (v1.8.6) 'org.springframework.scheduling.quartz.SchedulerFactoryBean#0' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2013-10-22 12:08:55,160 [pool-1-thread-1] INFO  org.quartz.impl.StdSchedulerFactory - Quartz scheduler 'org.springframework.scheduling.quartz.SchedulerFactoryBean#0' initialized from an externally provided properties instance.
+2013-10-22 12:08:55,160 [pool-1-thread-1] INFO  org.quartz.impl.StdSchedulerFactory - Quartz scheduler version: 1.8.6
+2013-10-22 12:08:55,162 [pool-1-thread-1] INFO  org.quartz.core.QuartzScheduler - JobFactory set to: org.springframework.scheduling.quartz.AdaptableJobFactory@105691e
+2013-10-22 12:08:55,169 [pool-1-thread-1] INFO  org.springframework.context.support.DefaultLifecycleProcessor - Starting beans in phase 2147483647
+2013-10-22 12:08:55,170 [pool-1-thread-1] INFO  org.springframework.scheduling.quartz.SchedulerFactoryBean - Starting Quartz Scheduler now
+2013-10-22 12:08:55,170 [pool-1-thread-1] INFO  org.quartz.core.QuartzScheduler - Scheduler org.springframework.scheduling.quartz.SchedulerFactoryBean#0_$_NON_CLUSTERED started.
+2013-10-22 12:08:55,171 [main] INFO  org.springframework.context.support.DefaultLifecycleProcessor - Starting beans in phase 2147483647
+2013-10-22 12:08:55,172 [main] INFO  net.aconite.wrapper.service.AconiteWrapperService - Converter started successfully.
+2013-10-22 12:08:55,244 [main] INFO  net.aconite.wrapper.service.AconiteWrapperService - Wrapper services started on host: 192.168.0.27  port: 6660
+2013-10-22 12:09:58,715 [main] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@4ac4aad3: startup date [Tue Oct 22 12:09:58 BST 2013]; root of context hierarchy
+2013-10-22 12:09:58,797 [main] INFO  org.springframework.beans.factory.xml.XmlBeanDefinitionReader - Loading XML bean definitions from class path resource [spring-wrapper-client.xml]
+2013-10-22 12:09:59,108 [main] INFO  org.springframework.beans.factory.config.PropertyPlaceholderConfigurer - Loading properties file from URL [file:/C://Wakkir//Workspaces//intelij//home//wrapper//WrapperServcies//src//main//resources//wrapper.properties]
+2013-10-22 12:09:59,119 [main] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@6e84cc09: defining beans [org.springframework.beans.factory.config.PropertyPlaceholderConfigurer#0,wrapperClient]; root of factory hierarchy
+2013-10-22 12:09:59,158 [main] WARN  net.aconite.wrapper.client.WrapperClientMain - stop or start argument must be presented.
+2013-10-22 12:09:59,160 [Thread-1] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Closing org.springframework.context.support.ClassPathXmlApplicationContext@4ac4aad3: startup date [Tue Oct 22 12:09:58 BST 2013]; root of context hierarchy
+2013-10-22 12:09:59,160 [Thread-1] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Destroying singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@6e84cc09: defining beans [org.springframework.beans.factory.config.PropertyPlaceholderConfigurer#0,wrapperClient]; root of factory hierarchy
+2013-10-22 12:10:21,234 [main] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@4ac4aad3: startup date [Tue Oct 22 12:10:21 BST 2013]; root of context hierarchy
+2013-10-22 12:10:21,307 [main] INFO  org.springframework.beans.factory.xml.XmlBeanDefinitionReader - Loading XML bean definitions from class path resource [spring-wrapper-client.xml]
+2013-10-22 12:10:21,611 [main] INFO  org.springframework.beans.factory.config.PropertyPlaceholderConfigurer - Loading properties file from URL [file:/C://Wakkir//Workspaces//intelij//home//wrapper//WrapperServcies//src//main//resources//wrapper.properties]
+2013-10-22 12:10:21,622 [main] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@6e84cc09: defining beans [org.springframework.beans.factory.config.PropertyPlaceholderConfigurer#0,wrapperClient]; root of factory hierarchy
+2013-10-22 12:10:21,677 [main] INFO  net.aconite.wrapper.service.AconiteWrapperService - command received :stop
+2013-10-22 12:10:21,677 [main] INFO  net.aconite.wrapper.service.AconiteWrapperService - Stopping converter...
+2013-10-22 12:10:21,677 [main] INFO  org.springframework.context.support.DefaultLifecycleProcessor - Stopping beans in phase 2147483647
+2013-10-22 12:10:21,679 [main] INFO  org.quartz.core.QuartzScheduler - Scheduler org.springframework.scheduling.quartz.SchedulerFactoryBean#0_$_NON_CLUSTERED paused.
+2013-10-22 12:10:21,679 [main] INFO  net.aconite.wrapper.service.AconiteWrapperService - Converter stopped successfully.
+2013-10-22 12:10:21,679 [main] INFO  net.aconite.wrapper.client.AconiteWrapperClient - Converter stopped successfully.
+2013-10-22 12:10:21,681 [Thread-3] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Closing org.springframework.context.support.ClassPathXmlApplicationContext@78105738: startup date [Tue Oct 22 12:08:54 BST 2013]; root of context hierarchy
+2013-10-22 12:10:21,681 [Thread-1] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Closing org.springframework.context.support.ClassPathXmlApplicationContext@4ac4aad3: startup date [Tue Oct 22 12:10:21 BST 2013]; root of context hierarchy
+2013-10-22 12:10:21,681 [Thread-2] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Closing org.springframework.context.support.ClassPathXmlApplicationContext@70d05c13: startup date [Tue Oct 22 12:08:54 BST 2013]; root of context hierarchy
+2013-10-22 12:10:21,681 [Thread-4] INFO  net.aconite.wrapper.service.WrapperServerMain - Application Service Handler Stopped.
+2013-10-22 12:10:21,682 [Thread-1] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Destroying singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@6e84cc09: defining beans [org.springframework.beans.factory.config.PropertyPlaceholderConfigurer#0,wrapperClient]; root of factory hierarchy
+2013-10-22 12:10:21,682 [Thread-3] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Destroying singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@4f4db0e3: defining beans [org.springframework.beans.factory.config.PropertyPlaceholderConfigurer#0,wrapperService,startServiceHandler,stopServiceHandler]; root of factory hierarchy
+2013-10-22 12:10:21,682 [Thread-2] INFO  org.springframework.context.support.DefaultLifecycleProcessor - Stopping beans in phase 2147483647
+2013-10-22 12:10:21,682 [Thread-2] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Destroying singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@20b40ec4: defining beans [runMeTask,runMeJob,simpleTrigger,cronTrigger,org.springframework.scheduling.quartz.SchedulerFactoryBean#0]; root of factory hierarchy
+2013-10-22 12:10:21,682 [Thread-2] INFO  org.springframework.scheduling.quartz.SchedulerFactoryBean - Shutting down Quartz Scheduler
+2013-10-22 12:10:21,682 [Thread-2] INFO  org.quartz.core.QuartzScheduler - Scheduler org.springframework.scheduling.quartz.SchedulerFactoryBean#0_$_NON_CLUSTERED shutting down.
+2013-10-22 12:10:21,682 [Thread-2] INFO  org.quartz.core.QuartzScheduler - Scheduler org.springframework.scheduling.quartz.SchedulerFactoryBean#0_$_NON_CLUSTERED paused.
+2013-10-22 12:10:21,683 [Thread-2] INFO  org.quartz.core.QuartzScheduler - Scheduler org.springframework.scheduling.quartz.SchedulerFactoryBean#0_$_NON_CLUSTERED shutdown complete.
+2013-10-22 12:10:52,915 [main] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@78105738: startup date [Tue Oct 22 12:10:52 BST 2013]; root of context hierarchy
+2013-10-22 12:10:52,989 [main] INFO  org.springframework.beans.factory.xml.XmlBeanDefinitionReader - Loading XML bean definitions from class path resource [spring-wrapper-services.xml]
+2013-10-22 12:10:53,283 [main] INFO  org.springframework.beans.factory.config.PropertyPlaceholderConfigurer - Loading properties file from URL [file:/C://Wakkir//Workspaces//intelij//home//wrapper//WrapperServcies//src//main//resources//wrapper.properties]
+2013-10-22 12:10:53,294 [main] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@506f9b8e: defining beans [org.springframework.beans.factory.config.PropertyPlaceholderConfigurer#0,wrapperService,startServiceHandler,stopServiceHandler]; root of factory hierarchy
+2013-10-22 12:10:53,339 [pool-1-thread-1] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@bb273cc: startup date [Tue Oct 22 12:10:53 BST 2013]; root of context hierarchy
+2013-10-22 12:10:53,341 [pool-1-thread-1] INFO  org.springframework.beans.factory.xml.XmlBeanDefinitionReader - Loading XML bean definitions from class path resource [Spring-Convertor-Quartz.xml]
+2013-10-22 12:10:53,401 [pool-1-thread-1] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@558352d8: defining beans [runMeTask,runMeJob,simpleTrigger,cronTrigger,org.springframework.scheduling.quartz.SchedulerFactoryBean#0]; root of factory hierarchy
+2013-10-22 12:10:53,564 [pool-1-thread-1] INFO  org.quartz.impl.StdSchedulerFactory - Using default implementation for ThreadExecutor
+2013-10-22 12:10:53,583 [pool-1-thread-1] INFO  org.quartz.core.SchedulerSignalerImpl - Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2013-10-22 12:10:53,585 [pool-1-thread-1] INFO  org.quartz.core.QuartzScheduler - Quartz Scheduler v.1.8.6 created.
+2013-10-22 12:10:53,587 [pool-1-thread-1] INFO  org.quartz.simpl.RAMJobStore - RAMJobStore initialized.
+2013-10-22 12:10:53,588 [pool-1-thread-1] INFO  org.quartz.core.QuartzScheduler - Scheduler meta-data: Quartz Scheduler (v1.8.6) 'org.springframework.scheduling.quartz.SchedulerFactoryBean#0' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2013-10-22 12:10:53,588 [pool-1-thread-1] INFO  org.quartz.impl.StdSchedulerFactory - Quartz scheduler 'org.springframework.scheduling.quartz.SchedulerFactoryBean#0' initialized from an externally provided properties instance.
+2013-10-22 12:10:53,588 [pool-1-thread-1] INFO  org.quartz.impl.StdSchedulerFactory - Quartz scheduler version: 1.8.6
+2013-10-22 12:10:53,590 [pool-1-thread-1] INFO  org.quartz.core.QuartzScheduler - JobFactory set to: org.springframework.scheduling.quartz.AdaptableJobFactory@51a19458
+2013-10-22 12:10:53,597 [pool-1-thread-1] INFO  org.springframework.context.support.DefaultLifecycleProcessor - Starting beans in phase 2147483647
+2013-10-22 12:10:53,597 [pool-1-thread-1] INFO  org.springframework.scheduling.quartz.SchedulerFactoryBean - Starting Quartz Scheduler now
+2013-10-22 12:10:53,597 [pool-1-thread-1] INFO  org.quartz.core.QuartzScheduler - Scheduler org.springframework.scheduling.quartz.SchedulerFactoryBean#0_$_NON_CLUSTERED started.
+2013-10-22 12:10:53,599 [main] INFO  org.springframework.context.support.DefaultLifecycleProcessor - Starting beans in phase 2147483647
+2013-10-22 12:10:53,599 [main] INFO  net.aconite.wrapper.service.AconiteWrapperService - Converter started successfully.
+2013-10-22 12:10:53,668 [main] INFO  net.aconite.wrapper.service.AconiteWrapperService - Wrapper services started on host: 192.168.0.27  port: 6660
+2013-10-22 12:51:14,296 [main] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@78105738: startup date [Tue Oct 22 12:51:14 BST 2013]; root of context hierarchy
+2013-10-22 12:51:14,376 [main] INFO  org.springframework.beans.factory.xml.XmlBeanDefinitionReader - Loading XML bean definitions from class path resource [spring-wrapper-services.xml]
+2013-10-22 12:51:14,688 [main] INFO  org.springframework.beans.factory.config.PropertyPlaceholderConfigurer - Loading properties file from URL [file:/C://Wakkir//Workspaces//intelij//home//wrapper//WrapperServcies//src//main//resources//wrapper.properties]
+2013-10-22 12:51:14,699 [main] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@506f9b8e: defining beans [org.springframework.beans.factory.config.PropertyPlaceholderConfigurer#0,wrapperService,startServiceHandler,stopServiceHandler]; root of factory hierarchy
+2013-10-22 12:51:14,745 [pool-1-thread-1] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@bb273cc: startup date [Tue Oct 22 12:51:14 BST 2013]; root of context hierarchy
+2013-10-22 12:51:14,747 [pool-1-thread-1] INFO  org.springframework.beans.factory.xml.XmlBeanDefinitionReader - Loading XML bean definitions from class path resource [Spring-Convertor-Quartz.xml]
+2013-10-22 12:51:14,808 [pool-1-thread-1] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@558352d8: defining beans [runMeTask,runMeJob,simpleTrigger,cronTrigger,org.springframework.scheduling.quartz.SchedulerFactoryBean#0]; root of factory hierarchy
+2013-10-22 12:51:14,979 [pool-1-thread-1] INFO  org.quartz.impl.StdSchedulerFactory - Using default implementation for ThreadExecutor
+2013-10-22 12:51:15,000 [pool-1-thread-1] INFO  org.quartz.core.SchedulerSignalerImpl - Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2013-10-22 12:51:15,002 [pool-1-thread-1] INFO  org.quartz.core.QuartzScheduler - Quartz Scheduler v.1.8.6 created.
+2013-10-22 12:51:15,004 [pool-1-thread-1] INFO  org.quartz.simpl.RAMJobStore - RAMJobStore initialized.
+2013-10-22 12:51:15,005 [pool-1-thread-1] INFO  org.quartz.core.QuartzScheduler - Scheduler meta-data: Quartz Scheduler (v1.8.6) 'org.springframework.scheduling.quartz.SchedulerFactoryBean#0' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2013-10-22 12:51:15,005 [pool-1-thread-1] INFO  org.quartz.impl.StdSchedulerFactory - Quartz scheduler 'org.springframework.scheduling.quartz.SchedulerFactoryBean#0' initialized from an externally provided properties instance.
+2013-10-22 12:51:15,005 [pool-1-thread-1] INFO  org.quartz.impl.StdSchedulerFactory - Quartz scheduler version: 1.8.6
+2013-10-22 12:51:15,007 [pool-1-thread-1] INFO  org.quartz.core.QuartzScheduler - JobFactory set to: org.springframework.scheduling.quartz.AdaptableJobFactory@51a19458
+2013-10-22 12:51:15,014 [pool-1-thread-1] INFO  org.springframework.context.support.DefaultLifecycleProcessor - Starting beans in phase 2147483647
+2013-10-22 12:51:15,014 [pool-1-thread-1] INFO  org.springframework.scheduling.quartz.SchedulerFactoryBean - Starting Quartz Scheduler now
+2013-10-22 12:51:15,014 [pool-1-thread-1] INFO  org.quartz.core.QuartzScheduler - Scheduler org.springframework.scheduling.quartz.SchedulerFactoryBean#0_$_NON_CLUSTERED started.
+2013-10-22 12:51:15,016 [main] INFO  org.springframework.context.support.DefaultLifecycleProcessor - Starting beans in phase 2147483647
+2013-10-22 12:51:15,016 [main] INFO  net.aconite.wrapper.service.AconiteWrapperService - Converter started successfully.
+2013-10-22 12:51:15,084 [main] INFO  net.aconite.wrapper.service.AconiteWrapperService - Wrapper services started on host: 192.168.0.27  port: 6660
+2013-10-22 12:51:44,879 [main] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@59c9b9ca: startup date [Tue Oct 22 12:51:44 BST 2013]; root of context hierarchy
+2013-10-22 12:51:44,955 [main] INFO  org.springframework.beans.factory.xml.XmlBeanDefinitionReader - Loading XML bean definitions from class path resource [spring-wrapper-client.xml]
+2013-10-22 12:51:45,265 [main] INFO  org.springframework.beans.factory.config.PropertyPlaceholderConfigurer - Loading properties file from URL [file:/C://Wakkir//Workspaces//intelij//home//wrapper//WrapperServcies//src//main//resources//wrapper.properties]
+2013-10-22 12:51:45,277 [main] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@7c6572b: defining beans [org.springframework.beans.factory.config.PropertyPlaceholderConfigurer#0,wrapperClient]; root of factory hierarchy
+2013-10-22 12:51:45,337 [main] INFO  net.aconite.wrapper.service.AconiteWrapperService - command received :stop
+2013-10-22 12:51:45,337 [main] INFO  net.aconite.wrapper.service.AconiteWrapperService - Stopping converter...
+2013-10-22 12:51:45,338 [main] INFO  org.springframework.context.support.DefaultLifecycleProcessor - Stopping beans in phase 2147483647
+2013-10-22 12:51:45,339 [main] INFO  org.quartz.core.QuartzScheduler - Scheduler org.springframework.scheduling.quartz.SchedulerFactoryBean#0_$_NON_CLUSTERED paused.
+2013-10-22 12:51:45,340 [main] INFO  net.aconite.wrapper.service.AconiteWrapperService - Converter stopped successfully.
+2013-10-22 12:51:45,340 [main] INFO  net.aconite.wrapper.client.AconiteWrapperClient - Converter stopped successfully.
+2013-10-22 12:51:45,342 [Thread-3] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Closing org.springframework.context.support.ClassPathXmlApplicationContext@78105738: startup date [Tue Oct 22 12:51:14 BST 2013]; root of context hierarchy
+2013-10-22 12:51:45,342 [Thread-1] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Closing org.springframework.context.support.ClassPathXmlApplicationContext@59c9b9ca: startup date [Tue Oct 22 12:51:44 BST 2013]; root of context hierarchy
+2013-10-22 12:51:45,342 [Thread-2] INFO  org.springframework.context.support.ClassPathXmlApplicationContext - Closing org.springframework.context.support.ClassPathXmlApplicationContext@bb273cc: startup date [Tue Oct 22 12:51:14 BST 2013]; root of context hierarchy
+2013-10-22 12:51:45,342 [Thread-4] INFO  net.aconite.wrapper.service.WrapperServerMain - Application Service Handler Stopped.
+2013-10-22 12:51:45,342 [Thread-1] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Destroying singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@7c6572b: defining beans [org.springframework.beans.factory.config.PropertyPlaceholderConfigurer#0,wrapperClient]; root of factory hierarchy
+2013-10-22 12:51:45,342 [Thread-3] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Destroying singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@506f9b8e: defining beans [org.springframework.beans.factory.config.PropertyPlaceholderConfigurer#0,wrapperService,startServiceHandler,stopServiceHandler]; root of factory hierarchy
+2013-10-22 12:51:45,343 [Thread-2] INFO  org.springframework.context.support.DefaultLifecycleProcessor - Stopping beans in phase 2147483647
+2013-10-22 12:51:45,343 [Thread-2] INFO  org.springframework.beans.factory.support.DefaultListableBeanFactory - Destroying singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@558352d8: defining beans [runMeTask,runMeJob,simpleTrigger,cronTrigger,org.springframework.scheduling.quartz.SchedulerFactoryBean#0]; root of factory hierarchy
+2013-10-22 12:51:45,343 [Thread-2] INFO  org.springframework.scheduling.quartz.SchedulerFactoryBean - Shutting down Quartz Scheduler
+2013-10-22 12:51:45,343 [Thread-2] INFO  org.quartz.core.QuartzScheduler - Scheduler org.springframework.scheduling.quartz.SchedulerFactoryBean#0_$_NON_CLUSTERED shutting down.
+2013-10-22 12:51:45,343 [Thread-2] INFO  org.quartz.core.QuartzScheduler - Scheduler org.springframework.scheduling.quartz.SchedulerFactoryBean#0_$_NON_CLUSTERED paused.
+2013-10-22 12:51:45,344 [Thread-2] INFO  org.quartz.core.QuartzScheduler - Scheduler org.springframework.scheduling.quartz.SchedulerFactoryBean#0_$_NON_CLUSTERED shutdown complete.
