@@ -1,4 +1,4 @@
-package TransferObjectPattern;
+package com.wakkir.designpattern.TransferObjectPattern;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,16 +17,16 @@ public class StudentBO
     public StudentBO()
     {
         students = new ArrayList<StudentVO>();
-        StudentVO student1 = new StudentVO("Robert",0);
-        StudentVO student2 = new StudentVO("John",1);
+        StudentVO student1 = new StudentVO("Robert", 0);
+        StudentVO student2 = new StudentVO("John", 1);
         students.add(student1);
         students.add(student2);
     }
+
     public void deleteStudent(StudentVO student)
     {
         students.remove(student.getRollNo());
-        System.out.println("Student: Roll No "
-                + student.getRollNo() +", deleted from database");
+        System.out.println("Student: Roll No "+ student.getRollNo() + ", deleted from database");
     }
 
     //retrive list of students from the database
@@ -43,7 +43,6 @@ public class StudentBO
     public void updateStudent(StudentVO student)
     {
         students.get(student.getRollNo()).setName(student.getName());
-        System.out.println("Student: Roll No "
-                + student.getRollNo() +", updated in the database");
+        System.out.println("Student: Roll No " + student.getRollNo() + ", updated in the database");
     }
 }

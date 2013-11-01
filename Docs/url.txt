@@ -1,0 +1,3 @@
+http://www.tutorialspoint.com/design_pattern/
+
+https://www.udemy.com/java-design-patterns-tutorial/

@@ -1,4 +1,4 @@
-package SingleObject;
+package com.wakkir.designpattern.creational.singleton;
 
 /**
  * User: wakkir.muzammil

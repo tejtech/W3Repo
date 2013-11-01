@@ -1,4 +1,4 @@
-package SingleObject;
+package com.wakkir.designpattern.creational.singleton;
 
 /**
  * User: wakkir.muzammil
@@ -26,7 +26,7 @@ public class SingleObject
 
     public void showMessage()
     {
-        System.out.println("Hello World! :"+message);
+        System.out.println("Hello World! :" + message);
     }
 
     public String getMessage()

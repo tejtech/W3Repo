@@ -1,7 +1,4 @@
-package com.wakkir.designpattern.test;
-
-import com.wakkir.designpattern.creational.factory.Shape;
-import com.wakkir.designpattern.creational.factory.ShapeFactory;
+package com.wakkir.designpattern.creational.factory;
 
 /**
  * User: wakkir

@@ -6,15 +6,19 @@ import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
-import org.w3c.dom.*;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
-import java.io.*;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.ImageInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
-import javax.imageio.*;
-import javax.imageio.stream.*;
-import javax.imageio.metadata.*;
-
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.TimeZone;
 
 
 /**
@@ -28,8 +32,8 @@ public class MetaData
     public static void main(String[] args) throws ImageProcessingException, IOException
     {
 
-        String extention=".jpg";
-        int count=0;
+        String extention = ".jpg";
+        int count = 0;
         try
         {
             File f = new File("\\\\Fs01\\mymedia\\MyPhones\\xNokia\\pic");
@@ -39,36 +43,36 @@ public class MetaData
             for (String oldFileName : names)
             {
                 //if(oldFileName.endsWith(".MTS"))
-                if(oldFileName.toLowerCase().endsWith(extention))
+                if (oldFileName.toLowerCase().endsWith(extention))
                 {
-                    Metadata metadata = ImageMetadataReader.readMetadata(new File(f.getPath()+"\\"+oldFileName)) ;
+                    Metadata metadata = ImageMetadataReader.readMetadata(new File(f.getPath() + "\\" + oldFileName));
 
-                    Iterator<Directory> directories=metadata.getDirectories().iterator();
+                    Iterator<Directory> directories = metadata.getDirectories().iterator();
 
                     while (directories.hasNext())
                     {
-                        Directory directory=directories.next();
+                        Directory directory = directories.next();
                         //System.out.println(directory.getClass().getName());
-                        if("com.drew.metadata.exif.ExifSubIFDDirectory".equalsIgnoreCase(directory.getClass().getName()))
+                        if ("com.drew.metadata.exif.ExifSubIFDDirectory".equalsIgnoreCase(directory.getClass().getName()))
                         {
-                            Iterator<Tag> tags=   directory.getTags().iterator();
+                            Iterator<Tag> tags = directory.getTags().iterator();
 
-                            while(tags.hasNext())
+                            while (tags.hasNext())
                             {
-                                Tag tag=tags.next();
-                                if(36867==tag.getTagType())
+                                Tag tag = tags.next();
+                                if (36867 == tag.getTagType())
                                 {
-                                    String temp=tag.getDescription().replace(" ", ":");
+                                    String temp = tag.getDescription().replace(" ", ":");
                                     //System.out.println(tag.getTagName() + " > " + temp);
-                                    String[] str=temp.split(":");
-                                    Calendar cal=Calendar.getInstance(TimeZone.getDefault());
-                                    cal.set(Integer.parseInt(str[0]),Integer.parseInt(str[1])-1,Integer.parseInt(str[2]),Integer.parseInt(str[3]),Integer.parseInt(str[4]),Integer.parseInt(str[5]));
+                                    String[] str = temp.split(":");
+                                    Calendar cal = Calendar.getInstance(TimeZone.getDefault());
+                                    cal.set(Integer.parseInt(str[0]), Integer.parseInt(str[1]) - 1, Integer.parseInt(str[2]), Integer.parseInt(str[3]), Integer.parseInt(str[4]), Integer.parseInt(str[5]));
 
                                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-                                    String newTempFileName= dateFormat.format(cal.getTime()).toUpperCase();
-                                    String newFileName=newTempFileName.subSequence(0,8)+"_"+newTempFileName.subSequence(8,14);
+                                    String newTempFileName = dateFormat.format(cal.getTime()).toUpperCase();
+                                    String newFileName = newTempFileName.subSequence(0, 8) + "_" + newTempFileName.subSequence(8, 14);
 
-                                    System.out.println("NewFileName :"+newFileName);
+                                    System.out.println("NewFileName :" + newFileName);
 
                                     FileUtils.renameFile(f.getAbsolutePath(), oldFileName, newFileName + extention);
                                     count++;
@@ -89,7 +93,7 @@ public class MetaData
         }
         finally
         {
-          System.out.println("Total Renamed : "+count);
+            System.out.println("Total Renamed : " + count);
         }
     }
 

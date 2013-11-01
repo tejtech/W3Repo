@@ -22,11 +22,11 @@ import java.util.TimeZone;
  */
 public class FileUtils
 {
-    private final static Logger logger=Logger.getLogger(FileUtils.class);
+    private final static Logger logger = Logger.getLogger(FileUtils.class);
 
-    public static  boolean createFolder(String filePath)
+    public static boolean createFolder(String filePath)
     {
-        boolean isFolderCreated=false;
+        boolean isFolderCreated = false;
         File theDir = new File(filePath);
         // if the directories do not exist, create them
         if (!theDir.exists())
@@ -34,15 +34,15 @@ public class FileUtils
             if (theDir.mkdirs())
             {
                 logger.debug("DIR created : " + filePath);
-                isFolderCreated=true;
+                isFolderCreated = true;
             }
         }
         return isFolderCreated;
     }
 
-    public static  boolean renameFile(String sourceFilePath, String oldFileName,  String newFileName,String destinationFilePath)
+    public static boolean renameFile(String sourceFilePath, String oldFileName, String newFileName, String destinationFilePath)
     {
-         boolean isFileRenamed=false;
+        boolean isFileRenamed = false;
 
         File newfile = new File(destinationFilePath, newFileName.trim());
         File oldfile = new File(sourceFilePath, oldFileName.trim());
@@ -52,33 +52,33 @@ public class FileUtils
             // if file doesnt exists, then create it
             createFolder(destinationFilePath);
 
-            if(oldfile.renameTo(newfile))
+            if (oldfile.renameTo(newfile))
             {
-                logger.info("File renamed : from " +oldfile.getAbsoluteFile()+" to "+newfile.getAbsoluteFile());
-                isFileRenamed=true;
+                logger.info("File renamed : from " + oldfile.getAbsoluteFile() + " to " + newfile.getAbsoluteFile());
+                isFileRenamed = true;
             }
             else
             {
-                logger.warn("File rename failed : from " +oldfile.getAbsoluteFile()+" to "+newfile.getAbsoluteFile());
+                logger.warn("File rename failed : from " + oldfile.getAbsoluteFile() + " to " + newfile.getAbsoluteFile());
             }
         }
         else
         {
-            logger.warn("File " +oldfile.getAbsoluteFile()+" doesn't exist ");
+            logger.warn("File " + oldfile.getAbsoluteFile() + " doesn't exist ");
         }
-        return  isFileRenamed;
+        return isFileRenamed;
 
     }
 
-    public static  boolean renameFile(String sourceFilePath, String oldFileName,  String newFileName)
+    public static boolean renameFile(String sourceFilePath, String oldFileName, String newFileName)
     {
-        return renameFile(sourceFilePath, oldFileName,  newFileName,sourceFilePath);
+        return renameFile(sourceFilePath, oldFileName, newFileName, sourceFilePath);
 
     }
 
     public static void main(String[] args)
     {
-        String extention=".JPG";
+        String extention = ".JPG";
         try
         {
             File f = new File("E:\\MyMedia\\MyVideos\\Test_20130302");
@@ -88,25 +88,25 @@ public class FileUtils
             for (String oldFileName : names)
             {
                 //if(oldFileName.endsWith(".MTS"))
-                if(oldFileName.endsWith(extention))
+                if (oldFileName.endsWith(extention))
                 {
                     //System.out.println(name);
                     Path path = Paths.get(f.getAbsolutePath(), oldFileName);
 
                     BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
 
-                    FileTime fileTime=attrs.lastModifiedTime();
+                    FileTime fileTime = attrs.lastModifiedTime();
 
 
-                    Calendar cal=Calendar.getInstance(TimeZone.getDefault());
+                    Calendar cal = Calendar.getInstance(TimeZone.getDefault());
                     cal.setTimeInMillis(fileTime.toMillis());
 
 
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
                     //dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-                    String newFileName= dateFormat.format(cal.getTime()).toUpperCase();
+                    String newFileName = dateFormat.format(cal.getTime()).toUpperCase();
 
-                    System.out.println(fileTime +" - "+newFileName);
+                    System.out.println(fileTime + " - " + newFileName);
 
                     //System.out.println(oldFileName+": Created: " + newFileName+extention);
 

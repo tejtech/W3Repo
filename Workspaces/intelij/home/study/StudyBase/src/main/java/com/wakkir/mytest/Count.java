@@ -13,17 +13,17 @@ public class Count
     public static void main(String[] args)
     {
         System.out.println("xxxxxx");
-        double basic=0.0;
-        double count=0.0;
-        double a=7.64;
-        double r=8.0/1200.0;
-        for(int i=0;i<35;i++)
+        double basic = 0.0;
+        double count = 0.0;
+        double a = 7.64;
+        double r = 8.0 / 1200.0;
+        for (int i = 0; i < 35; i++)
         {
-            basic=basic+a;
-            count=count+a*Math.pow((1+r),i);
-            System.out.println("count"+i+">"+count);
+            basic = basic + a;
+            count = count + a * Math.pow((1 + r), i);
+            System.out.println("count" + i + ">" + count);
         }
-        System.out.println("count>"+count);
-        System.out.println("basic>"+basic);
+        System.out.println("count>" + count);
+        System.out.println("basic>" + basic);
     }
 }

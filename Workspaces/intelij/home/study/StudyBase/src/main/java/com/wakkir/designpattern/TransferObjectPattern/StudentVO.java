@@ -1,4 +1,4 @@
-package TransferObjectPattern;
+package com.wakkir.designpattern.TransferObjectPattern;
 
 /**
  * User: wakkir.muzammil
@@ -17,19 +17,23 @@ public class StudentVO
         this.rollNo = rollNo;
     }
 
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(String name)
+    {
         this.name = name;
     }
 
-    public int getRollNo() {
+    public int getRollNo()
+    {
         return rollNo;
     }
 
-    public void setRollNo(int rollNo) {
+    public void setRollNo(int rollNo)
+    {
         this.rollNo = rollNo;
     }
 }

@@ -25,11 +25,11 @@ public class FileMetaData
     {
         File inputFilePath = new File(inputPath);
         File[] files = inputFilePath.listFiles();
-        int count=0;
+        int count = 0;
         assert files != null;
         for (File file : files)
         {
-            if(file.isDirectory())
+            if (file.isDirectory())
             {
                 System.out.println(file.getAbsolutePath());
                 readDirectory(file.getPath(), extension, outputPath);
@@ -37,32 +37,33 @@ public class FileMetaData
             else
             {
                 //System.out.println(file.getAbsolutePath());
-                if(readMetaData(file,extension,outputPath))
+                if (readMetaData(file, extension, outputPath))
                 {
                     count++;
                 }
             }
         }
-        System.out.println("Total Renamed : "+count);
+        System.out.println("Total Renamed : " + count);
     }
 
-    public boolean readMetaData(File inputFilePath,String extension,String newFilePath) throws ImageProcessingException, IOException
+    public boolean readMetaData(File inputFilePath, String extension, String newFilePath) throws ImageProcessingException, IOException
     {
-        boolean doneIt=false;
+        boolean doneIt = false;
         try
         {
-            String oldFileName=inputFilePath.getName();
-            String oldFilePath=inputFilePath.getParent();
+            String oldFileName = inputFilePath.getName();
+            String oldFilePath = inputFilePath.getParent();
 
             //if(oldFileName.endsWith(".MTS"))
-            if(oldFileName.toLowerCase().endsWith(extension))
+            if (oldFileName.toLowerCase().endsWith(extension))
             {
-                Metadata metadata = ImageMetadataReader.readMetadata(inputFilePath) ;
+                Metadata metadata = ImageMetadataReader.readMetadata(inputFilePath);
 
                 for (Directory directory : metadata.getDirectories())
                 {
                     //System.out.println(directory.getClass().getName());
-                    if ("com.drew.metadata.exif.ExifSubIFDDirectory".equalsIgnoreCase(directory.getClass().getName())) {
+                    if ("com.drew.metadata.exif.ExifSubIFDDirectory".equalsIgnoreCase(directory.getClass().getName()))
+                    {
 
                         for (Tag tag : directory.getTags())
                         {
@@ -100,11 +101,10 @@ public class FileMetaData
     }
 
 
-
-    public void readMetaDatax(File inputFilePath,String extention) throws ImageProcessingException, IOException
+    public void readMetaDatax(File inputFilePath, String extention) throws ImageProcessingException, IOException
     {
 
-        int count=0;
+        int count = 0;
         try
         {
             String[] names = inputFilePath.list();
@@ -112,14 +112,15 @@ public class FileMetaData
             for (String oldFileName : names)
             {
                 //if(oldFileName.endsWith(".MTS"))
-                if(oldFileName.toLowerCase().endsWith(extention))
+                if (oldFileName.toLowerCase().endsWith(extention))
                 {
-                    Metadata metadata = ImageMetadataReader.readMetadata(new File(inputFilePath.getPath()+"\\"+oldFileName)) ;
+                    Metadata metadata = ImageMetadataReader.readMetadata(new File(inputFilePath.getPath() + "\\" + oldFileName));
 
                     for (Directory directory : metadata.getDirectories())
                     {
                         //System.out.println(directory.getClass().getName());
-                        if ("com.drew.metadata.exif.ExifSubIFDDirectory".equalsIgnoreCase(directory.getClass().getName())) {
+                        if ("com.drew.metadata.exif.ExifSubIFDDirectory".equalsIgnoreCase(directory.getClass().getName()))
+                        {
 
                             for (Tag tag : directory.getTags())
                             {
@@ -156,21 +157,21 @@ public class FileMetaData
         }
         finally
         {
-          System.out.println("Total Renamed : "+count);
+            System.out.println("Total Renamed : " + count);
         }
     }
 
     public static void main(String[] args)
     {
 
-        FileMetaData fmd=new FileMetaData();
+        FileMetaData fmd = new FileMetaData();
         try
         {
-            String inputPath="E:\\WorkPlaces\\Aconite\\Wakkir\\pic";
+            String inputPath = "E:\\WorkPlaces\\Aconite\\Wakkir\\pic";
 
-            String extention=".jpg";
+            String extention = ".jpg";
 
-            String outputPath="\\\\fs01\\MyMedia\\MyPhones\\out\\pics\\Aconite-out";
+            String outputPath = "\\\\fs01\\MyMedia\\MyPhones\\out\\pics\\Aconite-out";
 
             fmd.readDirectory(inputPath, extention, outputPath);
 
