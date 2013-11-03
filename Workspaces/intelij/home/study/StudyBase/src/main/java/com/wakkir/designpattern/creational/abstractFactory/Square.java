@@ -1,4 +1,4 @@
-package com.wakkir.designpattern.creational.factory;
+package com.wakkir.designpattern.creational.abstractFactory;
 
 /**
  * User: wakkir

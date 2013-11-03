@@ -8,7 +8,7 @@ package com.wakkir.designpattern.creational.singleton;
 public class SingleObject
 {
     //create an object of SingleObject
-    private static SingleObject instance = new SingleObject();
+    private final static SingleObject instance = new SingleObject();
     private String message;
 
     //make the constructor private so that this class cannot be
@@ -26,7 +26,7 @@ public class SingleObject
 
     public void showMessage()
     {
-        System.out.println("Hello World! :" + message);
+        System.out.println("Hello World! :" + getMessage());
     }
 
     public String getMessage()

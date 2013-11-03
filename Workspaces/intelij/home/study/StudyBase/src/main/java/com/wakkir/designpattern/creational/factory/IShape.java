@@ -5,7 +5,7 @@ package com.wakkir.designpattern.creational.factory;
  * Date: 28/10/13
  * Time: 23:39
  */
-public interface Shape
+public interface IShape
 {
     void draw();
 }

@@ -1,14 +1,14 @@
-package com.wakkir.designpattern.creational.factory;
+package com.wakkir.designpattern.creational.abstractFactory;
 
 /**
  * User: wakkir
  * Date: 28/10/13
  * Time: 23:58
  */
-public class ShapeFactory
+//public class ShapeFactory extends AbstractFactory
+public class ShapeFactory implements IAbstractFactory
 {
-
-    //use getShape method to get object of type shape
+    @Override
     public IShape getShape(String shapeType)
     {
         if (shapeType == null)
@@ -27,6 +27,12 @@ public class ShapeFactory
         {
             return new Square();
         }
+        return null;
+    }
+
+    @Override
+    public IColour getColour(String colour)
+    {
         return null;
     }
 }
