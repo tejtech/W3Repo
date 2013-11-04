@@ -4,3 +4,6 @@ https://www.udemy.com/java-design-patterns-tutorial/
 
 
 http://www.oodesign.com/
+
+program to an interface:
+http://www.artima.com/lejava/articles/designprinciples.html
