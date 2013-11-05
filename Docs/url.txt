@@ -5,5 +5,8 @@ https://www.udemy.com/java-design-patterns-tutorial/
 
 http://www.oodesign.com/
 
-program to an interface:
+Program to an interface:
 http://www.artima.com/lejava/articles/designprinciples.html
+
+MockTests
+http://www.whizlabs.com/examprep/mod/quiz/review.php?attempt=257695&showall=true
