@@ -1,8 +1,6 @@
 package com.wakkir.mytest;
 
 
-import org.apache.log4j.Logger;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,7 +20,7 @@ import java.util.TimeZone;
  */
 public class FileUtils
 {
-    private final static Logger logger = Logger.getLogger(FileUtils.class);
+
 
     public static boolean createFolder(String filePath)
     {
@@ -33,7 +31,7 @@ public class FileUtils
         {
             if (theDir.mkdirs())
             {
-                logger.debug("DIR created : " + filePath);
+                //logger.debug("DIR created : " + filePath);
                 isFolderCreated = true;
             }
         }
@@ -54,17 +52,17 @@ public class FileUtils
 
             if (oldfile.renameTo(newfile))
             {
-                logger.info("File renamed : from " + oldfile.getAbsoluteFile() + " to " + newfile.getAbsoluteFile());
+                //logger.info("File renamed : from " + oldfile.getAbsoluteFile() + " to " + newfile.getAbsoluteFile());
                 isFileRenamed = true;
             }
             else
             {
-                logger.warn("File rename failed : from " + oldfile.getAbsoluteFile() + " to " + newfile.getAbsoluteFile());
+                //logger.warn("File rename failed : from " + oldfile.getAbsoluteFile() + " to " + newfile.getAbsoluteFile());
             }
         }
         else
         {
-            logger.warn("File " + oldfile.getAbsoluteFile() + " doesn't exist ");
+            //logger.warn("File " + oldfile.getAbsoluteFile() + " doesn't exist ");
         }
         return isFileRenamed;
 

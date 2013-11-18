@@ -1,11 +1,11 @@
 package com.wakkir.mytest;
 
-
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -167,11 +167,11 @@ public class FileMetaData
         FileMetaData fmd = new FileMetaData();
         try
         {
-            String inputPath = "E:\\WorkPlaces\\Aconite\\Wakkir\\pic";
+            String inputPath = "\\\\Fs01\\Wakkir\\Documents\\01.Personal\\04.Naadira\\x";
 
             String extention = ".jpg";
 
-            String outputPath = "\\\\fs01\\MyMedia\\MyPhones\\out\\pics\\Aconite-out";
+            String outputPath = "\\\\Fs01\\Wakkir\\Documents\\01.Personal\\04.Naadira\\x";
 
             fmd.readDirectory(inputPath, extention, outputPath);
 

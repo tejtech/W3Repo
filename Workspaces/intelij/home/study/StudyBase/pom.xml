@@ -47,17 +47,7 @@
             <version>1.4</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.drew.imaging</groupId>
-            <artifactId>metadata-extractor</artifactId>
-            <version>2.6.4</version>
-        </dependency>
 
-        <dependency>
-            <groupId>com.adobe.xmp</groupId>
-            <artifactId>xmpcore</artifactId>
-            <version>1.0</version>
-        </dependency>
 
         <!-- end:my -->
 
@@ -103,7 +93,6 @@
             <scope>test</scope>
         </dependency>
 
-
     </dependencies>
 
 
@@ -129,7 +118,7 @@
                         <addMavenDescriptor>false</addMavenDescriptor>
 
                         <manifestEntries>
-                            <Source-Revision>${build-info.revision}</Source-Revision>
+                            <Source-Revision></Source-Revision>
                             <!--<Implementation-Version>${build.number}</Implementation-Version>-->
                         </manifestEntries>
                     </archive>
