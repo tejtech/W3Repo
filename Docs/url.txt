@@ -10,3 +10,8 @@ http://www.artima.com/lejava/articles/designprinciples.html
 
 MockTests
 http://www.whizlabs.com/examprep/mod/quiz/review.php?attempt=257695&showall=true
+
+
+Spring
+https://github.com/spring-projects/spring-integration-samples
+https://github.com/spring-projects/spring-integration-samples.git
