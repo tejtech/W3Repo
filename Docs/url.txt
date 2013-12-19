@@ -15,3 +15,9 @@ http://www.whizlabs.com/examprep/mod/quiz/review.php?attempt=257695&showall=true
 Spring
 https://github.com/spring-projects/spring-integration-samples
 https://github.com/spring-projects/spring-integration-samples.git
+
+Spring-Integration Error handling
+http://xpadro.blogspot.co.uk/2013/11/how-error-handling-works-in-spring.html
+
+Issue with sending binary data as JMS messages using Spring Integration 
+http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration

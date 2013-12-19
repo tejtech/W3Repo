@@ -1,0 +1,3799 @@
+<!DOCTYPE html>
+<html class=" js no-flexbox no-touch hashchange history rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients no-cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent cookies bgpositionshorthand no-cssfilters lastchild boxsizing mediaqueries no-overflowscrolling cssremunit no-subpixelfont pointerevents cssresize no-cssscrollbar filereader placeholder fileinput formvalidation firefox no-opera" id="htmlTag" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" dir="ltr" lang="en-US"><head>
+	<!-- base href="http://forum.spring.io/" -->
+	
+		<link rel="Shortcut Icon" href="http://forum.spring.io/favicon.ico" type="image/x-icon">
+	
+
+	
+	
+	
+		
+		
+	
+
+	
+
+	
+	
+<!--[if IE]>
+<link rel="stylesheet" type="text/css" href="http://forum.spring.io/css.php?styleid=9&amp;td=ltr&amp;sheet=css_reset.css,css_unreset.css,css_utilities.css&amp;ts=1386943993 " />
+<link rel="stylesheet" type="text/css" href="http://forum.spring.io/css.php?styleid=9&amp;td=ltr&amp;sheet=css_imgareaselect-animated.css,css_jquery-ui-1_8_14_custom.css,css_jquery_qtip_min.css,css_jquery_selectBox.css,css_global.css&amp;ts=1386943993 " />
+<link rel="stylesheet" type="text/css" href="http://forum.spring.io/css.php?styleid=9&amp;td=ltr&amp;sheet=css_b_link.css,css_b_layout.css,css_b_layout.css,css_b_button.css,css_b_button_group.css&amp;ts=1386943993 " />
+<link rel="stylesheet" type="text/css" href="http://forum.spring.io/css.php?styleid=9&amp;td=ltr&amp;sheet=css_b_dropdown.css,css_b_icon.css,css_b_tabbed_pane.css,css_b_form_control.css,css_b_form_input.css&amp;ts=1386943993 " />
+<link rel="stylesheet" type="text/css" href="http://forum.spring.io/css.php?styleid=9&amp;td=ltr&amp;sheet=css_b_form_select.css,css_b_form_textarea.css,css_b_media.css,css_b_divider.css,css_b_avatar.css&amp;ts=1386943993 " />
+<link rel="stylesheet" type="text/css" href="http://forum.spring.io/css.php?styleid=9&amp;td=ltr&amp;sheet=css_b_ajax_loading_indicator.css,css_responsive.css&amp;ts=1386943993 " />
+<![endif]-->
+<!--[if !IE]><!-->
+<link rel="stylesheet" type="text/css" href="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/css.css">
+<link rel="stylesheet" type="text/css" href="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/css_002.css">
+<!--<![endif]-->
+
+<script id="undefined" src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/inpage_linkid.js" async="" type="text/javascript"></script><script src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/ga.js" async="" type="text/javascript"></script><script type="text/javascript" src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/header-rollup-504.js"></script>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	
+	<link rel="canonical" href="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1">
+
+	
+		
+		
+		
+			
+			
+		
+		
+	
+
+	
+	
+
+	<title>Issue with sending binary data as JMS messages using Spring Integration - Spring Forum</title>
+
+	<meta name="description" content="Discussion on messaging with the JMS protocol.">
+
+	
+<!--[if IE]>
+<link rel="stylesheet" type="text/css" href="http://forum.spring.io/css.php?styleid=9&amp;td=ltr&amp;sheet=css_b_post.css,css_b_post_control.css,css_b_post_attachments.css,css_b_comments.css,css_b_comment.css&amp;ts=1386943993 " />
+<link rel="stylesheet" type="text/css" href="http://forum.spring.io/css.php?styleid=9&amp;td=ltr&amp;sheet=css_b_comment_entry.css,css_b_userinfo.css,css_b_meter.css,css_b_inlinemod.css&amp;ts=1386943993 " />
+<link rel="stylesheet" type="text/css" href="http://forum.spring.io/css.php?styleid=9&amp;td=ltr&amp;sheet=css_additional.css&amp;ts=1386943993 " />
+<![endif]-->
+<!--[if !IE]><!-->
+<link rel="stylesheet" type="text/css" href="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/css_003.css">
+<link rel="stylesheet" type="text/css" href="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/css_005.css">
+<!--<![endif]-->
+
+<script type="text/javascript">
+		if (location.hash) {
+			document.write('<style type="text/css"> a.anchor { display:none;} <\/style>');
+		}
+
+		var uploadUrlTarget = "http://forum.spring.io/uploader/url";
+		var pageData = {
+			"baseurl": "http://forum.spring.io",
+			"baseurl_path": "/",
+			"baseurl_login": "http://forum.spring.io",
+			"baseurl_core": "http://forum.spring.io/core",
+			
+			"pageid": "154",
+			"pagetemplateid": "4",
+			"channelid": "68",
+			"nodeid": "114352",
+			"userid": "0",
+			"textDirLeft": "left",
+			"textDirRight": "right",
+			"textdirection": "ltr",
+			"can_use_sitebuilder": "",
+			"cookie_prefix": "bb",
+			"sb_state_cookie": "bbsitebuilder_active",
+			"inlinemod_cookie_name": "inlinemod_nodes",
+			
+				"pagenum": "1",
+			
+			"styleid": "0",
+			"threadmarking": "0",
+			"lastvisit": "1387406476",
+			"phrasedate": "1383180843",
+			"optionsdate": "1387406475",
+			
+			"current_server_datetime": "1387406476",
+			"simpleversion": "v=504",
+			
+			"showhv_post": "1",
+			"nextcron": "1387406473",
+			"securitytoken": "guest"
+		}
+	</script>
+	
+	
+<!-- ### -->
+  <link rel="stylesheet" type="text/css" href="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/header-footer.css">
+  <link rel="stylesheet" type="text/css" href="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/forum.css">
+  <link href="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/css_004.css" rel="stylesheet" type="text/css">
+  <link href="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/font-awesome.css" rel="stylesheet">
+
+<!-- /### -->
+
+<script type="text/javascript" src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/jquery.js"></script><script type="text/javascript">window.jQuery || document.write('<script type="text/javascript" src="http://forum.spring.io/js/jquery/jquery-1.7.2.min.js"><\/script>');</script><script type="text/javascript" src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/header-footer.js"></script></head>
+
+<!-- ### -->
+
+
+
+
+  <body id="vb-page-body" class="vb-page view-mode logged-out" itemscope="" itemtype="http://schema.org/ItemPage"><header class="navbar spring-header--navbar">
+    <div class="navbar-inner">
+      <div class="spring-container-fluid">
+        <div class="spring-logo--container">
+          <a class="spring-logo" href="http://spring.io/"><span></span></a>
+        </div>
+        <ul class="nav pull-right">
+          <li class="navbar-link">
+            <a href="http://spring.io/docs">Docs</a>
+          </li>
+          <li class="navbar-link">
+            <a href="http://spring.io/guides">Guides</a>
+          </li>
+          <li class="navbar-link">
+            <a href="http://spring.io/projects">Projects</a>
+          </li>
+          <li class="navbar-link">
+            <a href="http://spring.io/blog">Blog</a>
+          </li>
+          <li class="navbar-link active">
+            <a href="http://forum.spring.io/">Forum</a>
+          </li>
+          <li class="navbar-link nav-search">
+            <i class="icon-search navbar-search--icon js-search-input-open"></i>
+            <div class="search-input-close js-search-input-close">x</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="search-dropdown--container js-search-dropdown">
+      <div class="container-fluid">
+        <div class="search-form--container spring-container-fluid">
+          <form class="form-inline form-search" action="http://spring.io/search" method="get">
+            <input class="search-query search-form--form js-search-input" placeholder="Search for documention, guides, and posts..." name="q" th:value="${query}" type="text">
+            <button type="submit" class="search-form--submit"><i class="icon-search"></i></button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </header>
+
+<!-- /### -->
+
+
+
+
+
+
+<!--[if gte IE 9]>
+<body id="vb-page-body" class="vb-page ie ie9 view-mode logged-out" itemscope itemtype="http://schema.org/ItemPage">
+<![endif]-->
+<!--[if IE 8]>
+<body id="vb-page-body" class="vb-page ie ie8 view-mode logged-out" itemscope itemtype="http://schema.org/ItemPage">
+<![endif]-->
+<!--[if lte IE 7]>
+<body id="vb-page-body" class="vb-page ie ie7 view-mode logged-out" itemscope itemtype="http://schema.org/ItemPage">
+<![endif]-->
+<!--[if !IE]><!-->
+
+<!--<![endif]-->
+<div id="main-navbar-wrapper" class="noselect">
+	<div id="main-navbar" class="h-clearfix">
+		
+			<ul class="main-nav h-left h-hide"></ul>
+		
+		<ul class="secondary-nav h-right">
+			
+			
+				<li class="username-container h-right">
+					<span id="lnkLoginSignupMenu">Login or Sign Up</span>
+					<ul>
+						<li id="idLoginIframeContainer">
+							
+							
+							<iframe id="idLoginIframe" src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/login-form.htm"></iframe>
+						</li>
+						<li id="externalLoginProviders">
+							<span>Log in with</span>
+							
+
+						</li>
+					</ul>
+				</li>
+			
+		</ul>
+	</div>
+</div>
+<div id="sitebuilder-wrapper" class="noselect h-clearfix">
+	
+</div>
+<!--[if IE 8]>
+<div id="outer-wrapper">
+<div id="wrapper">
+<![endif]-->
+<!--[if !IE 8 ]><!-->
+<div id="outer-wrapper">
+<div id="wrapper">
+<!--<![endif]-->
+	<div id="header-axd" class="header-edit-box axdnum_1">
+		
+		<div class="axd-container axd-container_header">
+			<div class="admin-only">
+				
+			</div>
+			<div class="axd axd_header">
+				
+			</div>
+		</div>
+		<div class="axd-container axd-container_header2">
+			<div class="admin-only">
+				
+			</div>
+			<div class="axd axd_header2">
+				
+			</div>
+		</div>
+	</div>
+	
+<!-- ### ### -->
+ 	<div id="header" class="noselect" style="height:60px;">
+ 		<!--
+ 		<div class="header-cell">
+ 			
+			<div class="site-logo header-edit-box">
+				<a href="http://forum.spring.io/"><img src="http://forum.spring.io/images/misc/vbulletin5_logo.png" data-orig-src="http://forum.spring.io/images/misc/vbulletin5_logo.png" alt="Logo" title="Powered by vBulletin" /></a>
+			</div>
+		</div>
+		<div class="toolbar">
+				-->
+			<ul class="h-right">
+				
+				
+				
+				<li class="search-container">
+					<form id="searchForm" action="http://forum.spring.io/search" class="h-left desktopSearch" method="GET">
+						<div class="h-left">
+							<div class="search-box search-btn-inside-box">
+								<input name="q" id="q" placeholder="Search Forums" class="textbox search-term" autocomplete="off" type="text">
+								<button type="submit" id="btnSearch" class="search-btn" title="Search Forums"><span class="vb-icon vb-icon-search"></span></button>
+								<div class="vertical-divider-left"></div>
+								<div id="searchPopupControl" title="Filter search"><span class="vb-icon vb-icon-arrow-down-small"></span></div>
+								<div id="searchPopupContent"><div class="searchPopupBody">
+	<label><input name="searchFields[title_only]" class="searchFields_title_only" value="1" type="checkbox">Search in titles only</label>
+	<div class="h-clear"></div>
+	
+	
+		
+		
+			<label><input name="searchFields[channel][]" class="searchFields_channel" value="68" type="checkbox">Search in JMS only</label>
+		
+	
+	<label><span class="vb-icon vb-icon-adv-search"></span><a href="#" id="btnAdvSearch" class="adv-search-btn">Advanced Search</a></label>
+	<div class="h-clear"></div>
+	<div>
+		&nbsp;
+		<button type="submit" id="btnSearch-popup" class="button primary h-right">Search Forums</button>
+	</div>
+</div>
+<input name="searchJSON" value="" type="hidden"></div>
+							</div>
+						</div>
+					</form>
+				</li>
+				
+			</ul>
+<!--		</div> -->
+		
+	</div>
+<!-- / ### ### -->
+
+<!--
+	<div id="channel-tabbar" class="h-clearfix noselect">
+		<ul class="h-left">
+
+			
+			<li id="mobile-main-menu" class="mobile sections">
+				<div id="mobile-main-menu-sections">
+					<div class="main-menu-control-sections collapsed">
+						<span class="sections-menu-icon"><span class="icon h-left collapsed" ></span></span>
+						<span class="sections-title collapsed">SECTIONS</span>
+						<span class="sections-icon"><span class="icon h-left collapsed"></span></span>
+					</div>
+				</div>
+				<div id="mobile-main-menu-search"></div>
+				<span class="mobile-search"><span class="icon h-right"></span></span>
+			</li>
+
+			
+			
+				
+				
+				
+				
+				
+				
+				
+				
+				<li class=" section-item">
+					<a href="http://forum.spring.io/" class="h-left navbar_home">Forums</a>
+					<span class="mobile dropdown-icon"><span class="icon h-right"></span></span>
+				</li>
+			
+				
+				
+				
+				
+				
+				
+				
+				
+				<li class=" section-item">
+					<a href="http://forum.spring.io/blogs" class="h-left navbar_blogs">Blogs</a>
+					<span class="mobile dropdown-icon"><span class="icon h-right"></span></span>
+				</li>
+			
+				
+				
+				
+				
+				
+				
+				
+				
+				<li class=" section-item">
+					<a href="http://forum.spring.io/social-groups" class="h-left navbar_social_groups">Groups</a>
+					<span class="mobile dropdown-icon"><span class="icon h-right"></span></span>
+				</li>
+			
+			
+		</ul>
+	</div>
+
+	<div id="channel-subtabbar" class="h-clearfix h-hide">
+		<ul class="h-left">
+			
+		</ul>
+	</div>
+-->
+
+	
+		
+	
+
+	
+		
+		<ul id="breadcrumbs" class="h-clearfix" itemprop="breadcrumb">
+			<li class="crumb ellipsis"><a class="crumb-link" href="http://forum.spring.io/">Home</a></li>
+			
+				
+					
+					
+				
+				<li class="vb-icon separator"></li>
+				<li class="crumb ellipsis"><a class="crumb-link" href="http://forum.spring.io/forum">Forum</a></li>
+			
+				
+					
+					
+				
+				<li class="vb-icon separator"></li>
+				<li class="crumb ellipsis"><a class="crumb-link" href="http://forum.spring.io/forum/spring-projects">Spring Projects</a></li>
+			
+				
+					
+					
+				
+				<li class="vb-icon separator"></li>
+				<li class="crumb ellipsis"><a class="crumb-link" href="http://forum.spring.io/forum/spring-projects/integration">Integration</a></li>
+			
+				
+					
+					
+				
+				<li class="vb-icon separator"></li>
+				<li class="crumb ellipsis"><a class="crumb-link" href="http://forum.spring.io/forum/spring-projects/integration/jms">JMS</a></li>
+			
+		</ul>
+	
+
+	
+
+	
+
+<ul class="notices">
+	
+		
+		<li class="notice restore" data-notice-id="3" data-notice-persistent="1">Welcome to the new Spring.io forums!
+ If this is your first visit, be sure to check out the 
+ <a href="http://forum.spring.io/faq.php">FAQ</a> 
+ by clicking the link above, and for security reasons, use the 
+ <a href="http://forum.spring.io/lostpw">forgot password</a> link to reset your password.. 
+ You may have to register before you can post: click the <a href="http://forum.spring.io/register.php">register</a> 
+ link above to proceed. To start viewing messages, select the forum that you want to visit 
+ from the selection below.</li>
+	
+</ul>
+
+
+	
+
+	<div id="content" class="spring-container-fluid">
+		<div class="canvas-layout-container">
+<div id="canvas-layout-wide-narrow" class="canvas-layout" data-layout-id="2">
+	
+
+	<!-- section 2 -->
+	<div class="canvas-layout-row no-columns h-clearfix l-row">
+		
+		<div class="canvas-widget-list section-2 h-clearfix l-col__large-12 l-col__small--full">
+			
+				
+	
+
+
+	
+	
+
+
+
+
+
+<div class="canvas-widget default-widget announcement-widget empty" data-widget-id="140" data-widget-instance-id="17">
+	
+	
+	<div class="widget-header h-clearfix">
+		
+		
+		
+			
+		
+
+		<div class="module-title h-left">
+			
+				<span class="main-title hide-on-editmode">Announcement</span>
+			
+			<span class="admin-only">Announcement Module</span>
+		</div>
+		
+			<div class="module-buttons">
+				
+				
+					<span class="toggle-button module-button-item collapse" title="Collapse" data-toggle-title="Expand"><span class="vb-icon vb-icon-toggle">Collapse</span></span>
+				
+			</div>
+		
+	</div>
+	
+	<div class="widget-content">
+		
+			
+				No announcement yet.
+				
+			
+				
+	</div>
+</div>
+			
+		</div>
+	</div>
+
+	<!-- sections 0, 1 -->
+	<div class="canvas-layout-row has-columns l-row l-row__fixed--right">
+		
+		<div class="l-small canvas-widget-list section-1 has-adjacent-left-col l-col__fixed-6 l-col__small--full">
+			
+				
+	
+
+
+	
+	
+
+
+<div class="canvas-widget default-widget axd-widget axd-container" data-widget-id="150" data-widget-instance-id="131">
+	
+	<div class="widget-content restore axd axd_131">
+		
+		
+		<div class="ad_131_inner"><script>
+var now = new Date().getTime();
+document.write(unescape("%3Cscript src='http://dserv.springsource.org/spring_mylearn_banner?wh=nsf&v=side&ies="+now+"' type='text/javascript'%3E%3C/script%3E"));
+</script><script src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/spring_mylearn_banner.htm" type="text/javascript"></script><style>.S2UniGeoipBanner_top,
+.S2UniGeoipBanner_side {
+  cursor: pointer;
+  padding: 15px 10px;
+  border: 5px solid #bebebe;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
+  background: url('http://s3.amazonaws.com/assets.spring.io/drupal/files/SpringOne/2013/training-bg-image.png') top right no-repeat;
+  margin: 0;
+  background-color: #ede7de;
+}
+
+.S2UniGeoipBanner_top {
+  width: 995px;
+  margin-top: 12px;
+  text-align: left;
+}
+
+.S2UniGeoipBanner_side {
+  width: 272px;
+}
+
+.S2UniGeoipBanner_top .S2GPcourse_name,
+.S2UniGeoipBanner_side .S2GPcourse_name {
+  font-size: 14px;
+  font-weight: bold;
+  font-family: Arial;
+  text-transform: uppercase;
+  display: block;
+}
+
+.S2UniGeoipBanner_top .S2GPcity,
+.S2UniGeoipBanner_side .S2GPcity {
+  font-size: 14px;
+  color: #333;
+}
+
+.S2UniGeoipBanner_top .S2GPstart_date,
+.S2UniGeoipBanner_side .S2GPstart_date {
+  font-size: 14px;
+  color: #333;
+}
+
+.S2UniGeoipBanner_top .learn-more-button,
+.S2UniGeoipBanner_side .learn-more-button {
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffffff), color-stop(100%, #cdcdcd));
+  background-image: -webkit-linear-gradient(#ffffff,#cdcdcd);
+  background-image: -moz-linear-gradient(#ffffff,#cdcdcd);
+  background-image: -o-linear-gradient(#ffffff,#cdcdcd);
+  background-image: linear-gradient(#ffffff,#cdcdcd);
+  text-shadow: none;
+  color: #0094d4;
+  font-size: 12px;
+  line-height: 16px;
+  padding: 2px 9px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
+  border-radius: 4px;
+  text-align: center;
+  border: 1px solid #b8b8b8;
+  margin-top: 5px;
+  display: block;
+  width: 65px;
+}
+</style><a target="_new" href="http://mylearn.vmware.com/mgrreg/courses.cfm?ui=www_edu&amp;a=det&amp;id_course=200391" onclick="pageTracker._trackEvent('S2UniBanner', 'Click', '2014-02-04 - Live Online - Enterprise Integration with Spring Training', 1);" style="text-decoration:none;">
+           	<div class="S2UniGeoipBanner_side">
+                        <span class="S2GPcourse_name">Enterprise Integration with Spring Training</span>
+                        <span class="S2GPcity">Live Online, </span>
+                        <span class="S2GPstart_date">4 Feb 2014</span>
+                        <span class="learn-more-button">Learn More</span>
+                </div></a></div>
+	</div>
+</div>
+			
+		</div>
+		
+		<div class="canvas-widget-list section-0 has-adjacent-right-col l-col__flex-6 l-col__small--full h-padding-right-xl">
+			
+				
+	
+
+
+	
+	
+
+
+
+	
+	
+	
+		
+		
+	
+
+
+
+	
+
+
+<div class="canvas-widget default-widget page-title-widget widget-no-header-buttons widget-no-border" data-widget-id="164" data-widget-instance-id="18">
+	
+	
+	<div class="widget-header h-clearfix">
+		
+		
+		
+
+		<div class="module-title h-left">
+			
+				<span class="main-title hide-on-editmode">Issue with sending binary data as JMS messages using Spring Integration</span>
+			
+			<span class="admin-only">Page Title Module</span>
+		</div>
+		
+			<div class="module-buttons">
+				
+					<span class="admin-only">
+						
+							<span class="move-icon module-button-item" title="Move module"><span>Move</span></span>
+						
+						
+						
+							<span class="close-button module-button-item" title="Remove module"><span>Remove</span></span>
+						
+					</span>
+				
+				
+					<span class="toggle-button module-button-item collapse" title="Collapse" data-toggle-title="Expand"><span class="vb-icon vb-icon-toggle">Collapse</span></span>
+				
+			</div>
+		
+	</div>
+	
+</div>
+			
+				
+
+
+
+	
+		
+	
+	
+		
+			
+		
+	
+
+	
+	
+	
+		
+		
+		
+		
+
+		
+			
+			
+
+			
+
+			
+				
+			
+			
+
+			
+
+			
+
+			
+
+			
+				
+					
+				
+				
+				
+				
+				
+					
+					
+							
+					
+				
+				
+			
+
+			
+			
+
+			
+
+			
+
+			
+			
+			
+			
+
+			
+
+			
+			
+			
+
+			
+				
+			
+
+				
+			
+				
+					
+					
+					
+				
+			
+				
+					
+					
+					
+				
+			
+				
+					
+					
+					
+				
+			
+				
+					
+					
+					
+				
+			
+				
+					
+					
+					
+				
+			
+				
+					
+					
+					
+				
+			
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+				
+			
+
+			
+			
+			
+			
+			
+			
+
+		
+	
+
+	
+		
+		
+		
+		 
+	
+
+	
+	
+	
+		
+		
+	
+
+	<div class="canvas-widget default-widget conversation-content-widget  forum-conversation-content-widget widget-tabs widget-no-border widget-no-header-buttons  axd-container ui-tabs ui-widget ui-widget-content ui-corner-all" data-widget-id="117" data-widget-instance-id="19" data-widget-default-tab="">
+		
+			<div class="conversation-status-messages">
+				
+				
+				
+				<div class="conversation-status-message notice h-hide"><span></span><div class="close">X</div></div>
+			</div>
+
+			<div class="widget-header h-clearfix">
+				<div class="module-title h-left main-header-title">
+					
+					<span class="admin-only">Conversation Detail Module</span>
+				</div>
+				<div class="module-buttons moderationmenu_container">
+					
+					<span class="toggle-button module-button-item collapse" title="Collapse" data-toggle-title="Expand"><span class="vb-icon-toggle">Collapse</span></span>
+				</div>
+				
+				
+					<div class="widget-tabs-nav h-clear">
+						<a id="topic-module-top" class="anchor js-module-top-anchor"></a>
+						<ul class="ui-tabs-nav hide-on-editmode h-left ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">
+							
+							
+							<li class="ui-state-default ui-corner-top ui-tabs-selected ui-state-active"><a href="#thread-view-tab" data-href="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration?view=thread">Posts</a></li>
+							
+							<li class="ui-state-default ui-corner-top"><a href="#stream-view-tab" data-href="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration?view=stream">Latest Activity</a></li>
+						</ul>
+					</div>
+				
+			</div>
+			<div class="widget-content tab widget-tabs-panel">
+				<input name="canmoderate" id="canmoderate" value="0" type="hidden">
+
+				<div id="thread-view-tab" class="conversation-view conversation-thread-view ui-tabs-panel ui-widget-content ui-corner-bottom">
+					
+					
+						
+					
+
+					
+						
+							
+						
+					
+
+					
+
+	
+		
+	
+
+
+
+	
+
+
+
+
+
+
+
+<div style="z-index: 99;" class="spring-conversation-toolbar-wrapper conversation-toolbar-wrapper  top h-clear hide-on-editmode     scrolltofixed-floating   scrolltofixed-top" data-allow-history="1">
+	<div class="conversation-toolbar">
+		
+		<ul class="toolset-right">
+			
+			
+			
+				<li class="toolbar-search">
+					<form name="toolbar-search-form" action="http://forum.spring.io/activity/get" method="post" class="toolbar-search-form">
+						<input name="nodeid" value="114352" type="hidden">
+						<input name="view" value="thread" type="hidden">
+						
+							<input name="per-page" value="15" type="hidden">
+							<input name="pagenum" value="1" type="hidden">
+						
+						<div class="search-container">
+							<input name="q" class="textbox js-filter-search" placeholder="Search Forums" data-filter-name="Search Forums" type="text">
+							<button type="submit" name="btnSearch" id="btnSearch-top" class="search-btn"><span class="vb-icon vb-icon-search-small-gray">Search Forums</span></button>
+						</div>
+					<input name="securitytoken" value="guest" type="hidden"></form>
+				</li>
+			
+			
+			
+				<li class="toolbar-pagenav">
+					<!-- Page Nav controls -->
+
+
+
+
+
+
+
+
+
+
+
+<div class="pagenav-controls ">
+	<form class="pagenav-form h-clearfix" action="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration">
+		<input class="defaultpage" value="1" type="hidden">
+		<div class="pagenav h-left">
+			Page <input name="page" class="js-pagenum textbox h-padding-horiz-none" value="1" type="text"> of <span class="pagetotal">1</span>
+		</div>
+
+		<div class="horizontal-arrows h-left">
+			
+				<a class="arrow left-arrow h-disabled" title="Previous Page" rel="prev"><span class="vb-icon vb-icon-arrow-left"></span></a>
+				<a class="arrow right-arrow h-disabled" title="Next Page" rel="next"><span class="vb-icon vb-icon-arrow-right"></span></a>
+			
+		</div>
+	</form>	
+</div>
+				</li>
+			
+			
+				<li class="toolbar-filter toolbar-filter-top">
+					<div class="filter-wrapper h-clearfix">
+						<div class="label h-left">Filter</div>
+						<div class="arrow vb-icon-wrapper h-left"><span class="vb-icon vb-icon-triangle-down-wide"></span></div>
+					</div>
+				</li>
+			
+			
+
+			
+		</ul>
+	</div>
+
+	
+
+	
+		
+			
+		
+		
+		<form action="http://forum.spring.io/activity/get" method="post" class="toolbar-filter-overlay h-clearfix">
+			<input name="nodeid" value="114352" type="hidden">
+			<input name="view" value="thread" type="hidden">
+			
+			
+			
+			
+				<input name="nolimit" value="1" type="hidden">
+			
+			
+				<input name="per-page" value="15" type="hidden">
+				<input name="pagenum" value="1" type="hidden">
+			
+			
+			
+			
+				<input name="userid" value="0" type="hidden">
+			
+			
+			
+			<input name="showChannelInfo" value="1" type="hidden">
+			<ul class="filter-options-list">
+				
+				
+				<li>
+					<div class="filter-header">Time</div>
+					<div class="filter-options">
+						
+						
+						
+						
+						
+						
+						
+						
+						
+							
+						
+						
+						
+						
+
+						
+							<label><input name="filter_time" value="time_all" tabindex="4" checked="checked" class="js-default-checked" type="radio"><span>All Time</span></label>
+						
+						<label><input name="filter_time" value="time_today" tabindex="5" type="radio"><span>Today</span></label>
+						<label><input name="filter_time" value="time_lastweek" tabindex="6" type="radio"><span>Last Week</span></label>
+						<label><input name="filter_time" value="time_lastmonth" tabindex="7" type="radio"><span>Last Month</span></label>
+					</div>
+				</li>
+				
+				
+				<li>
+					<div class="filter-header">Show</div>
+					<div class="filter-options">
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+							
+						
+						
+						
+						
+
+						<label><input name="filter_show" value="show_all" tabindex="8" checked="checked" class="js-default-checked" type="radio"><span>All</span></label>
+						<label><input name="filter_show" value="vBForum_Text" tabindex="9" type="radio"><span>Discussions only</span></label>
+						<label><input name="filter_show" value="vBForum_Gallery" tabindex="10" type="radio"><span>Photos only</span></label>
+						<label><input name="filter_show" value="vBForum_Video" tabindex="11" type="radio"><span>Videos only</span></label>
+						<label><input name="filter_show" value="vBForum_Link" tabindex="12" type="radio"><span>Links only</span></label>
+						<label><input name="filter_show" value="vBForum_Poll" tabindex="13" type="radio"><span>Polls only</span></label>
+					</div>
+				</li>
+				
+				
+				
+				
+				
+				
+				
+
+				
+				<!-- end if prefixsets -->
+			</ul>
+		<input name="securitytoken" value="guest" type="hidden"></form>
+
+		
+		
+
+		<div class="filtered-by h-clearfix h-hide">
+			<label>Filtered by:</label>
+			<div class="filter-text-wrapper h-left">
+				
+				
+				
+			</div>
+			<a href="#" class="clear-all h-hide">Clear All</a>
+		</div>
+		<div class="new-conversations-strip"><span></span> new posts</div>
+	
+
+	
+</div><div style="display: none; width: 709px; height: 36px; float: none;" class="scrolltofixed-filler"></div>
+
+					<div class="conversation-content">
+						<ul class="conversation-list list-container h-clearfix  thread-view">
+							
+								
+								
+								
+								
+								
+								
+								
+								
+									
+
+									
+
+									
+								
+									
+
+									
+
+									
+										
+									
+								
+									
+
+									
+
+									
+										
+									
+								
+									
+
+									
+
+									
+								
+									
+
+									
+
+									
+										
+									
+								
+									
+
+									
+
+									
+								
+								
+								
+								
+								
+								
+									
+									
+									
+									
+										
+									
+								
+									
+									
+									
+									
+										
+									
+								
+									
+									
+									
+									
+										
+									
+								
+									
+									
+									
+									
+										
+									
+								
+									
+									
+									
+									
+										
+									
+								
+									
+									
+									
+									
+										
+									
+								
+							
+							
+							
+							
+								
+							
+								
+							
+								
+							
+								
+							
+								
+							
+								
+							
+
+							
+							
+							
+								
+									
+									
+								
+								
+									
+									<!-- Starter Conversation -->
+									
+									
+
+
+
+
+
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+		
+	
+
+
+
+
+
+
+
+
+
+
+<li data-node-id="114352" class="b-post js-post js-comment-entry__parent h-restore--on-preview b-post--text b-post--first OLD__list-item OLD__list-item-text OLD__conversation-starter js-conversation-starter h-left h-clear js-slideshow__gallery-node js-poll__parent" itemscope="" itemtype="http://schema.org/CreativeWork">
+	<a id="post114352" class="anchor"></a>
+	
+		
+
+		
+		
+
+		
+
+		
+		
+		<meta itemprop="url" content="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration">
+	
+
+
+	<a id="post" class="anchor"></a>
+
+	<div class="l-row l-row__fixed--left">
+		<div class="l-col__fixed-3 l-col__small--full h-hide--on-preview h-padding-right-l">
+			
+
+
+<div class="userinfo b-userinfo b-post__hide-when-deleted" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+	
+		
+			<a href="http://forum.spring.io/member/108205-venky-ramachandran" class="b-avatar b-avatar--m b-avatar--thread h-margin-bottom-l"><img src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/default_avatar_medium.png" alt="Venky Ramachandran" title="Venky Ramachandran" width="64" height="64"></a>
+		
+	
+
+	<!-- responsive alteration: Added userinfo-details wrapper in order to
+	support left floated avatar with all other information on the right. -->
+	
+	<div class="b-userinfo__details">
+		
+		<div class="author h-text-size--14"><strong><a href="http://forum.spring.io/member/108205-venky-ramachandran">Venky Ramachandran</a></strong></div>
+		
+			<div class="usertitle">
+			
+				Junior Member
+			
+			</div>
+		
+		
+
+		<div class="b-meter h-margin-top-m " title="is on a distinguished road">
+			
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+		</div>
+		
+		<div class="b-userinfo__rank h-margin-top-s h-hide"></div>
+		
+		<ul class="b-userinfo__additional-info-block h-margin-top-xl">
+			
+				<li class="b-userinfo__additional-info"><label>Join Date:</label> <span>Feb 2012</span></li>
+				<li class="b-userinfo__additional-info"><label>Posts:</label> <span>4</span></li>
+				
+			
+			
+		</ul>
+		<ul class="b-userinfo__icons h-margin-none OLD__userinfo-extra OLD__icons">
+			
+				
+			
+			<li class="b-userinfo__icon h-left OLD__online-status online" title="Venky Ramachandran is online now"><span class="b-icon b-icon__status--green"></span></li>
+
+			
+	
+
+		</ul>
+	</div>
+</div>
+		</div>
+
+		<div class="js-post__content-wrapper l-col__flex-3 l-col__small--full h-restore--on-preview OLD__list-item-body-wrapper">
+			<div class="b-post__body h-restore--on-preview h-padding-horiz-xxl h-padding-top-xl h-padding-bottom-m h-clearfix">
+				<div class="b-post__arrow b-post__hide-when-deleted OLD__pointer-left"></div>
+	
+	
+				
+	
+	
+	
+	<!-- REPLY -->
+			<!--vb:if condition="!$conversation['unpublishdate'] OR $canPhysicallyDeletePost"-->
+	<!-- /REPLY -->
+	
+				<div class="b-post__content js-post__content b-post__hide-when-deleted">
+					<hr class="b-divider--section OLD__section-divider">
+					
+					<div class="b-media h-hide--on-preview">
+						<div class="b-media__img--rev">
+						
+							
+								
+							
+	
+							
+							
+							
+							
+							
+								<a class="b-post__count" href="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration#post114352">#1
+								</a>
+							
+	
+							
+	
+							
+	
+	
+						</div>
+						<div class="b-media__body">
+							
+	
+								<h2 class="b-post__title OLD__post-title">
+									
+									
+									Issue with sending binary data as JMS messages using Spring Integration
+								</h2>
+							
+	
+	
+							
+							
+							<div class="b-post__timestamp OLD__post-date"><time itemprop="dateCreated" datetime="2012-03-01T10:56:37">Mar 1st, 2012, 01:56 PM</time></div>
+	
+						</div>
+					</div>
+	
+					<div class="OLD__post-content h-padding-vert-xl">
+						
+	
+	
+						
+						<div class="js-post__content-text OLD__post-content-text restore" itemprop="text">
+							
+							I have a Spring Integration (SI) application that extracts email 
+attachments which can be either XML files or JPG images and sends it to a
+ legacy system using WebSphere MQ for further downstream processing. I 
+am using the SI jms:outbound-channel-adapter for the MQ messaging. My SI
+ application context has the following definitions:<br>
+<br>
+&lt;!-- Legacy Queue Connection Factory and Queue Name definitions --&gt;<br>
+&lt;bean id="connectionFactory" class="org.springframework.jms.connection.CachingC  onnectionFactory"&gt;<br>
+	&lt;property name="targetConnectionFactory"&gt;<br>
+	       &lt;bean class="com.ibm.mq.jms.MQQueueConnectionFactory"&gt;<br>
+          		&lt;property name="port" value="${legacyQMgrPort}"/&gt;<br>
+          		&lt;property name="hostName" value="${legacyQMgrHost}"/&gt;<br>
+      		&lt;property name="queueManager" value="${legacyQMgrName}"/&gt;<br>
+          		&lt;property name="channel" value="${legacyQMgrClientChannel}"/&gt;<br>
+          		&lt;property name="transportType" value="${transportTypeMQClient}"/&gt;      <br>
+	      &lt;/bean&gt;<br>
+	&lt;/property&gt;<br>
+	&lt;property name="sessionCacheSize" value="10"/&gt;<br>
+	&lt;property name="cacheProducers" value="false"/&gt;<br>
+&lt;/bean&gt;<br>
+<br>
+&lt;bean id="requestQueue" class="com.ibm.mq.jms.MQQueue" &gt;<br>
+    &lt;property name="baseQueueName" value="${legacyRequestQName}"/&gt;<br>
+     &lt;property name="TargetClient"&gt;<br>
+            &lt;util:constant static-field="com.ibm.mq.jms.JMSC.MQJMS_CLIENT_NONJMS_MQ" /&gt;<br>
+      &lt;/property&gt;<br>
+&lt;/bean&gt;<br>
+<br>
+&lt;!-- Binary File to byte stream transformer for image files like .jpg, .gif etc --&gt;<br>
+&lt;int:channel id="bytesChannel"/&gt;<br>
+&lt;int-file:file-to-bytes-transformer input-channel="bytesChannel" output-channel="jmsOutChannel" delete-files="true"/&gt; <br>
+<br>
+&lt;!-- Text File to String transformer for XML messages with UTF-16 encoding --&gt;<br>
+&lt;int:channel id="textChannel"/&gt;<br>
+&lt;int-file:file-to-string-transformer input-channel="textChannel" 
+output-channel="jmsOutChannel" delete-files="true" charset="UTF-16"/&gt;
+ <br>
+<br>
+&lt;int:service-activator input-channel="jmsOutChannel"<br>
+                       output-channel="mqChannel"<br>
+                       ref="mqMessageHandler"/&gt;<br>
+&lt;bean id="mqMessageHandler" class="gov.dhs.cbp.tecs.tipoff.MQMessageHandler"/&gt;<br>
+<br>
+&lt;int-jms:outbound-channel-adapter id="jmsOutboundAdapter" 
+channel="mqChannel" connection-factory="connectionFactory" 
+destination="requestQueue" extract-payload="true"/&gt;<br>
+<br>
+The XML files are transmitted correctly as JMS Text Messages over MQ. 
+The issue seems to be with the image files which are transformed to a 
+byte array first with the file-to-bytes transformer and then sent as the
+ payload of a JMS message. For some reason the outbound-channel-adapter 
+is treating the binary data as text when it should be a JMS bytes 
+message. The following logs show the output from some tracing within 
+Spring Integration components.<br>
+The JMSMessage Class: jms_text in the log output indicates that it is a 
+text message when it should have been a jms_bytes message due to the 
+binary payload.<br>
+<br>
+ Has anyone encountered this issue? If so can you please let me know how you resolved it.<br>
+<br>
+<br>
+12:30:08,890  INFO CachingConnectionFactory: Established shared JMS Connection: com.ibm.mq.jms.MQQueueConnection@1352367<br>
+12:30:08,968 DEBUG CachingConnectionFactory: Creating cached JMS Session for mode 1: com.ibm.mq.jms.MQQueueSession@109da93<br>
+12:30:08,984 DEBUG DynamicJmsTemplate: Executing callback on JMS 
+Session: Cached JMS Session: com.ibm.mq.jms.MQQueueSession@109da93<br>
+12:30:09,062 DEBUG DynamicJmsTemplate: Sending created message: <br>
+  JMSMessage class: jms_text <br>
+  JMSType:          jms_bytes<br>
+  JMSDeliveryMode:  2<br>
+  JMSExpiration:    0<br>
+  JMSPriority:      4<br>
+  JMSMessageID:     null<br>
+  JMSTimestamp:     0<br>
+  JMSCorrelationID: null<br>
+  JMSDestination:   null<br>
+  JMSReplyTo:       null<br>
+  JMSRedelivered:   false<br>
+    correlationId: SAMPLE_Venky_Image.jpg<br>
+    fileName: SAMPLE_Venky_Image.jpg<br>
+    fileType: BINARY<br>
+    file_name: SAMPLE_Venky_Image.jpg<br>
+    timestamp: 1330623008406<br>
+[B@58e2a1<br>
+12:30:09,187 DEBUG DirectChannel: postSend (sent=true) on channel 
+'mqChannel', message: 
+[Payload=[B@58e2a1][Headers={timestamp=1330623008406, 
+id=4ee6d8ae-8ca1-451c-93bc-68fc8d483513, jms_type=jms_bytes, 
+fileType=BINARY, correlationId=SAMPLE_Venky_Image.jpg, 
+fileName=SAMPLE_Venky_Image.jpg,
+						</div>
+					</div>
+	
+	<!-- REPLY -->
+				<!--/vb:if-->
+	<!-- /REPLY -->
+
+
+
+
+      
+  </div> 
+
+
+
+
+		
+			
+				
+				
+				
+			
+			
+<div class="b-post__footer h-hide--on-preview h-clear h-padding-bottom-m">
+
+	<div class="h-clearfix">
+	
+			<div class="h-margin-bottom-xl h-margin-top-none h-text-size--11" id="content-tags-114352">
+	<strong>Tags:</strong>
+	
+		<span>None</span>
+	
+</div>
+		
+
+		
+			<hr class="b-divider b-divider--post-controls">
+		
+
+		<ul class="h-left js-post-info">
+
+			
+			
+
+			
+
+			
+		</ul>
+
+		<ul style="-moz-user-select: none;" class="h-margin-top-m h-right js-post-controls" data-node-id="114352">
+			
+
+			
+
+			
+
+			
+
+				
+
+					
+
+				
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+				
+
+			
+
+		</ul>
+	</div>
+</div>
+
+
+			<div class="edit-conversation-container"></div>
+		
+
+
+
+      </div>
+    </div>  
+  </div>    
+</li><!-- /end .b-post -->
+									
+								
+								
+							
+								
+									
+									
+								
+								
+									<!-- Conversation Replies or Comments -->
+									
+									
+									
+										
+									
+
+									
+										
+
+
+
+
+
+
+
+
+
+	
+	
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+<li data-node-id="582727" class="b-post js-post js-comment-entry__parent h-restore--on-preview b-post--text  OLD__list-item OLD__list-item-text OLD__conversation-reply js-conversation-reply h-left h-clear js-slideshow__gallery-node js-poll__parent" itemscope="" itemtype="http://schema.org/Comment">
+	<a id="post582727" class="anchor"></a>
+	
+		
+
+		
+		
+
+		
+
+		
+		
+		<meta itemprop="url" content="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration">
+	
+
+
+	<a id="post" class="anchor"></a>
+
+	<div class="l-row l-row__fixed--left">
+		<div class="l-col__fixed-3 l-col__small--full h-hide--on-preview h-padding-right-l">
+			
+
+
+<div class="userinfo b-userinfo b-post__hide-when-deleted" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+	
+		
+			<a href="http://forum.spring.io/member/12893-mark-fisher" class="b-avatar b-avatar--m b-avatar--thread h-margin-bottom-l"><img src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/image.png" alt="Mark Fisher" title="Mark Fisher"></a>
+		
+	
+
+	<!-- responsive alteration: Added userinfo-details wrapper in order to
+	support left floated avatar with all other information on the right. -->
+	
+	<div class="b-userinfo__details">
+		
+		<div class="author h-text-size--14"><strong><a href="http://forum.spring.io/member/12893-mark-fisher">Mark Fisher</a></strong></div>
+		
+			<div class="usertitle">
+			
+				Senior Member
+			
+			</div>
+		
+		
+
+		<div class="b-meter h-margin-top-m " title="is on a distinguished road">
+			
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+		</div>
+		
+		<div class="b-userinfo__rank h-margin-top-s">Spring Team</div>
+		
+		<ul class="b-userinfo__additional-info-block h-margin-top-xl">
+			
+				<li class="b-userinfo__additional-info"><label>Join Date:</label> <span>Oct 2005</span></li>
+				<li class="b-userinfo__additional-info"><label>Posts:</label> <span>2862</span></li>
+				
+			
+			
+		</ul>
+		<ul class="b-userinfo__icons h-margin-none OLD__userinfo-extra OLD__icons">
+			
+				
+			
+			<li class="b-userinfo__icon h-left OLD__online-status online" title="Mark Fisher is online now"><span class="b-icon b-icon__status--green"></span></li>
+
+			
+	
+		
+			<li class="js-userinfo__signature b-userinfo__icon h-left">
+				<span class="b-icon b-icon__signature">
+					<div class="user-signature h-hide restore">Mark Fisher<br>
+Founder: Spring Integration, Spring AMQP, and Spring XD<br>
+SpringSource, a division of VMware<br>
+<a href="http://www.springsource.com/" target="_blank">http://www.springsource.com</a><br>
+<a href="http://www.springsource.org/spring-integration" target="_blank">http://www.springsource.org/spring-integration</a><br>
+<a href="http://blog.springsource.com/main/author/markf" target="_blank">http://blog.springsource.com/main/author/markf</a></div>
+				</span>
+			</li>
+		
+	
+
+		</ul>
+	</div>
+</div>
+		</div>
+
+		<div class="js-post__content-wrapper l-col__flex-3 l-col__small--full h-restore--on-preview OLD__list-item-body-wrapper">
+			<div class="b-post__body h-restore--on-preview h-padding-horiz-xxl h-padding-top-xl h-padding-bottom-m h-clearfix">
+				<div class="b-post__arrow b-post__hide-when-deleted OLD__pointer-left"></div>
+	
+	
+				
+	
+	
+	
+	<!-- REPLY -->
+			<!--vb:if condition="!$conversation['unpublishdate'] OR $canPhysicallyDeletePost"-->
+	<!-- /REPLY -->
+	
+				<div class="b-post__content js-post__content b-post__hide-when-deleted">
+					<hr class="b-divider--section OLD__section-divider">
+					
+					<div class="b-media h-hide--on-preview">
+						<div class="b-media__img--rev">
+						
+							
+								
+							
+	
+							
+							
+							
+							
+							
+	
+							
+								<a class="b-post__count" href="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration?p=582727#post582727">#2</a>
+							
+	
+							
+	
+	
+						</div>
+						<div class="b-media__body">
+							
+	
+	
+							
+							
+							<div class="b-post__timestamp OLD__post-date"><time itemprop="dateCreated" datetime="2012-03-01T11:13:56">Mar 1st, 2012, 02:13 PM</time></div>
+	
+						</div>
+					</div>
+	
+					<div class="OLD__post-content h-padding-vert-xl">
+						
+	
+	
+						
+						<div class="js-post__content-text OLD__post-content-text restore" itemprop="text">
+							
+							First, can you be sure to use [ CODE ] and [ /CODE ] (without the
+ spaces) to wrap code/config excerpts in the future? It makes it much 
+easier to read.<br>
+<br>
+From what you are showing, the default SimpleMessageConverter 
+implementation would be in use, so that means a payload that is a byte 
+array *should* cause creation of a javax.jms.BytesMessage. Are you 
+positive that the routing logic is correct... that the image files are 
+indeed going through the file-to-bytes-transformer?
+						</div>
+					</div>
+	
+	<!-- REPLY -->
+				<!--/vb:if-->
+	<!-- /REPLY -->
+
+
+
+
+
+      
+  </div> 
+
+
+	
+	
+
+
+
+
+
+		
+			
+				
+				
+				
+			
+			
+<div class="b-post__footer h-hide--on-preview h-clear h-padding-bottom-m">
+
+	<div class="h-clearfix">
+	
+
+		
+			<hr class="b-divider b-divider--post-controls">
+		
+
+		<ul class="h-left js-post-info">
+
+			
+			
+
+			
+
+			
+		</ul>
+
+		<ul style="-moz-user-select: none;" class="h-margin-top-m h-right js-post-controls" data-node-id="582727">
+			
+
+			
+
+			
+
+			
+
+				
+
+					
+
+				
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+				
+
+			
+
+		</ul>
+	</div>
+</div>
+
+
+			<div class="b-comment-entry js-comment-entry h-padding-xxl h-padding-top-xl  comment-entry-box h-hide ">
+				<h2 class="h-margin-bottom-xl OLD__comment-entry-box-header">Comment</h2>
+				<textarea style="overflow: hidden;" class="b-comment-entry__textbox js-comment-entry__textbox autogrow" placeholder="Type your comment here"></textarea>
+
+				<div class="b-button-group h-margin-top-xl h-text--right">
+					<button type="button" id="btnPostCommentCancel-582727" class="b-button js-comment-entry__cancel">Cancel</button>
+					<button type="button" id="btnPostComment-582727" class="b-button b-button--primary js-comment-entry__post">Post</button>
+				</div>
+			<div class="elastic-twin-div" style="position: absolute; display: none; word-wrap: break-word; white-space: pre-wrap; border-left: 1px solid rgb(174, 179, 182); border-color: rgb(174, 179, 182); border-style: solid; border-width: 1px; font-weight: 400; width: 100%; font-family: Helvetica,Arial,sans-serif; line-height: 16px; font-size: 12px; padding: 12px;">�</div></div>
+
+			<div class="edit-conversation-container"></div>
+
+			
+
+
+
+<div class="b-comments js-comments h-margin-bottom-xl h-clearfix h-hide">
+	
+		
+	
+	
+		
+	
+	
+		
+	
+	
+		
+	
+
+	
+	
+	
+	
+	
+	
+
+	
+	
+
+	
+		<div class="b-comments__header js-comments__header OLD__top b-media h-padding-vert-m h-padding-horiz-l h-hide">
+			<div class="js-comments__total OLD__comment-total h-margin-left-l OLD__h-left b-media__body">
+				<span class="b-icon b-icon__speech-single h-margin-right-s"></span>
+				<label class="js-comments__total-text h-align-top"></label>
+			</div>
+			<div class="b-media__img--rev js-comments__pagination h-hide">
+				<label></label>
+				<span class="b-comments__pagination--up js-comments__page--prev h-margin-left-s OLD__icon" title="See previous comments"><span class="b-icon b-icon__arrow-up-m--default"></span></span>
+			</div>
+		</div>
+		<ul class="b-comments__comments js-comments__comments h-left"></ul>
+		<div class="b-comments__footer js-comments__footer b-media OLD__bottom h-padding-vert-m h-padding-horiz-l h-clear h-hide">
+			<div class="b-media__img--rev js-comments__pagination">
+				<label></label>
+				<span class="b-comments__pagination--down js-comments__page--next h-margin-left-s OLD__icon" title="See next comments"><span class="b-icon b-icon__arrow-down-m--default"></span></span>
+			</div>
+		</div>
+	
+</div>
+		
+
+
+      </div>
+    </div>  
+  </div>    
+</li><!-- /end .b-post -->
+
+									
+								
+								
+							
+								
+									
+									
+								
+								
+									<!-- Conversation Replies or Comments -->
+									
+									
+									
+										
+									
+
+									
+										
+
+
+
+
+
+
+
+
+
+	
+	
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+<li data-node-id="582728" class="b-post js-post js-comment-entry__parent h-restore--on-preview b-post--text  OLD__list-item OLD__list-item-text OLD__conversation-reply js-conversation-reply h-left h-clear js-slideshow__gallery-node js-poll__parent" itemscope="" itemtype="http://schema.org/Comment">
+	<a id="post582728" class="anchor"></a>
+	
+		
+
+		
+		
+
+		
+
+		
+		
+		<meta itemprop="url" content="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration">
+	
+
+
+	<a id="post" class="anchor"></a>
+
+	<div class="l-row l-row__fixed--left">
+		<div class="l-col__fixed-3 l-col__small--full h-hide--on-preview h-padding-right-l">
+			
+
+
+<div class="userinfo b-userinfo b-post__hide-when-deleted" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+	
+		
+			<a href="http://forum.spring.io/member/12893-mark-fisher" class="b-avatar b-avatar--m b-avatar--thread h-margin-bottom-l"><img src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/image.png" alt="Mark Fisher" title="Mark Fisher"></a>
+		
+	
+
+	<!-- responsive alteration: Added userinfo-details wrapper in order to
+	support left floated avatar with all other information on the right. -->
+	
+	<div class="b-userinfo__details">
+		
+		<div class="author h-text-size--14"><strong><a href="http://forum.spring.io/member/12893-mark-fisher">Mark Fisher</a></strong></div>
+		
+			<div class="usertitle">
+			
+				Senior Member
+			
+			</div>
+		
+		
+
+		<div class="b-meter h-margin-top-m " title="is on a distinguished road">
+			
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+		</div>
+		
+		<div class="b-userinfo__rank h-margin-top-s">Spring Team</div>
+		
+		<ul class="b-userinfo__additional-info-block h-margin-top-xl">
+			
+				<li class="b-userinfo__additional-info"><label>Join Date:</label> <span>Oct 2005</span></li>
+				<li class="b-userinfo__additional-info"><label>Posts:</label> <span>2862</span></li>
+				
+			
+			
+		</ul>
+		<ul class="b-userinfo__icons h-margin-none OLD__userinfo-extra OLD__icons">
+			
+				
+			
+			<li class="b-userinfo__icon h-left OLD__online-status online" title="Mark Fisher is online now"><span class="b-icon b-icon__status--green"></span></li>
+
+			
+	
+		
+			<li class="js-userinfo__signature b-userinfo__icon h-left">
+				<span class="b-icon b-icon__signature">
+					<div class="user-signature h-hide restore">Mark Fisher<br>
+Founder: Spring Integration, Spring AMQP, and Spring XD<br>
+SpringSource, a division of VMware<br>
+<a href="http://www.springsource.com/" target="_blank">http://www.springsource.com</a><br>
+<a href="http://www.springsource.org/spring-integration" target="_blank">http://www.springsource.org/spring-integration</a><br>
+<a href="http://blog.springsource.com/main/author/markf" target="_blank">http://blog.springsource.com/main/author/markf</a></div>
+				</span>
+			</li>
+		
+	
+
+		</ul>
+	</div>
+</div>
+		</div>
+
+		<div class="js-post__content-wrapper l-col__flex-3 l-col__small--full h-restore--on-preview OLD__list-item-body-wrapper">
+			<div class="b-post__body h-restore--on-preview h-padding-horiz-xxl h-padding-top-xl h-padding-bottom-m h-clearfix">
+				<div class="b-post__arrow b-post__hide-when-deleted OLD__pointer-left"></div>
+	
+	
+				
+	
+	
+	
+	<!-- REPLY -->
+			<!--vb:if condition="!$conversation['unpublishdate'] OR $canPhysicallyDeletePost"-->
+	<!-- /REPLY -->
+	
+				<div class="b-post__content js-post__content b-post__hide-when-deleted">
+					<hr class="b-divider--section OLD__section-divider">
+					
+					<div class="b-media h-hide--on-preview">
+						<div class="b-media__img--rev">
+						
+							
+								
+							
+	
+							
+							
+							
+							
+							
+	
+							
+								<a class="b-post__count" href="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration?p=582728#post582728">#3</a>
+							
+	
+							
+	
+	
+						</div>
+						<div class="b-media__body">
+							
+	
+	
+							
+							
+							<div class="b-post__timestamp OLD__post-date"><time itemprop="dateCreated" datetime="2012-03-01T11:15:21">Mar 1st, 2012, 02:15 PM</time></div>
+	
+						</div>
+					</div>
+	
+					<div class="OLD__post-content h-padding-vert-xl">
+						
+	
+	
+						
+						<div class="js-post__content-text OLD__post-content-text restore" itemprop="text">
+							
+							Actually looking at it again, what are you doing within the mqMessageHandler bean?<br>
+<br>
+That's most likely where something is changing (since the post-send log does show a bytes payload).
+						</div>
+					</div>
+	
+	<!-- REPLY -->
+				<!--/vb:if-->
+	<!-- /REPLY -->
+
+
+
+
+
+      
+  </div> 
+
+
+	
+	
+
+
+
+
+
+		
+			
+				
+				
+				
+			
+			
+<div class="b-post__footer h-hide--on-preview h-clear h-padding-bottom-m">
+
+	<div class="h-clearfix">
+	
+
+		
+			<hr class="b-divider b-divider--post-controls">
+		
+
+		<ul class="h-left js-post-info">
+
+			
+			
+
+			
+
+			
+		</ul>
+
+		<ul style="-moz-user-select: none;" class="h-margin-top-m h-right js-post-controls" data-node-id="582728">
+			
+
+			
+
+			
+
+			
+
+				
+
+					
+
+				
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+				
+
+			
+
+		</ul>
+	</div>
+</div>
+
+
+			<div class="b-comment-entry js-comment-entry h-padding-xxl h-padding-top-xl  comment-entry-box h-hide ">
+				<h2 class="h-margin-bottom-xl OLD__comment-entry-box-header">Comment</h2>
+				<textarea style="overflow: hidden;" class="b-comment-entry__textbox js-comment-entry__textbox autogrow" placeholder="Type your comment here"></textarea>
+
+				<div class="b-button-group h-margin-top-xl h-text--right">
+					<button type="button" id="btnPostCommentCancel-582728" class="b-button js-comment-entry__cancel">Cancel</button>
+					<button type="button" id="btnPostComment-582728" class="b-button b-button--primary js-comment-entry__post">Post</button>
+				</div>
+			<div class="elastic-twin-div" style="position: absolute; display: none; word-wrap: break-word; white-space: pre-wrap; border-left: 1px solid rgb(174, 179, 182); border-color: rgb(174, 179, 182); border-style: solid; border-width: 1px; font-weight: 400; width: 100%; font-family: Helvetica,Arial,sans-serif; line-height: 16px; font-size: 12px; padding: 12px;">�</div></div>
+
+			<div class="edit-conversation-container"></div>
+
+			
+
+
+
+<div class="b-comments js-comments h-margin-bottom-xl h-clearfix h-hide">
+	
+		
+	
+	
+		
+	
+	
+		
+	
+	
+		
+	
+
+	
+	
+	
+	
+	
+	
+
+	
+	
+
+	
+		<div class="b-comments__header js-comments__header OLD__top b-media h-padding-vert-m h-padding-horiz-l h-hide">
+			<div class="js-comments__total OLD__comment-total h-margin-left-l OLD__h-left b-media__body">
+				<span class="b-icon b-icon__speech-single h-margin-right-s"></span>
+				<label class="js-comments__total-text h-align-top"></label>
+			</div>
+			<div class="b-media__img--rev js-comments__pagination h-hide">
+				<label></label>
+				<span class="b-comments__pagination--up js-comments__page--prev h-margin-left-s OLD__icon" title="See previous comments"><span class="b-icon b-icon__arrow-up-m--default"></span></span>
+			</div>
+		</div>
+		<ul class="b-comments__comments js-comments__comments h-left"></ul>
+		<div class="b-comments__footer js-comments__footer b-media OLD__bottom h-padding-vert-m h-padding-horiz-l h-clear h-hide">
+			<div class="b-media__img--rev js-comments__pagination">
+				<label></label>
+				<span class="b-comments__pagination--down js-comments__page--next h-margin-left-s OLD__icon" title="See next comments"><span class="b-icon b-icon__arrow-down-m--default"></span></span>
+			</div>
+		</div>
+	
+</div>
+		
+
+
+      </div>
+    </div>  
+  </div>    
+</li><!-- /end .b-post -->
+
+									
+								
+								
+							
+								
+									
+									
+								
+								
+									<!-- Conversation Replies or Comments -->
+									
+									
+									
+										
+									
+
+									
+										
+
+
+
+
+
+
+
+
+
+	
+	
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+<li data-node-id="582733" class="b-post js-post js-comment-entry__parent h-restore--on-preview b-post--text  OLD__list-item OLD__list-item-text OLD__conversation-reply js-conversation-reply h-left h-clear js-slideshow__gallery-node js-poll__parent" itemscope="" itemtype="http://schema.org/Comment">
+	<a id="post582733" class="anchor"></a>
+	
+		
+
+		
+		
+
+		
+
+		
+		
+		<meta itemprop="url" content="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration">
+	
+
+
+	<a id="post" class="anchor"></a>
+
+	<div class="l-row l-row__fixed--left">
+		<div class="l-col__fixed-3 l-col__small--full h-hide--on-preview h-padding-right-l">
+			
+
+
+<div class="userinfo b-userinfo b-post__hide-when-deleted" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+	
+		
+			<a href="http://forum.spring.io/member/108205-venky-ramachandran" class="b-avatar b-avatar--m b-avatar--thread h-margin-bottom-l"><img src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/default_avatar_medium.png" alt="Venky Ramachandran" title="Venky Ramachandran" width="64" height="64"></a>
+		
+	
+
+	<!-- responsive alteration: Added userinfo-details wrapper in order to
+	support left floated avatar with all other information on the right. -->
+	
+	<div class="b-userinfo__details">
+		
+		<div class="author h-text-size--14"><strong><a href="http://forum.spring.io/member/108205-venky-ramachandran">Venky Ramachandran</a></strong></div>
+		
+			<div class="usertitle">
+			
+				Junior Member
+			
+			</div>
+		
+		
+
+		<div class="b-meter h-margin-top-m " title="is on a distinguished road">
+			
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+		</div>
+		
+		<div class="b-userinfo__rank h-margin-top-s h-hide"></div>
+		
+		<ul class="b-userinfo__additional-info-block h-margin-top-xl">
+			
+				<li class="b-userinfo__additional-info"><label>Join Date:</label> <span>Feb 2012</span></li>
+				<li class="b-userinfo__additional-info"><label>Posts:</label> <span>4</span></li>
+				
+			
+			
+		</ul>
+		<ul class="b-userinfo__icons h-margin-none OLD__userinfo-extra OLD__icons">
+			
+				
+			
+			<li class="b-userinfo__icon h-left OLD__online-status online" title="Venky Ramachandran is online now"><span class="b-icon b-icon__status--green"></span></li>
+
+			
+	
+
+		</ul>
+	</div>
+</div>
+		</div>
+
+		<div class="js-post__content-wrapper l-col__flex-3 l-col__small--full h-restore--on-preview OLD__list-item-body-wrapper">
+			<div class="b-post__body h-restore--on-preview h-padding-horiz-xxl h-padding-top-xl h-padding-bottom-m h-clearfix">
+				<div class="b-post__arrow b-post__hide-when-deleted OLD__pointer-left"></div>
+	
+	
+				
+	
+	
+	
+	<!-- REPLY -->
+			<!--vb:if condition="!$conversation['unpublishdate'] OR $canPhysicallyDeletePost"-->
+	<!-- /REPLY -->
+	
+				<div class="b-post__content js-post__content b-post__hide-when-deleted">
+					<hr class="b-divider--section OLD__section-divider">
+					
+					<div class="b-media h-hide--on-preview">
+						<div class="b-media__img--rev">
+						
+							
+								
+							
+	
+							
+							
+							
+							
+							
+	
+							
+								<a class="b-post__count" href="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration?p=582733#post582733">#4</a>
+							
+	
+							
+	
+	
+						</div>
+						<div class="b-media__body">
+							
+	
+	
+							
+							
+							<div class="b-post__timestamp OLD__post-date"><time itemprop="dateCreated" datetime="2012-03-01T12:46:26">Mar 1st, 2012, 03:46 PM</time></div>
+	
+						</div>
+					</div>
+	
+					<div class="OLD__post-content h-padding-vert-xl">
+						
+	
+	
+						
+						<div class="js-post__content-text OLD__post-content-text restore" itemprop="text">
+							
+							Mark,<br>
+   Thanks for the quick response!! The mqMessageHandler bean is a 
+service activator that intercepts the message and adds a correlation id 
+(which is the file name) and the jms type (either jms_text or 
+jms_bytes). Your response pointed me in the right direction and I took a
+ closer look at the bean and found the subtle bug which I introduced 
+with the line<br>
+<br>
+ String msgPayload = msg.getPayload().toString();<br>
+<br>
+I have enclosed the bean implementation with the bug for your reference.<br>
+<br>
+This string ended up getting propagated as the message payload 
+regardless of the original payload type. I fixed the issue and it work 
+great now!!  Thanks for your help!!  <br>
+<br>
+
+	
+	
+	
+
+<div class="bbcode_container">
+	<div class="bbcode_description">Code:</div>
+	<pre class="bbcode_code" style="height:270px;">    @ServiceActivator
+    public Message handleMessage(@Header(FileHeaders.FILENAME) String fileName, Message msg) {            
+      logger.info("Received Message: " + msg + " with original filename " + fileName);
+      String msgPayload = msg.getPayload().toString();
+           
+      // Get the message header to examine the file type
+      MessageHeaders msgHeaders = msg.getHeaders();
+      
+      String payloadType = (String) msgHeaders.get("fileType");      
+      String jmsType = ("TEXT".equalsIgnoreCase(payloadType))? "jms_text" : "jms_bytes";
+
+      // Set the correlation id to original fileName.
+      return MessageBuilder.withPayload(msgPayload)
+              .setHeader(JmsHeaders.TYPE, jmsType)
+              .setCorrelationId(fileName)
+              .build();
+    }</pre>
+</div>After fixing the issue the response is as expected. Thanks again<br>
+<br>
+15:26:03,021 DEBUG DynamicJmsTemplate: Sending created message: <br>
+  JMSMessage class: jms_bytes<br>
+  JMSType:          jms_bytes<br>
+  JMSDeliveryMode:  2<br>
+  JMSExpiration:    0<br>
+  JMSPriority:      4<br>
+  JMSMessageID:     null<br>
+  JMSTimestamp:     0<br>
+  JMSCorrelationID: null<br>
+  JMSDestination:   null<br>
+  JMSReplyTo:       null<br>
+  JMSRedelivered:   false<br>
+    correlationId: SAMPLE_Venky_Image.jpg<br>
+    fileName: SAMPLE_Venky_Image.jpg<br>
+    fileType: BINARY<br>
+    file_name: SAMPLE_Venky_Image.jpg<br>
+    timestamp: 1330633562678<br>
+ffd8ffe000104a46494600010101009600960000ffdb004300  06040506050406060506070706080a<br>
+100a0a09090a140e0f0c1017141818171416161a1d251f1a1b  231c1616202c20232627292a29191f<br>
+2d302d283025282928ffdb0043010707070a080a130a0a1328  1a161a282828282828282828282828<br>
+28282828282828282828282828282828282828282828282828  28282828282828282828282828ffc0<br>
+001108011400dc03012200021101031101ffc4001f00000105  010101010101000000000000000001<br>
+02030405060708090a0bffc400b51000020103030204030505  04040000017d010203000411051221<br>
+31410613516107227114328191a1082342b1c11552d1f02433  627282090a161718191a2526272829<br>
+2a3435363738393a434445464748494a535455565758595a63  6465666768696a737475767778797a<br>
+838485868788898a92939495969798999aa2a3a4a5a6a7a8a9  aab2b3b4b5b6b7b8b9bac2c3c4c5c6<br>
+c7c8c9cad2d3d4d5d6d7d8d9dae1e2e3e4e5e6e7e8e9eaf1f2  f3f4f5f6f7f8f9faffc4001f010003<br>
+...<br>
+<br>
+15:26:03,115 DEBUG DirectChannel: postSend (sent=true) on channel 
+'mqChannel', message: 
+[Payload=[B@186f3b3][Headers={timestamp=13306335626
+						</div>
+					</div>
+	
+	<!-- REPLY -->
+				<!--/vb:if-->
+	<!-- /REPLY -->
+
+
+
+
+
+      
+  </div> 
+
+
+	
+	
+
+
+
+
+
+		
+			
+				
+				
+				
+			
+			
+<div class="b-post__footer h-hide--on-preview h-clear h-padding-bottom-m">
+
+	<div class="h-clearfix">
+	
+
+		
+			<hr class="b-divider b-divider--post-controls">
+		
+
+		<ul class="h-left js-post-info">
+
+			
+			
+
+			
+
+			
+		</ul>
+
+		<ul style="-moz-user-select: none;" class="h-margin-top-m h-right js-post-controls" data-node-id="582733">
+			
+
+			
+
+			
+
+			
+
+				
+
+					
+
+				
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+				
+
+			
+
+		</ul>
+	</div>
+</div>
+
+
+			<div class="b-comment-entry js-comment-entry h-padding-xxl h-padding-top-xl  comment-entry-box h-hide ">
+				<h2 class="h-margin-bottom-xl OLD__comment-entry-box-header">Comment</h2>
+				<textarea style="overflow: hidden;" class="b-comment-entry__textbox js-comment-entry__textbox autogrow" placeholder="Type your comment here"></textarea>
+
+				<div class="b-button-group h-margin-top-xl h-text--right">
+					<button type="button" id="btnPostCommentCancel-582733" class="b-button js-comment-entry__cancel">Cancel</button>
+					<button type="button" id="btnPostComment-582733" class="b-button b-button--primary js-comment-entry__post">Post</button>
+				</div>
+			<div class="elastic-twin-div" style="position: absolute; display: none; word-wrap: break-word; white-space: pre-wrap; border-left: 1px solid rgb(174, 179, 182); border-color: rgb(174, 179, 182); border-style: solid; border-width: 1px; font-weight: 400; width: 100%; font-family: Helvetica,Arial,sans-serif; line-height: 16px; font-size: 12px; padding: 12px;">�</div></div>
+
+			<div class="edit-conversation-container"></div>
+
+			
+
+
+
+<div class="b-comments js-comments h-margin-bottom-xl h-clearfix h-hide">
+	
+		
+	
+	
+		
+	
+	
+		
+	
+	
+		
+	
+
+	
+	
+	
+	
+	
+	
+
+	
+	
+
+	
+		<div class="b-comments__header js-comments__header OLD__top b-media h-padding-vert-m h-padding-horiz-l h-hide">
+			<div class="js-comments__total OLD__comment-total h-margin-left-l OLD__h-left b-media__body">
+				<span class="b-icon b-icon__speech-single h-margin-right-s"></span>
+				<label class="js-comments__total-text h-align-top"></label>
+			</div>
+			<div class="b-media__img--rev js-comments__pagination h-hide">
+				<label></label>
+				<span class="b-comments__pagination--up js-comments__page--prev h-margin-left-s OLD__icon" title="See previous comments"><span class="b-icon b-icon__arrow-up-m--default"></span></span>
+			</div>
+		</div>
+		<ul class="b-comments__comments js-comments__comments h-left"></ul>
+		<div class="b-comments__footer js-comments__footer b-media OLD__bottom h-padding-vert-m h-padding-horiz-l h-clear h-hide">
+			<div class="b-media__img--rev js-comments__pagination">
+				<label></label>
+				<span class="b-comments__pagination--down js-comments__page--next h-margin-left-s OLD__icon" title="See next comments"><span class="b-icon b-icon__arrow-down-m--default"></span></span>
+			</div>
+		</div>
+	
+</div>
+		
+
+
+      </div>
+    </div>  
+  </div>    
+</li><!-- /end .b-post -->
+
+									
+								
+								
+							
+								
+									
+									
+								
+								
+									<!-- Conversation Replies or Comments -->
+									
+									
+									
+										
+									
+
+									
+										
+
+
+
+
+
+
+
+
+
+	
+	
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+<li data-node-id="582734" class="b-post js-post js-comment-entry__parent h-restore--on-preview b-post--text  OLD__list-item OLD__list-item-text OLD__conversation-reply js-conversation-reply h-left h-clear js-slideshow__gallery-node js-poll__parent" itemscope="" itemtype="http://schema.org/Comment">
+	<a id="post582734" class="anchor"></a>
+	
+		
+
+		
+		
+
+		
+
+		
+		
+		<meta itemprop="url" content="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration">
+	
+
+
+	<a id="post" class="anchor"></a>
+
+	<div class="l-row l-row__fixed--left">
+		<div class="l-col__fixed-3 l-col__small--full h-hide--on-preview h-padding-right-l">
+			
+
+
+<div class="userinfo b-userinfo b-post__hide-when-deleted" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+	
+		
+			<a href="http://forum.spring.io/member/66040-gary-russell" class="b-avatar b-avatar--m b-avatar--thread h-margin-bottom-l"><img src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/image.jpg" alt="Gary Russell" title="Gary Russell"></a>
+		
+	
+
+	<!-- responsive alteration: Added userinfo-details wrapper in order to
+	support left floated avatar with all other information on the right. -->
+	
+	<div class="b-userinfo__details">
+		
+		<div class="author h-text-size--14"><strong><a href="http://forum.spring.io/member/66040-gary-russell">Gary Russell</a></strong></div>
+		
+			<div class="usertitle">
+			
+				Senior Member
+			
+			</div>
+		
+		
+
+		<div class="b-meter h-margin-top-m " title="is on a distinguished road">
+			
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+		</div>
+		
+		<div class="b-userinfo__rank h-margin-top-s">Spring Team</div>
+		
+		<ul class="b-userinfo__additional-info-block h-margin-top-xl">
+			
+				<li class="b-userinfo__additional-info"><label>Join Date:</label> <span>Mar 2010</span></li>
+				<li class="b-userinfo__additional-info"><label>Posts:</label> <span>2785</span></li>
+				
+			
+			
+		</ul>
+		<ul class="b-userinfo__icons h-margin-none OLD__userinfo-extra OLD__icons">
+			
+				
+			
+			<li class="b-userinfo__icon h-left OLD__online-status offline" title="Gary Russell is offline"><span class="b-icon b-icon__status--gray"></span></li>
+
+			
+	
+		
+			<li class="js-userinfo__signature b-userinfo__icon h-left">
+				<span class="b-icon b-icon__signature">
+					<div class="user-signature h-hide restore">Gary P. Russell<br>
+Lead for Spring Integration and Spring AMQP<br>
+SpringSource by Pivotal Inc.</div>
+				</span>
+			</li>
+		
+	
+
+		</ul>
+	</div>
+</div>
+		</div>
+
+		<div class="js-post__content-wrapper l-col__flex-3 l-col__small--full h-restore--on-preview OLD__list-item-body-wrapper">
+			<div class="b-post__body h-restore--on-preview h-padding-horiz-xxl h-padding-top-xl h-padding-bottom-m h-clearfix">
+				<div class="b-post__arrow b-post__hide-when-deleted OLD__pointer-left"></div>
+	
+	
+				
+	
+	
+	
+	<!-- REPLY -->
+			<!--vb:if condition="!$conversation['unpublishdate'] OR $canPhysicallyDeletePost"-->
+	<!-- /REPLY -->
+	
+				<div class="b-post__content js-post__content b-post__hide-when-deleted">
+					<hr class="b-divider--section OLD__section-divider">
+					
+					<div class="b-media h-hide--on-preview">
+						<div class="b-media__img--rev">
+						
+							
+								
+							
+	
+							
+							
+							
+							
+							
+	
+							
+								<a class="b-post__count" href="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration?p=582734#post582734">#5</a>
+							
+	
+							
+	
+	
+						</div>
+						<div class="b-media__body">
+							
+	
+	
+							
+							
+							<div class="b-post__timestamp OLD__post-date"><time itemprop="dateCreated" datetime="2012-03-01T13:17:35">Mar 1st, 2012, 04:17 PM</time></div>
+	
+						</div>
+					</div>
+	
+					<div class="OLD__post-content h-padding-vert-xl">
+						
+	
+	
+						
+						<div class="js-post__content-text OLD__post-content-text restore" itemprop="text">
+							
+							You may also want to consider using a &lt;header-enricher/&gt;; 
+you will then need no custom Java code - it always raises an alarm with 
+me when I see dependencies on SI in user classes <img src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/smile.png" alt="" title="Smile" smilieid="1" class="inlineimg" border="0"> Such dependencies can be avoided in many (if not most) cases.<br>
+<br>
+
+	
+	
+	
+
+<div class="bbcode_container">
+	<div class="bbcode_description">Code:</div>
+	<pre class="bbcode_code" style="height:88px;">&lt;header-enricher input-channel="foo" output-channel="bar"&gt;
+	&lt;correlation-id expression="headers[T(org.springframework.integration.file.FileHeaders).FILENAME]"/&gt;
+	&lt;header name="jms_type" expression="'TEXT'.equalsIgnoreCase(headers['fileType']) ? 'jms_text' : 'jms_bytes'"/&gt;
+&lt;/header-enricher&gt;</pre>
+</div>
+						</div>
+					</div>
+	
+	<!-- REPLY -->
+				<!--/vb:if-->
+	<!-- /REPLY -->
+
+
+
+
+
+      
+  </div> 
+
+
+	
+	
+
+
+
+
+
+		
+			
+				
+				
+				
+			
+			
+<div class="b-post__footer h-hide--on-preview h-clear h-padding-bottom-m">
+
+	<div class="h-clearfix">
+	
+
+		
+			<hr class="b-divider b-divider--post-controls">
+		
+
+		<ul class="h-left js-post-info">
+
+			
+			
+
+			
+
+			
+		</ul>
+
+		<ul style="-moz-user-select: none;" class="h-margin-top-m h-right js-post-controls" data-node-id="582734">
+			
+
+			
+
+			
+
+			
+
+				
+
+					
+
+				
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+				
+
+			
+
+		</ul>
+	</div>
+</div>
+
+
+			<div class="b-comment-entry js-comment-entry h-padding-xxl h-padding-top-xl  comment-entry-box h-hide ">
+				<h2 class="h-margin-bottom-xl OLD__comment-entry-box-header">Comment</h2>
+				<textarea style="overflow: hidden;" class="b-comment-entry__textbox js-comment-entry__textbox autogrow" placeholder="Type your comment here"></textarea>
+
+				<div class="b-button-group h-margin-top-xl h-text--right">
+					<button type="button" id="btnPostCommentCancel-582734" class="b-button js-comment-entry__cancel">Cancel</button>
+					<button type="button" id="btnPostComment-582734" class="b-button b-button--primary js-comment-entry__post">Post</button>
+				</div>
+			<div class="elastic-twin-div" style="position: absolute; display: none; word-wrap: break-word; white-space: pre-wrap; border-left: 1px solid rgb(174, 179, 182); border-color: rgb(174, 179, 182); border-style: solid; border-width: 1px; font-weight: 400; width: 100%; font-family: Helvetica,Arial,sans-serif; line-height: 16px; font-size: 12px; padding: 12px;">�</div></div>
+
+			<div class="edit-conversation-container"></div>
+
+			
+
+
+
+<div class="b-comments js-comments h-margin-bottom-xl h-clearfix h-hide">
+	
+		
+	
+	
+		
+	
+	
+		
+	
+	
+		
+	
+
+	
+	
+	
+	
+	
+	
+
+	
+	
+
+	
+		<div class="b-comments__header js-comments__header OLD__top b-media h-padding-vert-m h-padding-horiz-l h-hide">
+			<div class="js-comments__total OLD__comment-total h-margin-left-l OLD__h-left b-media__body">
+				<span class="b-icon b-icon__speech-single h-margin-right-s"></span>
+				<label class="js-comments__total-text h-align-top"></label>
+			</div>
+			<div class="b-media__img--rev js-comments__pagination h-hide">
+				<label></label>
+				<span class="b-comments__pagination--up js-comments__page--prev h-margin-left-s OLD__icon" title="See previous comments"><span class="b-icon b-icon__arrow-up-m--default"></span></span>
+			</div>
+		</div>
+		<ul class="b-comments__comments js-comments__comments h-left"></ul>
+		<div class="b-comments__footer js-comments__footer b-media OLD__bottom h-padding-vert-m h-padding-horiz-l h-clear h-hide">
+			<div class="b-media__img--rev js-comments__pagination">
+				<label></label>
+				<span class="b-comments__pagination--down js-comments__page--next h-margin-left-s OLD__icon" title="See next comments"><span class="b-icon b-icon__arrow-down-m--default"></span></span>
+			</div>
+		</div>
+	
+</div>
+		
+
+
+      </div>
+    </div>  
+  </div>    
+</li><!-- /end .b-post -->
+
+									
+								
+								
+							
+								
+									
+									
+								
+								
+									<!-- Conversation Replies or Comments -->
+									
+									
+									
+										
+									
+
+									
+										
+
+
+
+
+
+
+
+
+
+	
+	
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+<li data-node-id="582741" class="b-post js-post js-comment-entry__parent h-restore--on-preview b-post--text  OLD__list-item OLD__list-item-text OLD__conversation-reply js-conversation-reply h-left h-clear js-slideshow__gallery-node js-poll__parent" itemscope="" itemtype="http://schema.org/Comment">
+	<a id="post582741" class="anchor"></a>
+	
+		
+
+		
+		
+
+		
+
+		
+		
+		<meta itemprop="url" content="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration">
+	
+
+
+	<a id="post" class="anchor"></a>
+
+	<div class="l-row l-row__fixed--left">
+		<div class="l-col__fixed-3 l-col__small--full h-hide--on-preview h-padding-right-l">
+			
+
+
+<div class="userinfo b-userinfo b-post__hide-when-deleted" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+	
+		
+			<a href="http://forum.spring.io/member/108205-venky-ramachandran" class="b-avatar b-avatar--m b-avatar--thread h-margin-bottom-l"><img src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/default_avatar_medium.png" alt="Venky Ramachandran" title="Venky Ramachandran" width="64" height="64"></a>
+		
+	
+
+	<!-- responsive alteration: Added userinfo-details wrapper in order to
+	support left floated avatar with all other information on the right. -->
+	
+	<div class="b-userinfo__details">
+		
+		<div class="author h-text-size--14"><strong><a href="http://forum.spring.io/member/108205-venky-ramachandran">Venky Ramachandran</a></strong></div>
+		
+			<div class="usertitle">
+			
+				Junior Member
+			
+			</div>
+		
+		
+
+		<div class="b-meter h-margin-top-m " title="is on a distinguished road">
+			
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+				<div class="b-meter__bar"></div>
+				<div class="b-meter__bar"></div>
+			
+		</div>
+		
+		<div class="b-userinfo__rank h-margin-top-s h-hide"></div>
+		
+		<ul class="b-userinfo__additional-info-block h-margin-top-xl">
+			
+				<li class="b-userinfo__additional-info"><label>Join Date:</label> <span>Feb 2012</span></li>
+				<li class="b-userinfo__additional-info"><label>Posts:</label> <span>4</span></li>
+				
+			
+			
+		</ul>
+		<ul class="b-userinfo__icons h-margin-none OLD__userinfo-extra OLD__icons">
+			
+				
+			
+			<li class="b-userinfo__icon h-left OLD__online-status online" title="Venky Ramachandran is online now"><span class="b-icon b-icon__status--green"></span></li>
+
+			
+	
+
+		</ul>
+	</div>
+</div>
+		</div>
+
+		<div class="js-post__content-wrapper l-col__flex-3 l-col__small--full h-restore--on-preview OLD__list-item-body-wrapper">
+			<div class="b-post__body h-restore--on-preview h-padding-horiz-xxl h-padding-top-xl h-padding-bottom-m h-clearfix">
+				<div class="b-post__arrow b-post__hide-when-deleted OLD__pointer-left"></div>
+	
+	
+				
+	
+	
+	
+	<!-- REPLY -->
+			<!--vb:if condition="!$conversation['unpublishdate'] OR $canPhysicallyDeletePost"-->
+	<!-- /REPLY -->
+	
+				<div class="b-post__content js-post__content b-post__hide-when-deleted">
+					<hr class="b-divider--section OLD__section-divider">
+					
+					<div class="b-media h-hide--on-preview">
+						<div class="b-media__img--rev">
+						
+							
+								
+							
+	
+							
+							
+							
+							
+							
+	
+							
+								<a class="b-post__count" href="http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration?p=582741#post582741">#6</a>
+							
+	
+							
+	
+	
+						</div>
+						<div class="b-media__body">
+							
+	
+	
+							
+							
+							<div class="b-post__timestamp OLD__post-date"><time itemprop="dateCreated" datetime="2012-03-01T14:21:27">Mar 1st, 2012, 05:21 PM</time></div>
+	
+						</div>
+					</div>
+	
+					<div class="OLD__post-content h-padding-vert-xl">
+						
+	
+	
+						
+						<div class="js-post__content-text OLD__post-content-text restore" itemprop="text">
+							
+							Thanks for the tip. I will try this out.
+						</div>
+					</div>
+	
+	<!-- REPLY -->
+				<!--/vb:if-->
+	<!-- /REPLY -->
+
+
+
+
+
+      
+  </div> 
+
+
+	
+	
+
+
+
+
+
+		
+			
+				
+				
+				
+			
+			
+<div class="b-post__footer h-hide--on-preview h-clear h-padding-bottom-m">
+
+	<div class="h-clearfix">
+	
+
+		
+			<hr class="b-divider b-divider--post-controls">
+		
+
+		<ul class="h-left js-post-info">
+
+			
+			
+
+			
+
+			
+		</ul>
+
+		<ul style="-moz-user-select: none;" class="h-margin-top-m h-right js-post-controls" data-node-id="582741">
+			
+
+			
+
+			
+
+			
+
+				
+
+					
+
+				
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+				
+
+			
+
+		</ul>
+	</div>
+</div>
+
+
+			<div class="b-comment-entry js-comment-entry h-padding-xxl h-padding-top-xl  comment-entry-box h-hide ">
+				<h2 class="h-margin-bottom-xl OLD__comment-entry-box-header">Comment</h2>
+				<textarea style="overflow: hidden;" class="b-comment-entry__textbox js-comment-entry__textbox autogrow" placeholder="Type your comment here"></textarea>
+
+				<div class="b-button-group h-margin-top-xl h-text--right">
+					<button type="button" id="btnPostCommentCancel-582741" class="b-button js-comment-entry__cancel">Cancel</button>
+					<button type="button" id="btnPostComment-582741" class="b-button b-button--primary js-comment-entry__post">Post</button>
+				</div>
+			<div class="elastic-twin-div" style="position: absolute; display: none; word-wrap: break-word; white-space: pre-wrap; border-left: 1px solid rgb(174, 179, 182); border-color: rgb(174, 179, 182); border-style: solid; border-width: 1px; font-weight: 400; width: 100%; font-family: Helvetica,Arial,sans-serif; line-height: 16px; font-size: 12px; padding: 12px;">�</div></div>
+
+			<div class="edit-conversation-container"></div>
+
+			
+
+
+
+<div class="b-comments js-comments h-margin-bottom-xl h-clearfix h-hide">
+	
+		
+	
+	
+		
+	
+	
+		
+	
+	
+		
+	
+
+	
+	
+	
+	
+	
+	
+
+	
+	
+
+	
+		<div class="b-comments__header js-comments__header OLD__top b-media h-padding-vert-m h-padding-horiz-l h-hide">
+			<div class="js-comments__total OLD__comment-total h-margin-left-l OLD__h-left b-media__body">
+				<span class="b-icon b-icon__speech-single h-margin-right-s"></span>
+				<label class="js-comments__total-text h-align-top"></label>
+			</div>
+			<div class="b-media__img--rev js-comments__pagination h-hide">
+				<label></label>
+				<span class="b-comments__pagination--up js-comments__page--prev h-margin-left-s OLD__icon" title="See previous comments"><span class="b-icon b-icon__arrow-up-m--default"></span></span>
+			</div>
+		</div>
+		<ul class="b-comments__comments js-comments__comments h-left"></ul>
+		<div class="b-comments__footer js-comments__footer b-media OLD__bottom h-padding-vert-m h-padding-horiz-l h-clear h-hide">
+			<div class="b-media__img--rev js-comments__pagination">
+				<label></label>
+				<span class="b-comments__pagination--down js-comments__page--next h-margin-left-s OLD__icon" title="See next comments"><span class="b-icon b-icon__arrow-down-m--default"></span></span>
+			</div>
+		</div>
+	
+</div>
+		
+
+
+      </div>
+    </div>  
+  </div>    
+</li><!-- /end .b-post -->
+
+									
+								
+								
+							
+						</ul>
+					</div>
+				</div>
+				
+					<hr class="footer-spacer">
+					
+
+<div class="pagenav-container noselect h-hide">
+    <div class="pagenav h-right">
+		
+        
+		
+        
+    </div>
+</div>
+				
+
+				
+			</div>
+		
+		
+	</div>
+	<script type="text/javascript">
+	(function(){
+	
+		window.vBulletin = window.vBulletin || {};
+		vBulletin.widget = vBulletin.widget || {};
+		vBulletin.conversation = vBulletin.conversation || {};
+	
+		vBulletin.conversation.COMMENTS_PER_PAGE = Number('') || 25;
+		vBulletin.conversation.POSTS_PER_PAGE = Number('15') || 15;
+	})();
+	</script>
+
+
+
+			
+		</div>
+	</div>
+
+	<!-- section 3 -->
+	<div class="canvas-layout-row no-columns h-clearfix l-row">
+		
+		<div class="canvas-widget-list section-3 h-clearfix l-col__large-12 l-col__small--full">
+			
+		</div>
+	</div>
+
+	<input name="displaysections[0]" type="hidden">
+	<input name="displaysections[1]" type="hidden">
+	<input name="displaysections[2]" type="hidden">
+	<input name="displaysections[3]" type="hidden">
+</div>
+
+</div>
+	<div class="h-clear"></div>
+</div>
+
+
+<!--
+	<div id="footer">
+		
+		
+		<div id="footer-tabbar" class="h-clearfix">
+			
+			
+			<ul class="chooser-list h-left">
+				
+					<li>
+						<select class="stylechooser custom-dropdown">
+							
+								<option value="9" selected="selected"> Default vB5 Style</option>
+							
+								<option value="1"> Default Style(vB3 Style - Incompatible)</option>
+							
+								<option value="2">- Spring(vB3 Style - Incompatible)</option>
+							
+								<option value="3"> vB4 Default Style (vB4 Style - Incompatible)</option>
+							
+								<option value="4">- Spring (vB4 Style - Incompatible)</option>
+							
+								<option value="5">- Spring_style (vB4 Style - Incompatible)</option>
+							
+								<option value="6"> Spring11 (vB4 Style - Incompatible)</option>
+							
+								<option value="7"> Spring11-Gray (vB4 Style - Incompatible)</option>
+							
+						</select>
+					</li>
+				
+				
+				
+				
+				<li class="rx-list-to-select">
+				<select>
+					<option value="">Go to...</option>
+					
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						!-- if NOT admincp, add option to select --
+						
+							<option value="http://forum.spring.io/help"
+							
+							>Help</option>
+						
+						
+					
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						!-- if NOT admincp, add option to select --
+						
+							<option value="http://forum.spring.io/contact-us"
+							
+							>Contact Us</option>
+						
+						
+					
+				</select>
+				</li>
+			</ul>
+			<ul class="nav-list h-right">
+				
+				
+					
+					
+					
+						
+						
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+						<li class="">
+					
+					<a rel="nofollow" href="http://forum.spring.io/help">Help</a></li>
+				
+					
+					
+					
+						
+						
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+						<li class="">
+					
+					<a rel="nofollow" href="http://forum.spring.io/contact-us">Contact Us</a></li>
+				
+			</ul>	
+		</div>
+		
+	</div>
+-->
+</div>
+
+<!--
+<div id="footer-copyright">
+	<div id="footer-vb-copyright">Powered by <a href="https://www.vbulletin.com" id="vbulletinlink">vBulletin&trade;</a> Version 5.0.4 <br />Copyright &copy; 2013 vBulletin Solutions, Inc. All rights reserved. </div>
+	<div id="footer-user-copyright"></div>
+</div>
+-->
+
+</div>
+
+<!-- ### -->
+  <footer class="spring-footer--wrapper">
+    <div class="spring-container-fluid">
+      <div class="row-fluid">
+        <div class="span8">
+          <div class="navbar">
+            <div class="container">
+              <ul class="nav">
+<!--                <li><a href="http://spring.io/about">About</a></li> -->
+                <li><a href="http://spring.io/team">Team</a></li>
+                <li><a href="http://spring.io/services">Services</a></li>
+                <li><a href="http://spring.io/tools">Tools</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="footer-company-info">
+            © <script type="text/javascript"> var d = new Date();
+                  document.write(d.getFullYear());</script>2013 
+<a href="http://www.gopivotal.com/">Pivotal Software</a>, Inc. All Rights Reserved.
+            <a href="http://www.gopivotal.com/terms-of-use">Terms of Use</a> and
+            <a href="http://www.gopivotal.com/privacy-policy">Privacy</a>
+          </div>
+        </div>
+        <div class="span4 footer-newsletter--wrapper pull-right">
+          <div class="footer-newsletter--container">
+           <label>Subscribe to our newsletter</label>
+<iframe style="border:none" src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/OSS_Website_Spring_SpringNewsletterSubscriptionEmailOnly.htm" scrolling="no" width="324px" frameborder="0" height="42px"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+<!-- /### -->
+
+<div style="display: none;" id="loading-indicator" class="js-loading-indicator b-ajax-loading-indicator h-hide">
+	<span>Working...</span>
+</div>
+<div id="confirm-dialog" class="sb-dialog">
+	<div class="dialog-content h-clearfix">
+		<div class="icon h-left"></div>
+		<div class="message h-right"></div>
+	</div>
+	<div class="action-buttons h-clear">
+		<button id="btnConfirmDialogYes" type="button" class="button secondary">Yes</button>
+		<button id="btnConfirmDialogNo" type="button" class="button primary">No</button>
+	</div>
+</div>
+<div id="alert-dialog" class="sb-dialog">
+	<div class="dialog-content h-clearfix">
+		<div class="icon h-left"></div>
+		<div class="message h-right"></div>
+	</div>
+	<div class="action-buttons h-clear">
+		<button id="btnAlertDialogOK" type="button" class="button primary">OK</button>
+	</div>
+</div>
+<div id="prompt-dialog" class="sb-dialog">
+	<div class="dialog-content table h-clearfix">
+		<div class="message td"></div>
+		<div class="input-box-container td">
+			<input class="input-box textbox" type="text">
+			<textarea class="input-box textbox h-hide" rows="3"></textarea>
+		</div>
+	</div>
+	<div class="action-buttons h-clear">
+		<button id="btnPromptDialogOK" type="button" class="button primary">OK</button>
+		<button id="btnPromptDialogCancel" type="button" class="button secondary">Cancel</button>
+	</div>
+</div>
+<div id="slideshow-dialog" class="sb-dialog slideshow">
+	<div class="slideshow-wrapper"><div class="vb-icon vb-icon-x-square close-btn">X</div></div>
+	<div class="caption"></div>
+	<div class="thumbnails"></div>
+	
+</div>
+
+<div class="unsubscribe-overlay-container"></div>
+
+
+
+
+
+
+<script type="text/javascript" src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/jquery.js"></script>
+<script type="text/javascript">window.jQuery || document.write('<script type="text/javascript" src="http://forum.spring.io/js/jquery/jquery-1.7.2.min.js"><\/script>');</script>
+
+<script type="text/javascript" src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/footer-rollup-504.js"></script>
+
+
+	
+
+
+
+    <!-- Begin Google Analytics code --> 
+    <script>
+        var _gaq = _gaq || [];
+        var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+        _gaq.push(
+            ['_require', 'inpage_linkid', pluginUrl],
+            ['_setAccount', 'UA-2728886-21'],
+            ['_trackPageview'],
+            ['b._require', 'inpage_linkid', pluginUrl],
+            ['b._setAccount', 'UA-2728886-19'],
+            ['b._trackPageview']
+        );
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    </script>  	<!-- End Google Analytics code -->
+
+<script type="text/javascript" src="Issue%20with%20sending%20binary%20data%20as%20JMS%20messages%20using%20Spring%20Integration%20-%20Spring%20Forum_files/conversation.js"></script>
+
+</body></html>

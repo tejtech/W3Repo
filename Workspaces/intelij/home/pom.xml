@@ -13,11 +13,13 @@
 		<module>jsf</module>
 	    <module>rest</module>
 		<module>json</module>
+		<module>mytest</module>
 		<module>spring</module>
 		<module>report</module>	
 		<module>convertor</module>
 		<module>study</module>
 		<module>wrapper</module>
+		<module>velocity</module>
     </modules>
 
 </project>
