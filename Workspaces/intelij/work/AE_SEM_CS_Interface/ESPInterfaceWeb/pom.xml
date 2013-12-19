@@ -99,16 +99,21 @@
                       %regex[WEB-INF/lib/log4j-(?!over-slf4j).*.jar]
                     -->
                     <packagingExcludes>
+						WEB-INF/lib/admin-client-*.jar,
                         WEB-INF/lib/ant-*.jar,
                         WEB-INF/lib/comm-*.jar,
+						WEB-INF/lib/datasource.oracle*.jar,
                         WEB-INF/lib/dhbcore*.jar,
                         WEB-INF/lib/fscontext*.jar,
                         WEB-INF/lib/iaik_jce*.jar,
+						WEB-INF/lib/IBM.EJB.THIN-*.jar,
+                        WEB-INF/lib/jms-*.jar,
                         WEB-INF/lib/mq-*.jar,
-                        WEB-INF/lib/mqjms-*.jar,
+						WEB-INF/lib/mq.headers-*.jar,
+						WEB-INF/lib/mq.jmqi-*.jar,
+                        WEB-INF/lib/mqjms-*.jar, 
                         WEB-INF/lib/ojdbc*.jar,
-                        WEB-INF/lib/runtime-*.jar,
-                        WEB-INF/lib/admin-client-*.jar
+                        WEB-INF/lib/runtime-*.jar 
                     </packagingExcludes>
                 </configuration>
             </plugin>
