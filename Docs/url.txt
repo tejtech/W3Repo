@@ -5,19 +5,25 @@ https://www.udemy.com/java-design-patterns-tutorial/
 
 http://www.oodesign.com/
 
-Program to an interface:
+#Program to an interface:
 http://www.artima.com/lejava/articles/designprinciples.html
 
-MockTests
+#MockTests
 http://www.whizlabs.com/examprep/mod/quiz/review.php?attempt=257695&showall=true
 
 
-Spring
+#Spring
 https://github.com/spring-projects/spring-integration-samples
 https://github.com/spring-projects/spring-integration-samples.git
 
-Spring-Integration Error handling
+#Spring-Integration Error handling
 http://xpadro.blogspot.co.uk/2013/11/how-error-handling-works-in-spring.html
 
-Issue with sending binary data as JMS messages using Spring Integration 
+#Issue with sending binary data as JMS messages using Spring Integration 
 http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration
+
+#Spring and Autowiring of Generic Types
+http://www.jayway.com/2013/11/03/spring-and-autowiring-of-generic-types/
+
+#Spring 3 Part 5: Factory Beans 
+http://ojitha.blogspot.co.uk/2013/03/spring-3-part-5-factory-beans.html
