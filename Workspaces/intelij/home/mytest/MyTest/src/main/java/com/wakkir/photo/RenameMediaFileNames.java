@@ -13,22 +13,22 @@ public class RenameMediaFileNames
 {
     AccessFileMetaData fmd = new AccessFileMetaData();
 
-    public void renameVideoFiles(boolean needRename)  throws ImageProcessingException, IOException
+    public void renameVideoFiles(boolean needRename,boolean keepSameFolderStructure)  throws ImageProcessingException, IOException
     {
-        String inputPath = "E:\\MyMedia\\MyVideos\\Test_20130302";
-        String extention = ".mts";
-        String outputPath = "E:\\MyMedia\\MyVideos\\Test_20130302";
+        String inputPath = "E:\\MyMedia\\MyPictures\\x";
+        String extension = ".mov";
+        String outputPath = "E:\\MyMedia\\MyPictures\\x";
 
-        fmd.readDirectory(inputPath, extention, outputPath,needRename);
+        fmd.readDirectory(inputPath, extension, outputPath,needRename,keepSameFolderStructure,0,15,"");
     }
 
-    public void renamePictureFiles(boolean needRename) throws ImageProcessingException, IOException
+    public void renamePictureFiles(boolean needRename,boolean keepSameFolderStructure) throws ImageProcessingException, IOException
     {
-        String inputPath = "E:\\MyMedia\\MyPictures\\xxx\\Waseem_Birthday-01";
-        String extention = ".jpg";
-        String outputPath = "E:\\MyMedia\\MyPictures\\xxx";
+        String inputPath = "E:\\MyMedia\\MyPictures\\x";
+        String extension = ".jpg";
+        String outputPath = "E:\\MyMedia\\MyPictures\\x";
 
-        fmd.readDirectory(inputPath, extention, outputPath,needRename);
+        fmd.readDirectory(inputPath, extension, outputPath,needRename,keepSameFolderStructure,0,15,"");
     }
 
     public static void main(String[] args)
@@ -38,8 +38,9 @@ public class RenameMediaFileNames
         {
             RenameMediaFileNames rename=new RenameMediaFileNames();
             boolean needRename=true;
-            rename.renamePictureFiles(needRename);
-            //rename.renameVideoFiles(needRename);
+            boolean keepSameFolderStructure=false;
+            //rename.renamePictureFiles(needRename,keepSameFolderStructure);
+            rename.renameVideoFiles(needRename,keepSameFolderStructure);
 
         }
         catch (Exception e)
