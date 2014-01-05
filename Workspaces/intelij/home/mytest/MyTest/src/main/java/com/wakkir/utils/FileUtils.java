@@ -1,9 +1,10 @@
 package com.wakkir.utils;
 
 
-import java.io.File;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 
 
@@ -30,6 +31,42 @@ public class FileUtils
             }
         }
         return isFolderCreated;
+    }
+
+    public static boolean saveFile(byte[] fileDataInByte,String destinationFilePath,String destinationFileName)
+    {
+        boolean isFileSaved=false;
+        try
+        {
+            createFolder(destinationFilePath);
+            FileOutputStream fos = new FileOutputStream(destinationFilePath+File.separator+destinationFileName);
+            fos.write(fileDataInByte);
+            fos.close();
+            isFileSaved=true;
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return isFileSaved;
+    }
+
+    public static boolean saveFile(String fileDataInString,String destinationFilePath,String destinationFileName)
+    {
+        boolean isFileSaved=false;
+        try
+        {
+            createFolder(destinationFilePath);
+            BufferedWriter writer = new BufferedWriter ( new FileWriter(destinationFilePath+File.separator+destinationFileName) );
+            writer.write(fileDataInString);
+            writer.close();
+            isFileSaved=true;
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return isFileSaved;
     }
 
     public static boolean renameFile(String sourceFilePath, String oldFileName, String newFileName, String destinationFilePath,int primaryFileNameStartIndex,int primaryFileNameEndIndex)
@@ -118,5 +155,21 @@ public class FileUtils
         return newFileName;
     }
 
-
+    private long getMonthendEndTime(Date date)
+    {
+        Calendar cal = Calendar.getInstance();
+        if(date!=null)
+            cal.setTime(date);
+        else
+            cal.setTime(new Date());
+        cal.add(Calendar.MONTH, 1); //Beware, month start at 0, not 1
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), 1,0,0,0);
+        //cal.add(Calendar.MILLISECOND, -1);
+        //System.out.println("year:"+cal.get(Calendar.YEAR));
+        //System.out.println("month:"+cal.get(Calendar.MONTH));
+        //System.out.println("day:"+cal.get(Calendar.DATE));
+        //System.out.println("Month edn date :"+new Date(cal.getTimeInMillis()).toString());
+        //logger.debug("Month end date & end time :"+new Date(cal.getTimeInMillis()).toString());
+        return cal.getTimeInMillis();
+    }
 }

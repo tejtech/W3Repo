@@ -1,5 +1,8 @@
 package com.wakkir.mytest;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 /**
  * Created with IntelliJ IDEA.
  * User: wakkir
@@ -10,8 +13,21 @@ package com.wakkir.mytest;
 public class Count
 {
 
+    private final static SimpleDateFormat dateFormat_yyyyMMddHHmmss = new SimpleDateFormat("yyyyMMddHHmmss");
+
+
     public static void main(String[] args)
     {
+        Calendar cal=Calendar.getInstance();
+        cal.set(2016,8,30,0,0,0);
+        System.out.println("time1 : " + cal.getTimeInMillis());
+        System.out.println("formatted Time1 : " + dateFormat_yyyyMMddHHmmss.format(cal.getTime()).toUpperCase());
+
+        cal.setTimeInMillis(1475190000000l);
+        System.out.println("time2 : " + cal.getTimeInMillis());
+        System.out.println("formatted Time2 : " + dateFormat_yyyyMMddHHmmss.format(cal.getTime()).toUpperCase());
+
+         /*
         System.out.println("xxxxxx");
         double basic = 0.0;
         double count = 0.0;
@@ -25,5 +41,6 @@ public class Count
         }
         System.out.println("count>" + count);
         System.out.println("basic>" + basic);
+        */
     }
 }

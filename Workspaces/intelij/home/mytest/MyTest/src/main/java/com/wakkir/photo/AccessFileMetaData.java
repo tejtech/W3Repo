@@ -86,6 +86,10 @@ public class AccessFileMetaData
                 for (Directory directory : metadata.getDirectories())
                 {
                     //System.out.println(directory.getClass().getName());
+                    if ("com.drew.metadata.exif.GpsDirectory".equalsIgnoreCase(directory.getClass().getName()))
+                    {
+                        System.out.println("GpsDirectory found");
+                    }
                     if ("com.drew.metadata.exif.ExifSubIFDDirectory".equalsIgnoreCase(directory.getClass().getName()))
                     {
                         for (Tag tag : directory.getTags())
