@@ -190,11 +190,13 @@ public class DownloadFiles
 
         boolean keepSameFolderStructure=false;
 
-        String destPath="\\\\fs01\\WakSpace\\Business\\08.eBay\\Pictures\\Shoes\\06.MS-Mark&Spencer\\Boots";
+        //String destPath="\\\\fs01\\WakSpace\\Business\\08.eBay\\Pictures\\Shoes\\06.MS-Mark&Spencer\\Boots";
+        String destPath="\\\\fs01\\WakSpace\\Business\\08.eBay\\Pictures\\Shoes\\07.Debenhams\\Heels\\Stilleto";
 
         try
         {
             Map<String,String> map=new HashMap<String,String>();
+            //M&S
             //map.put("T027065-01","http://ecx.images-amazon.com/images/I/91hVjKzfQoL._SX1400_SY1820_.jpg");
             //map.put("T027065-02","http://ecx.images-amazon.com/images/I/81DD7-EfBcL._SX1400_SY1820_.jpg");
             //map.put("T027065-03","http://ecx.images-amazon.com/images/I/A1OJIFB55xL._SX1400_SY1820_.jpg");
@@ -205,11 +207,17 @@ public class DownloadFiles
             //map.put("T028698W-03","http://ecx.images-amazon.com/images/I/81rLnu9jTSL._SX1400_SY1820_.jpg");
             //map.put("T028698W-04","http://ecx.images-amazon.com/images/I/81rLnu9jTSL._SX1400_SY1820_.jpg");
 
-            map.put("T026404W-01","http://ecx.images-amazon.com/images/I/817FrdV08aL._SX1400_SY1820_.jpg");
-            map.put("T026404W-02","http://ecx.images-amazon.com/images/I/81wnBHvmk7L._SX1400_SY1820_.jpg");
-            map.put("T026404W-03","http://ecx.images-amazon.com/images/I/91-mG6UZjTL._SX1400_SY1820_.jpg");
-            map.put("T026404W-04","http://ecx.images-amazon.com/images/I/81wnBHvmk7L._SX1400_SY1820_.jpg");
-            map.put("T026404W-05","http://ecx.images-amazon.com/images/I/81wnBHvmk7L._SX1400_SY1820_.jpg");
+            //map.put("T026404W-01","http://ecx.images-amazon.com/images/I/817FrdV08aL._SX1400_SY1820_.jpg");
+            //map.put("T026404W-02","http://ecx.images-amazon.com/images/I/81wnBHvmk7L._SX1400_SY1820_.jpg");
+            //map.put("T026404W-03","http://ecx.images-amazon.com/images/I/91-mG6UZjTL._SX1400_SY1820_.jpg");
+            //map.put("T026404W-04","http://ecx.images-amazon.com/images/I/81wnBHvmk7L._SX1400_SY1820_.jpg");
+            //map.put("T026404W-05","http://ecx.images-amazon.com/images/I/81wnBHvmk7L._SX1400_SY1820_.jpg");
+
+            //Debenhams
+            map.put("0530101115-00","http://debenhams.scene7.com/is/image/Debenhams/053010111560?wid=1250&hei=1250&qlt=95");
+            map.put("0530101115-01","http://debenhams.scene7.com/is/image/Debenhams/053010111560_1?wid=1250&hei=1250&qlt=95");
+            map.put("0530101115-02","http://debenhams.scene7.com/is/image/Debenhams/053010111560_2?wid=1250&hei=1250&qlt=95");
+            map.put("0530101115-03","http://debenhams.scene7.com/is/image/Debenhams/053010111560_3?wid=1250&hei=1250&qlt=95");
 
 
             Set keys=map.keySet();
