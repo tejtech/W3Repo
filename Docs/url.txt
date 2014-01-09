@@ -22,6 +22,9 @@ http://xpadro.blogspot.co.uk/2013/11/how-error-handling-works-in-spring.html
 #Issue with sending binary data as JMS messages using Spring Integration 
 http://forum.spring.io/forum/spring-projects/integration/jms/114352-issue-with-sending-binary-data-as-jms-messages-using-spring-integration
 
+#Spring Integration and IBM MQ
+http://stackoverflow.com/questions/17988872/could-not-fetch-messages-from-webpshere-mq-sometimes-even-though-the-application
+
 #Spring and Autowiring of Generic Types
 http://www.jayway.com/2013/11/03/spring-and-autowiring-of-generic-types/
 
@@ -33,3 +36,4 @@ http://www.newthinktank.com/videos/design-patterns-tutorial/
 
 #to download you tube
 http://keepvid.com
+
