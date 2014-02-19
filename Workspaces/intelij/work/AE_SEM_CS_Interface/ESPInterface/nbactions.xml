@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <actions>
         <action>
-            <actionName>CUSTOM-COMPILE NO TESTS</actionName>
-            <displayName>COMPILE NO TESTS</displayName>
+            <actionName>CUSTOM-BuildSkipTest</actionName>
+            <displayName>BuildSkipTest</displayName>
             <goals>
                 <goal>clean</goal>
                 <goal>install</goal>

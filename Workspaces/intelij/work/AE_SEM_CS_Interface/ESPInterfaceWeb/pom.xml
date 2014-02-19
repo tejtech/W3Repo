@@ -5,7 +5,7 @@
     <parent>
         <groupId>net.aconite.affina</groupId>
         <artifactId>esp-interface-parent</artifactId>
-        <version>2.11</version>
+        <version>2.12</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -79,7 +79,9 @@
                                     </outputDirectory>
                                     <includes>
                                         META-INF/spring/*.xml,
-                                        META-INF/templates/*.vm
+                                        META-INF/templates/*.vm,
+                                        errormsgs_*.properties,
+                                        infomsgs_*.properties
                                     </includes>
                                 </artifactItem>
                             </artifactItems>

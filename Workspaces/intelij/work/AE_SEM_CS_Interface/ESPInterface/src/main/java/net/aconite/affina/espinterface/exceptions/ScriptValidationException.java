@@ -10,15 +10,31 @@ package net.aconite.affina.espinterface.exceptions;
  */
 public class ScriptValidationException extends ScriptProcessingRuntimeException
 {
+
     static final long serialVersionUID = -3387516993124229941L;
+
     public ScriptValidationException()
     {
         super();
     }
-    
+
     public ScriptValidationException(String message)
     {
         super(message);
     }
-            
+    public ScriptValidationException(ScriptProcessingRuntimeException exception)
+    {
+        super(exception);
+    }
+
+    public ScriptValidationException(String message, String errCode)
+    {
+        super(message, errCode);
+    }
+
+    public ScriptValidationException(String message, String eReason , String errCode)
+    {
+        super(message, eReason, errCode);
+
+    }
 }

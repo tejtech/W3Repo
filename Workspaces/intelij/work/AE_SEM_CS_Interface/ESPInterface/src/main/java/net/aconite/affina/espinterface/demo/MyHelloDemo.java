@@ -1,6 +1,11 @@
 package net.aconite.affina.espinterface.demo;
 
+import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import net.aconite.affina.espinterface.context.ESPShutDownHook;
+import net.aconite.affina.espinterface.helper.DateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -19,7 +24,8 @@ public class MyHelloDemo
 
     public void initServer()
     {
-        ConfigurableApplicationContext espContext = new ClassPathXmlApplicationContext("/META-INF/spring/application-context.xml");
+        //ConfigurableApplicationContext espContext = new ClassPathXmlApplicationContext("/META-INF/spring/application-context.xml");
+        ConfigurableApplicationContext espContext = new ClassPathXmlApplicationContext("/test/spring/application-context.xml");
         /*ConfigurableApplicationContext espContext = new ClassPathXmlApplicationContext(
                 "/META-INF/spring/application-context.xml",
                 "/META-INF/spring/app-config.xml",
@@ -100,6 +106,13 @@ public class MyHelloDemo
     public static void main(String[] args)
     {
         System.out.println("Hello World");
+
+        //System.setProperty("affinaRoot", "C:/affina-R2.11.15831WAS7");
+        //System.setProperty("windows", "true");
+        long ltime=1475276399999l;
+        
+        System.out.println("longtime "+ltime+" in Hex : "+Long.toHexString(ltime).toUpperCase());
+        
         new MyHelloDemo().initServer();
     }
 

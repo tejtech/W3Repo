@@ -53,7 +53,8 @@ public class Object2XMLTest
         request.setTrackingReference("12121212121212");
 
         CardType cardType = new CardType();
-        cardType.setExpirationDate("1385855999999");
+        cardType.setExpirationYear("2017");
+        cardType.setExpirationMonth("11");
         cardType.setPAN("0129002312");
         cardType.setPANSequence("01");
         request.setCard(cardType);
@@ -96,7 +97,8 @@ public class Object2XMLTest
         request.setTrackingReference("4525234552525");
 
         CardType cardType = new CardType();
-        cardType.setExpirationDate("1385855999999");
+        cardType.setExpirationYear("2017");
+        cardType.setExpirationMonth("11");
         cardType.setPAN("0129002312");
         cardType.setPANSequence("01");
         request.setCard(cardType);

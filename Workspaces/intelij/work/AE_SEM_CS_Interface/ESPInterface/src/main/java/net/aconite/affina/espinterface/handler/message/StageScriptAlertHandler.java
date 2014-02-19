@@ -25,6 +25,8 @@ public class StageScriptAlertHandler implements IEspMessageHandler
 {
     private static final Logger logger = LoggerFactory.getLogger(StageScriptAlertHandler.class.getName());
 
+    private String espScope;
+    
     @Splitter
     public List<Message> split(Message inMessage) throws EspMessageTransformationException
     {
@@ -37,10 +39,11 @@ public class StageScriptAlertHandler implements IEspMessageHandler
 
         logger.debug("process : Incoming Message header: ", inHeaders);
         logger.debug("process : Message payload: ", inPayload);
-
+               
         String inTrackId = inPayload.getTrackingReference();
         MessageContent messageContent = new MessageContent(EspConstant.STAGE_SCRIPT_ALERT, inTrackId);
-
+        messageContent.setScopeName(getEspScope());
+        
         MessageBuilderFactory msgBuilderFactory = new MessageBuilderFactory();
         IMessageBuilder builder = msgBuilderFactory.getBuilder(EspConstant.STAGE_SCRIPT_REQUEST);
 
@@ -76,12 +79,24 @@ public class StageScriptAlertHandler implements IEspMessageHandler
 
     private Message<StageScriptRequest> generateStageScriptRequestMessage(MessageHeaders headers, StageScriptRequest sourceData)
     {
-        logger.info("Created StageScriptRequest Message. Identfier: " + sourceData.getTrackingReference());
+        logger.info("Created StageScriptRequest Message : " + sourceData.getTrackingReference());
 
         return MessageBuilder.withPayload(sourceData)
                 .copyHeaders(headers)
-                .setHeader(JmsHeaders.TYPE, EspConstant.JMS_TEXT_MESSAGE)
-                .setHeader(EspConstant.MQ_MESSAGE_TYPE, EspConstant.STAGE_SCRIPT_REQUEST)
+                .setHeader(JmsHeaders.TYPE, EspConstant.STAGE_SCRIPT_REQUEST)
+                //.setHeader(EspConstant.MQ_MESSAGE_TYPE, EspConstant.STAGE_SCRIPT_REQUEST)
                 .build();
+    }
+    
+    //==========================================================================
+    
+    public String getEspScope() 
+    {
+        return espScope;
+    }
+
+    public void setEspScope(String espScope) 
+    {
+        this.espScope = espScope;
     }
 }

@@ -3,7 +3,7 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified"
            version="1.0">
     <xs:include schemaLocation="CommonData.xsd"/>
-    <xs:element name="scriptStatusUpdate">
+    <xs:element name="ScriptStatusUpdate">
         <xs:complexType>
             <xs:sequence>
                 <xs:element name="TrackingReference" type="TrackingReferenceType"/>

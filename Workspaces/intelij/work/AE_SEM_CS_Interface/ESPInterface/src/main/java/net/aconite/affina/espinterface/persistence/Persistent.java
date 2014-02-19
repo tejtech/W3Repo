@@ -33,4 +33,5 @@ public interface Persistent
     public void addTransactionalWorker(Workable workable);
     public <R> Vector getRegisteredAllObjects(Collection<R> cls);
     public Object getRegisteredExistingObject(Object cls);
+    public com.platform7.standardinfrastructure.multiissuer.Scope getScope(String name);
 }

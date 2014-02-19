@@ -14,12 +14,17 @@ import org.springframework.integration.jms.JmsHeaders;
 import org.springframework.integration.support.MessageBuilder;
 
 import java.util.List;
+import net.aconite.affina.espinterface.builder.MessageContent;
+import net.aconite.affina.espinterface.validators.ResponseMessageValidator;
+import net.aconite.affina.espinterface.xmlmapping.sem.CardSetupResponse;
+import net.aconite.affina.espinterface.xmlmapping.sem.ErrorType;
 
 
 public class StageScriptResponseHandler implements IEspMessageHandler
 {
     private static final Logger logger = LoggerFactory.getLogger(StageScriptResponseHandler.class.getName());
 
+    private String espScope;
 
     @Transformer
     public Message transform(Message inMessage)
@@ -35,24 +40,28 @@ public class StageScriptResponseHandler implements IEspMessageHandler
         logger.debug("process : Message payload: ", inPayload);
 
         String trackId = inPayload.getTrackingReference();
-        String Status = inPayload.getStatus().value();
+        StatusType statusType = inPayload.getStatus();
+        ErrorType errorType = inPayload.getError();
+                
+        String inTrackId = inPayload.getTrackingReference();
+        MessageContent messageContent = new MessageContent(EspConstant.STAGE_SCRIPT_RESPONSE, inTrackId,statusType,errorType);
+        messageContent.setScopeName(getEspScope());
+               
 
         StageScriptResponse response = new StageScriptResponse();
         response.setTrackingReference(trackId);
-
-        //ToDo - need to inform affina and handle trackId status & data
-
-        if (StatusType.STATUS_OK.value().equalsIgnoreCase(Status))
+                
+        MessageContent validatedContent=new ResponseMessageValidator().validate(messageContent);
+        
+        if(validatedContent.isValid())
         {
             response.setStatus(StatusType.STATUS_OK);
         }
         else
         {
             response.setStatus(StatusType.ERROR);
-            response.setError(inPayload.getError());
+            response.setError(validatedContent.getError());
         }
-
-
         Message outMessage = generateStageScriptResponseMessage(inHeaders, response);
 
         return outMessage;
@@ -70,13 +79,22 @@ public class StageScriptResponseHandler implements IEspMessageHandler
 
     private Message<StageScriptResponse> generateStageScriptResponseMessage(MessageHeaders headers, StageScriptResponse sourceData)
     {
-
-        logger.info("Created CardSetupResponse Message. Identfier: " + sourceData.getTrackingReference());
-
         return MessageBuilder.withPayload(sourceData)
                 .copyHeaders(headers)
-                .setHeader(JmsHeaders.TYPE, EspConstant.JMS_TEXT_MESSAGE)
-                .setHeader(EspConstant.MQ_MESSAGE_TYPE, EspConstant.STAGE_SCRIPT_RESPONSE)
+                .setHeader(JmsHeaders.TYPE, EspConstant.STAGE_SCRIPT_RESPONSE)
+                //.setHeader(EspConstant.MQ_MESSAGE_TYPE, EspConstant.STAGE_SCRIPT_RESPONSE)
                 .build();
+    }
+    
+    //==========================================================================
+    
+    public String getEspScope() 
+    {
+        return espScope;
+    }
+
+    public void setEspScope(String espScope) 
+    {
+        this.espScope = espScope;
     }
 }

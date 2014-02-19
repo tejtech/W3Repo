@@ -105,7 +105,7 @@ import java.util.List;
         "scriptDeliveryStatus",
         "scriptDataItem"
 })
-@XmlRootElement(name = "scriptStatusUpdate")
+@XmlRootElement(name = "ScriptStatusUpdate")
 public class ScriptStatusUpdate
 {
 

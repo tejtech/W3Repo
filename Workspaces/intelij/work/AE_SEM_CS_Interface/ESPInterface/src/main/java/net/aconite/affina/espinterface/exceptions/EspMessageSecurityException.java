@@ -26,6 +26,16 @@ public class EspMessageSecurityException extends EspInterfaceException
     {
         super(message, cause);
     }
+    
+    public EspMessageSecurityException(String message,String errCode)
+    {
+        super(message,errCode);
+    }
+
+    public EspMessageSecurityException(String message, Throwable cause,String errCode)
+    {
+        super(message, cause,errCode);
+    }
 
     public EspMessageSecurityException(Throwable cause)
     {

@@ -1,17 +1,16 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package net.aconite.affina.espinterface.scripting.statusupdate;
 
+import com.platform7.pma.application.Application;
 import com.platform7.pma.card.SoftCard;
 import com.platform7.pma.request.emvscriptrequest.*;
 import java.sql.Timestamp;
 import java.util.*;
+import net.acointe.affina.esp.*;
 import net.aconite.affina.espinterface.cardselection.CardGenerator;
-import net.aconite.affina.espinterface.cardselection.SelectableCardGenerator;
 import net.aconite.affina.espinterface.constants.*;
 import net.aconite.affina.espinterface.exceptions.*;
+import net.aconite.affina.espinterface.exceptions.util.*;
+import net.aconite.affina.espinterface.factory.*;
 import net.aconite.affina.espinterface.helper.*;
 import net.aconite.affina.espinterface.model.*;
 import net.aconite.affina.espinterface.persistence.GenericPersistentDAO;
@@ -19,9 +18,10 @@ import net.aconite.affina.espinterface.persistence.Persistent;
 import net.aconite.affina.espinterface.persistence.Workable;
 import net.aconite.affina.espinterface.scripting.generic.*;
 import net.aconite.affina.espinterface.xmlmapping.sem.*;
-import net.aconite.affina.espinterface.xmlmapping.sem.ScriptStatusUpdate.ScriptDeliveryStatus;
 import org.eclipse.persistence.expressions.Expression;
 import org.eclipse.persistence.expressions.ExpressionBuilder;
+import org.eclipse.persistence.queries.*;
+import org.slf4j.*;
 
 /**
  *
@@ -30,6 +30,7 @@ import org.eclipse.persistence.expressions.ExpressionBuilder;
 public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpdateDataHolder>, Workable
 {
 
+    private static final Logger logger = LoggerFactory.getLogger(ScriptUpdateProcessor.class);
     /**
      * Scriptable card-generator.
      */
@@ -37,7 +38,7 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
     /**
      * Persistence framework.
      */
-    private static Persistent peristent;
+    private Persistent persistent;
     /**
      * To indicate whether validation is successful or not.
      */
@@ -46,18 +47,27 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
      * Used to indicate whether script order should be checked or not.
      */
     private boolean isCheckScriptOrder;
+
+    private Application app;
+
+    private String scope;
     /**
      * Scriptable card.
      */
     private ScriptableCard sc;
+    private boolean hasTransactionDetails = false;
+    private boolean hasDeviceDetails = false;
+    private boolean hasDeletionDetails = false;
+    private boolean hasDeliveryStatus = false;
+    private boolean isNewScript = false;
+    private String errorData;
     /**
      * A helper Map to store script status life cycles and their processing order.
      */
     private static final Map<String, Integer> statusOrderMap = new HashMap<String, Integer>();
-    
+
     static
     {
-        peristent = GenericPersistentDAO.getPersistent();
         statusOrderMap.put("STAGED", 1);
         statusOrderMap.put("SENT", 2);
         statusOrderMap.put("DELETED", 3);
@@ -69,7 +79,8 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
      */
     private ScriptUpdateProcessor()
     {
-        cardGen = new SelectableCardGenerator();
+        persistent = GenericPersistentDAO.getPersistent();
+        cardGen = CardGeneratorFactory.getCardgenerator(persistent);//new SelectableCardGenerator();
     }
 
     /**
@@ -80,8 +91,14 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
     public static ScriptProcessable<ScriptStatusUpdateDataHolder> getProcessable()
     {
         ScriptProcessable<ScriptStatusUpdateDataHolder> sp = new ScriptUpdateProcessor();
-        peristent.addTransactionalWorker((Workable) sp);
+        ((ScriptUpdateProcessor)sp).addWorker(sp);
+        //peristent.addTransactionalWorker((Workable) sp);
         return sp;
+    }
+
+    public void addWorker(ScriptProcessable sp)
+    {
+        persistent.addTransactionalWorker((Workable) sp);
     }
 
     /**
@@ -94,27 +111,51 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
      * @param scriptData ScriptStatusUpdateDataHolder which encapsulates the XML object ScriptStatusUpdate
      */
     @Override
-    public Result processScript(ScriptStatusUpdateDataHolder scriptData)
+    public synchronized Result processScript(ScriptStatusUpdateDataHolder scriptData)
     {
+        Result result;
+        ScriptStatusUpdate data = scriptData.getScriptStatusUpdate();
         try
         {
-            ScriptStatusUpdate data = scriptData.getScriptStatusUpdate();
+            scope = scriptData.getScopeName();
             //Validate Script
-            validateScript(data);
+            logger.info("Received scripting request: Tracking reference " + data.getTrackingReference());
             //If all is well do the transaction and commit.
-
-            peristent.<ScriptStatusUpdate>doTransactionalWorkAndCommit(data);
+            persistent.<ScriptStatusUpdate>doTransactionalWorkAndCommit(data);
+            result = Result.getInstance(isScriptValidationSuccessful, null,
+                                        "Script processing completed successfully", "1", data.getTrackingReference());
+            logger.info("Scripting successful: Tracking reference " + data.getTrackingReference());
         }
-        catch (Exception esvx)
+        catch (ScriptValidationException esvx)
         {
-            return Result.getInstance(isScriptValidationSuccessful, esvx,
-                                      "Unable to complete Script processing successfuly.");
+            logger.error("Unable to complete Script processing successfully.", esvx);
+            result = Result.getInstance(isScriptValidationSuccessful, esvx,
+                                        "Unable to complete Script processing successfully.", esvx.getErrorCode(),
+                                        data == null ? "" : data.getTrackingReference());
+            result.setErrorData(errorData);
+        }
+        catch (ScriptableCardNotFoundException esvx)
+        {
+            logger.error("Unable to complete Script processing successfully.", esvx);
+            result = Result.getInstance(isScriptValidationSuccessful, esvx,
+                                        "Unable to complete Script processing successfully.", esvx.getErrorCode(),
+                                        data == null ? "" : data.getTrackingReference());
+            result.setErrorData(errorData);
+        }
+        catch (PersistentException pex)
+        {
+            logger.error("Persistent related error.", pex);
+            result = Result.getInstance(false, pex,
+                                        "Unable to complete Script processing successfully due to persistent issues.",
+                                        pex.getErrorCode(),
+                                        data == null ? "" : data.getTrackingReference());
+            result.setErrorData(errorData);
         }
         finally
         {
             //peristent = null;
         }
-        return Result.getInstance(isScriptValidationSuccessful, null, "Script processing completed successfuly");
+        return result;
     }
 
     /**
@@ -126,7 +167,16 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
     @Override
     public <T> void doWork(T arg)
     {
-        storeScriptData((ScriptStatusUpdate) arg);
+        try
+        {
+            validateScript((ScriptStatusUpdate) arg);
+            storeScriptData((ScriptStatusUpdate) arg);
+        }
+        catch(ScriptValidationException ex)
+        {
+            throw ex;
+        }
+
     }
 
     /**
@@ -143,75 +193,236 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
         if (ssu == null)
         {
             isScriptValidationSuccessful = false;
-            throw new ScriptValidationException("Invalid Script. Script received is empty.");
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
+                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_SCRIPT),
+                    getErrorCode(MsgConstant.INVALID_MESSAGE));
         }
-        
+        if (DataUtil.isNull(ssu.getScriptUpdateStatus()))
+        {
+            isScriptValidationSuccessful = false;
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS),
+                    getErrorMessage(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS),
+                    getErrorCode(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS));
+        }
+        if (DataUtil.isEmpty(ssu.getSource()))
+        {
+            isScriptValidationSuccessful = false;
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
+                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_SOURCE),
+                    getErrorCode(MsgConstant.INVALID_MESSAGE));
+        }
+        if (DataUtil.isEmpty(ssu.getTarget()))
+        {
+            isScriptValidationSuccessful = false;
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
+                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_TARGET),
+                    getErrorCode(MsgConstant.INVALID_MESSAGE));
+        }
+        if (DataUtil.isNull(ssu.getScriptSequenceNumber()))
+        {
+            isScriptValidationSuccessful = false;
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
+                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_SEQ_NO),
+                    getErrorCode(MsgConstant.INVALID_MESSAGE));
+        }
+        if (DataUtil.isNull(ssu.getAutoRetryCount()))
+        {
+            isScriptValidationSuccessful = false;
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
+                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_RETRY_COUNT),
+                    getErrorCode(MsgConstant.INVALID_MESSAGE));
+        }
+
         if (DataUtil.isEmpty(ssu.getTrackingReference()))
         {
             isScriptValidationSuccessful = false;
-            throw new ScriptValidationException("Empty Tracking reference.");
-        }
-        
-        if (DataUtil.isEmpty(ssu.getCard().getPAN()))
-        {
-            isScriptValidationSuccessful = false;
-            throw new ScriptValidationException("Invalid PAN. Empty or no value.");
-        }
-        
-        if (DataUtil.isEmpty(ssu.getCard().getPANSequence()))
-        {
-            isScriptValidationSuccessful = false;
-            throw new ScriptValidationException("Invalid PSN. Empty or no value.");
-        }
-        
-        if (!DataUtil.isDate(ssu.getCard().getExpirationDate()))
-        {
-            isScriptValidationSuccessful = false;
-            throw new ScriptValidationException("Invalid Expiration date. Empty or no value.");
-        }
-        
-        if (ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELETED)
-        {
-            if (ssu.getDeletionDetails() == null)
-            {
-                isScriptValidationSuccessful = false;
-                throw new ScriptValidationException("Invalid message. Missing deletion "
-                        + "details on a script with " + ssu.getScriptUpdateStatus().value() + " state.");
-            }
-        }
-        
-        if (ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.SENT
-                || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELIVERED)
-        {
-            if (ssu.getTransactionDetails() == null)
-            {
-                isScriptValidationSuccessful = false;
-                throw new ScriptValidationException("Invalid message. Missing Transaction "
-                        + "details on a script with " + ssu.getScriptUpdateStatus().value() + " state.");
-            }
-        }
-        
-        if (ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.SENT
-                || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELIVERED
-                || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELETED)
-        {
-            if (ssu.getScriptDeliveryStatus() == null)
-            {
-                isScriptValidationSuccessful = false;
-                throw new ScriptValidationException("Invalid message. Missing Delivery "
-                        + "status on a script with " + ssu.getScriptUpdateStatus().value() + " state.");
-            }
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
+                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_TRACKING_REF),
+                    getErrorCode(MsgConstant.INVALID_MESSAGE));
         }
 
+        if (DataUtil.isNull(ssu.getCard()) || DataUtil.isEmpty(ssu.getCard().getPAN()))
+        {
+            isScriptValidationSuccessful = false;
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
+                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_PAN),
+                    getErrorCode(MsgConstant.INVALID_MESSAGE));
+        }
+
+        if (DataUtil.isEmpty(ssu.getCard().getPANSequence()) || !DataUtil.isPSNValid(ssu.getCard().getPANSequence()))
+        {
+            isScriptValidationSuccessful = false;
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
+                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_PSN),
+                    getErrorCode(MsgConstant.INVALID_MESSAGE));
+        }
+
+        long expDate = -1;
+        try
+        {
+            expDate = generateExpiryDate(ssu);
+        }
+        catch (ScriptValidationException ex)
+        {
+            isScriptValidationSuccessful = false;
+            throw ex;
+        }
+
+        if (!DateHelper.isDate(expDate))
+        {
+            isScriptValidationSuccessful = false;
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
+                    getErrorMessage(MsgConstant.INVALID_DATA_INVALID_EXP_DATE_FORMAT),
+                    getErrorCode(MsgConstant.INVALID_DATA));
+        }
+
+        if (!DataUtil.isDate(ssu.getDatePublished()))
+        {
+            isScriptValidationSuccessful = false;
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
+                    getErrorMessage(MsgConstant.INVALID_DATA_INVALID_PUBLISHED_DATE_FORMAT),
+                    getErrorCode(MsgConstant.INVALID_DATA));
+        }
+
+        if (DataUtil.isNull(ssu.getScriptOrder()))
+        {
+            isScriptValidationSuccessful = false;
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
+                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_SCRIPT_ORDER),
+                    getErrorCode(MsgConstant.INVALID_DATA));
+        }
+        boolean isStatusValid = isValidScriptUpdateStatus(ssu);
+        if(!isStatusValid)
+        {
+            isScriptValidationSuccessful = false;
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS),
+                    getErrorMessage(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS)
+                    + ": " + ssu.getScriptUpdateStatus().toString(),
+                    getErrorCode(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS));
+        }
+        validateDeletionDetails(ssu);
+        validateDeviceDetails(ssu);
+        validateTransactionDetails(ssu);
+        validateDeliveryStatus(ssu);
+        //ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELETED removed as per spec change
+        //ScriptDeliveryStatus required if SENT, DELIVERED OR DELETED, but later DELETED was removed.
+
+
         //Locate Card R.5-1
-        long cadExpdate = DateHelper.fromStringTolong(ssu.getCard().getExpirationDate());
-        sc = cardGen.generateCard(ssu.getCard().getPAN(), ssu.getCard().getPANSequence(), cadExpdate);
+        long cadExpdate = generateExpiryDate(ssu);
+        try
+        {
+            sc = cardGen.generateScriptableCard(ssu.getCard().getPAN(),
+                                                ssu.getCard().getPANSequence(), cadExpdate, scope);
+            if(sc != null)
+            {
+                app = (Application) persistent.getRegisteredExistingObject(sc.getApplication().getApplication());
+            }
+
+        }
+        catch (ScriptValidationException ex)
+        {
+            isScriptValidationSuccessful = false;
+            throw ex;
+        }
+
         //If card cannot be located log error.
         if (sc == null)
         {
             isScriptValidationSuccessful = false;
-            throw new ScriptableCardNotFoundException("Card not found");
+            throw new ScriptableCardNotFoundException(getErrorMessage(MsgConstant.NO_MATCHING_CARD),
+                                                      getErrorMessage(MsgConstant.NO_MATCHING_CARD),
+                                                      getErrorCode(MsgConstant.NO_MATCHING_CARD));
         }
+
+        ///If non parm script having the wrong business function.
+
+
+        if (ssu.getBusinessFunction() == null)
+        {
+            isScriptValidationSuccessful = false;
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
+                                                      getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_BUSINESS_FUNCTION),
+                                                      getErrorCode(MsgConstant.INVALID_MESSAGE));
+        }
+
+        if (!isParameterScript(ssu))
+        {
+            ESPBusinessFunction bf = getESPBusinessFunctionByAlias(ssu.getBusinessFunction().getFunctionName(), app);
+            if (bf == null)
+            {
+                isScriptValidationSuccessful = false;
+                throw new ScriptValidationException(getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
+                                                      getErrorMessage(MsgConstant.
+                        DATA_ITEM_MISSING_NON_PARAM_SCRIPT_BUSINESS_FUNCTION),
+                                                      getErrorCode(MsgConstant.
+                        DATA_ITEM_MISSING_NON_PARAM_SCRIPT_BUSINESS_FUNCTION));
+            }
+        }
+        else
+        {
+            ESPBusinessFunction bf = getESPBusinessFunctionByAlias("Parameter Script", app);
+            if (bf == null)
+            {
+                isScriptValidationSuccessful = false;
+                throw new ScriptValidationException(getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
+                                                      getErrorMessage(MsgConstant.
+                        DATA_ITEM_MISSING_PARAMETER_SCRIPT_BUSINESS_FUNCTION),
+                                                      getErrorCode(MsgConstant.DATA_ITEM_MISSING));
+            }
+            else
+            {
+                Result<List<ESPBusinessParameter>> result = getResultOfAllDefinedParametersInRequest(ssu.getScriptDataItem());
+                boolean docontinue = result.isSuccessFul();
+                if(!docontinue)
+                {
+                    isScriptValidationSuccessful = false;
+                    List<ESPBusinessParameter> edata = result.getData();
+                    if(edata != null && !edata.isEmpty())
+                    {
+                        Iterator<ESPBusinessParameter> it = edata.iterator();
+                        StringBuilder sb = new StringBuilder();
+                        while(it.hasNext())
+                        {
+                            if(sb != null && sb.toString().trim().length() > 0)
+                            {
+                                sb.append(",");
+                            }
+                            ESPBusinessParameter bp = it.next();
+                            sb.append(bp.getAlias());
+                        }
+                        errorData = sb.toString();
+                    }                     
+                    throw new ScriptValidationException(getErrorMessage(MsgConstant.UNKNOWN_SCRIPT_DATA_ITEM),
+                                                      getErrorMessage(MsgConstant.
+                                                        UNKNOWN_SCRIPT_DATA_ITEM),
+                                                      getErrorCode(MsgConstant.UNKNOWN_SCRIPT_DATA_ITEM));
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param ssu < p/>
+     * <p/>
+     * @return
+     */
+    private static long generateExpiryDate(ScriptStatusUpdate ssu)
+    {
+        long expDate = 0;
+        try
+        {
+            expDate = AffinaEspUtils.getMonthendDateZeroTime(ssu.getCard().getExpirationYear(),
+                                                             ssu.getCard().getExpirationMonth());
+        }
+        catch (AffinaEspUtilException ex)
+        {
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
+                    getErrorMessage(MsgConstant.INVALID_DATA_INVALID_EXP_DATE_FORMAT),
+                    getErrorCode(MsgConstant.INVALID_DATA));
+        }
+        return expDate;
     }
 
     /**
@@ -224,7 +435,7 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
         {
             data.setScriptDeliveryStatus(ssu.getScriptDeliveryStatus().getDeliveryStatus());
         }
-        //Do store delete Detals and others 
+        //Do store delete Details and others
     }
 
     /**
@@ -239,58 +450,102 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
      */
     private void storeScriptData(ScriptStatusUpdate ssu)
     {
-        //Get the stored record that matches the TrackingReference.
-        ESPScriptUpdateStatus statusUpdateData = getExistingStatusUpdateData(ssu.getTrackingReference());
-        //1.Get the pan,psnexp date
-        //2.See whether another ESPParameter exist with a similar PAN to the one fetched above via tracking ref.
-        //3.if does not then fine and proceed. script order does not matter.
-        //4.if it does then check the script order
-
-        //Must get the soft card and test the PAN,PSN and EXP Date with the one arrived
-        //And check the arived seq and if its greater than stored update else discard.
-        Timestamp newDate = getScriptDate(ssu);
-
-        //Null statusUpdateData means that Script with this Tracking Ref does not exists yet. So create it new.
-        if (statusUpdateData == null)
+        try
         {
-            statusUpdateData = peristent.getRegisteredObject(ESPScriptUpdateStatus.class);
-            updateScriptStatusUpdateModel(statusUpdateData, ssu, true);
-        }
-
-        /**
-         * If the Record exists for the given Tracking ref then update Script State if
-         * isCurrLifecycleStateEarlierOrRestagedScript returns true.
-         */
-        if (statusUpdateData != null)
-        {
-            boolean isCurrLifecycleStateEarlierOrRestagedScript = isCurrLifecycleStateEarlierOrRestagedScript(
-                    statusUpdateData.getScriptLifecycleStatus(),
-                    ssu.getScriptUpdateStatus(),
-                    ssu.getScriptDeliveryStatus());
-            //This means that we have a state (via script) later than currently stored in DB.
-            if (isCurrLifecycleStateEarlierOrRestagedScript)
+            //Get the stored record that matches the TrackingReference.
+            ESPScriptUpdateStatus statusUpdateData =  getExistingStatusUpdateData(ssu.getTrackingReference(), scope);
+            //1.Get the pan,psnexp date
+            //2.See whether another ESPParameter exist with a similar PAN to the one fetched above via tracking ref.
+            //3.if does not then fine and proceed. script order does not matter.
+            //4.if it does then check the script order
+            //Must get the soft card and test the PAN,PSN and EXP Date with the one arrived
+            //And check the arived seq and if its greater than stored update else discard.
+            Timestamp newDate = getScriptDate(ssu);
+            ESPScriptUpdateStatus statusUpdateDataWithSameCardData  = null;
+            //Null statusUpdateData means that Script with this Tracking Ref does not exists yet. So create it new.
+            if (statusUpdateData == null)
             {
-                updateScriptStatus(statusUpdateData, ssu);
+                //If new tracking reference then its a new script.
+                isNewScript = true;
+                //We are here means its a new script new tracking ref. So we check for existence of card for the new TR
+                statusUpdateDataWithSameCardData = getESPScriptUpdateStatusByCardData(ssu);
+                if(statusUpdateDataWithSameCardData == null)
+                {
+                    //We are here means no card found for new TR so we check if card exists at all
+                    //This will check for PAN/PSN/EXPDATE and NO TR as in the above case.
+                    statusUpdateDataWithSameCardData = getESPScriptUpdateStatusByCardDataAndNoTR(ssu);
+                }
+                //if new TR same SO then update. New TR different SO then create new.
+                //statusUpdateDataWithSameCardData == null means TR is new and Card does not exist.
+                if(statusUpdateDataWithSameCardData == null || 
+                        doUpdateScriptStatus(statusUpdateDataWithSameCardData.getScriptOrder(),
+                                             ssu.getScriptOrder().longValue()))
+                {                    
+                    //We are here means new script with new TR does not have that card in DB
+                    statusUpdateData = persistent.getRegisteredObject(ESPScriptUpdateStatus.class);
+                    updateModel(statusUpdateData, ssu, true);
+                    //Get ESP Param that matches PAN, PSN and Ex Date of the card in request (ssu above)
+                    SoftCard softCard = sc.getSoftCard();
+                    softCard = (SoftCard) persistent.getRegisteredExistingObject(softCard);
+
+                    statusUpdateData.setSoftCard(softCard);
+                }
+            }
+            else
+            {
+                if(!statusUpdateData.getESPApplicationDetail().getPan().equals(ssu.getCard().getPAN())
+                        || !statusUpdateData.getESPApplicationDetail().getPanSequenceNumber().equals(ssu.getCard().getPANSequence())
+                        || statusUpdateData.getESPApplicationDetail().getExpiryDate().getTime() != generateExpiryDate(ssu))
+                {
+                    isScriptValidationSuccessful = false;
+                    throw new ScriptValidationException(getErrorMessage(MsgConstant.DUPLICATE_TRACKING_REFERENCE),
+                                     getErrorMessage(MsgConstant.DUPLICATE_TRACKING_REFERENCE),
+                            getErrorCode(MsgConstant.DUPLICATE_TRACKING_REFERENCE));
+                }
+                else
+                {
+
+                }
+            }
+
+            /**
+             * If the Record exists for the given Tracking ref then update Script State if
+             * isCurrLifecycleStateEarlierOrRestagedScript returns true.
+             */
+            if (statusUpdateData != null)
+            {
+                boolean isCurrLifecycleStateEarlierOrIsRestagedScript =
+                        isCurrLifecycleStateEarlierOrRestagedScript(statusUpdateData.getScriptLifecycleStatus(), ssu);
+                //This means that we have a state (via script) later than currently stored in DB.
+                if (isCurrLifecycleStateEarlierOrIsRestagedScript)
+                {
+                    updateScriptStatus(statusUpdateData, ssu);
+                }
+            }
+            else
+            {
+                statusUpdateData = statusUpdateDataWithSameCardData;
+            }            
+            //If it does not exist means, a previous update for this card does not exist,so no need to check script order.
+            if (statusUpdateDataWithSameCardData != null)
+            {
+                isCheckScriptOrder = true;
+            }
+            //Another record for the card exists (indicated by isCheckScriptOrder above) and script order is heigher.
+            boolean doUpdateScriptStatus = (statusUpdateData != null &&
+                    doUpdateScriptStatus(statusUpdateData.getScriptOrder(), ssu.getScriptOrder().longValue()))
+                                            || (isCheckScriptOrder
+                                            && doUpdateScriptStatus(statusUpdateDataWithSameCardData.getScriptOrder(),
+                                                                                    ssu.getScriptOrder().longValue()));
+            if (doUpdateScriptStatus || ssu.getScriptUpdateStatus().equals(ScriptStatusUpdateType.DELETED))
+            {
+                //Update just the params..
+                updateModel(statusUpdateData, ssu, false);
             }
         }
-
-        //Get ESP Param that matches PAN, PSN and Ex Date of the card in request (ssu above)
-        SoftCard softCard = sc.getSoftCard();
-        /////////////Review must get the one with heighest SCRIPT ORDER///////////////////////////
-        ESPScriptUpdateStatus statusUpdateDataWithSameCardData = getESPScriptUpdateStatusBySoftCardOID(ssu);
-
-        //If it does not exist means, a previous update for this card does not exist,so no need to check script order.
-        if (statusUpdateDataWithSameCardData != null)
+        catch (ScriptValidationException ex)
         {
-            isCheckScriptOrder = true;
-        }
-        //Another record for the card exists (indicated by isCheckScriptOrder above) and script order is heigher.
-        if (isCheckScriptOrder && doUpdateScriptStatus(statusUpdateDataWithSameCardData.getScriptOrder(),
-                                                       ssu.getScriptOrder().intValue()))
-        {
-            ////REVIEW*****************************check the mapping.
-            //Update just the params..
-            updateScriptStatusUpdateModel(statusUpdateData, ssu, false);
+            throw ex;
         }
     }
 
@@ -301,52 +556,68 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
      * @param ssu              The XML Data
      * @param createNew        Indicates whether its a new Model creation or and Update of an existing Model.
      */
-    private void updateScriptStatusUpdateModel(ESPScriptUpdateStatus scriptUpdateData, ScriptStatusUpdate ssu,
-                                               boolean createNew)
+    private void updateModel(ESPScriptUpdateStatus scriptUpdateData, ScriptStatusUpdate ssu,
+                             boolean createNew)
     {
         Timestamp newDate = getScriptDate(ssu);
         if (createNew)
         {
             scriptUpdateData.setTrackingReference(ssu.getTrackingReference());
+            ESPApplicationDetail easpAppDetails = (ESPApplicationDetail) persistent.
+                                                                getRegisteredExistingObject(sc.getEaspAppDetails());
+            scriptUpdateData.setEspApplicationDetail(easpAppDetails);
             //scriptUpdateData.setSoftCard(sc.getSoftCard());
             scriptUpdateData.setSource(ssu.getSource());
             scriptUpdateData.setTarget(ssu.getTarget());
             scriptUpdateData.setScriptSequenceNumber(ssu.getScriptSequenceNumber().intValue());
             scriptUpdateData.setAutoRetryCount(ssu.getAutoRetryCount().intValue());
-            scriptUpdateData.setStatus(ssu.getScriptUpdateStatus().name());            
-            scriptUpdateData.setDateCreated(newDate);
-            scriptUpdateData.setPan(ssu.getCard().getPAN());
-            scriptUpdateData.setPsn(ssu.getCard().getPANSequence());
-            scriptUpdateData.setExpiryDate(DateHelper.getTimestampUSFormat(DateHelper.fromStringTolong(
-                    ssu.getCard().getExpirationDate())));
-            
+            scriptUpdateData.setStatus(ssu.getScriptUpdateStatus().name());
+            scriptUpdateData.setDateCreated(new java.sql.Timestamp(new Date().getTime()));
+            scriptUpdateData.setScope(persistent.getScope(scope));
+            //scriptUpdateData.setPan(ssu.getCard().getPAN());
+            //scriptUpdateData.setPsn(ssu.getCard().getPANSequence());
+            //long expDate = generateExpiryDate(ssu);
+            //scriptUpdateData.setExpiryDate(DateHelper.getTimestampUSFormat(expDate));
         }
-        scriptUpdateData.setDatePublished(DateHelper.fromLongStringToTimeStamp(ssu.getDatePublished()));
+        scriptUpdateData.setDatePublished(new java.sql.Timestamp(Long.parseLong(ssu.getDatePublished())));
         scriptUpdateData.setScriptDate(newDate);
-
-//        if (!DataUtil.isNull(ssu.getBusinessFunction()))
-//        {
-//            Vector bfList = getESPBusinessFunctionByAlias(ssu.getBusinessFunction().getFunctionName());
-//            if (bfList != null && !bfList.isEmpty())
-//            {
-//                ESPBusinessFunction bf = (ESPBusinessFunction) bfList.get(0);
-//                scriptUpdateData.setBusinessFunction(bf);
-//            }
-//        }
+        /**
+         * **********SET TRANSACTION AND DELETEION DETAILS********************
+         */
+        if (!DataUtil.isNull(ssu.getBusinessFunction()) && !isParameterScript(ssu))
+        {
+            ESPBusinessFunction bf = getESPBusinessFunctionByAlias(ssu.getBusinessFunction().getFunctionName(), app);            
+            scriptUpdateData.setBusinessFunction(bf); 
+            scriptUpdateData.setScriptDescription(ssu.getBusinessFunction().getFunctionName());
+        }
+        else
+        {
+            ESPBusinessFunction bf = getESPBusinessFunctionByAlias("Parameter Script", app);            
+            scriptUpdateData.setBusinessFunction(bf);
+            scriptUpdateData.setScriptDescription(ssu.getBusinessFunction().getFunctionName());
+        }
 
         if (!DataUtil.isNull(ssu.getScriptOrder()))
         {
-            scriptUpdateData.setScriptOrder(ssu.getScriptOrder().intValue());
+            scriptUpdateData.setScriptOrder(ssu.getScriptOrder().longValue());
         }
 
         //For parameter based Scripts.
-        changeParameterValues(scriptUpdateData, ssu);
+        try
+        {
+            changeParameterValues(scriptUpdateData, ssu);
+        }
+        catch (ScriptValidationException svex)
+        {
+            throw svex;
+        }
 
         //This should simply be SCRIPT STATUS i.e setScriptStatus.
         if (!DataUtil.isNull(ssu.getScriptUpdateStatus()))
         {
             scriptUpdateData.setScriptLifecycleStatus(ssu.getScriptUpdateStatus().value());
         }
+
         if (hasScriptDeliveryStatus(ssu))
         {
             scriptUpdateData.setScriptDeliveryStatus(ssu.getScriptDeliveryStatus().getDeliveryStatus());
@@ -364,129 +635,256 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
         {
             boolean docontinue;
             List<NVPType> paramData = ssu.getScriptDataItem();
-            Vector bfList = getESPBusinessFunctionByAlias(ssu.getBusinessFunction().getFunctionName());
-            docontinue = !bfList.isEmpty();
+            Result<List<ESPBusinessParameter>> result = getResultOfAllDefinedParametersInRequest(paramData);
+            docontinue = result.isSuccessFul();
             if (docontinue)
             {
                 //This is what we have configured.
-                ESPBusinessFunction bf = (ESPBusinessFunction) bfList.get(0);
-                Vector paramDefinition = bf.getESPBusinessParameters();
+                //ESPBusinessFunction bf = (ESPBusinessFunction) bfList.get(0);
+                //Parameter Script
+                List<ESPBusinessParameter> paramDefinition = result.getData();//getESPBusinessParameters();
                 docontinue = !paramDefinition.isEmpty();
-                //TO DO : Refactor this to pass in isDeleted(ssu) results to updateEMVParamvalues and remove the if test.
                 if (docontinue)
                 {
-                    ESPScriptStatusParameter storeParams = scriptUpdateData.getScriptStatusParameters();
-                    if (isDeleted(ssu))
-                    {
-                        //IF delete then remove params if the params already exist, stored from STAGED script status.
-                        //(so check staged and params exist)
-                        Iterator<NVPType> it = paramData.iterator();
-                        
-                        updateEMVParamvalues(scriptUpdateData, storeParams, it, paramDefinition, 1);
-                        bf.setESPBusinessParameters(paramDefinition);
-                    }
-                    //And if STAGED, SENT or DELIVERED Then store that parameters.
+                    Vector storeParams = scriptUpdateData.getScriptStatusParameters();
                     Iterator<NVPType> it = paramData.iterator();
-                    updateEMVParamvalues(scriptUpdateData, storeParams, it, paramDefinition, 2);
+                    updateEMVParamvalues(scriptUpdateData, storeParams, it, paramDefinition, isDeleted(ssu));
                 }
+                else
+                {
+                    logger.info("Unable to find EMV parameter: " + paramData.toString());
+                }
+            }
+            else
+            {
+                isScriptValidationSuccessful = false;
+                throw new ScriptValidationException(getErrorMessage(MsgConstant.UNKNOWN_SCRIPT_DATA_ITEM),
+                                                    getErrorMessage(MsgConstant.UNKNOWN_SCRIPT_DATA_ITEM)
+                        + extractParamterAliasesFromMessage(paramData) + "'", getErrorCode(MsgConstant.UNKNOWN_SCRIPT_DATA_ITEM));
             }
         }
     }
 
+    /**
+     *
+     * @param mc
+     * @return
+     */
+    public static String getErrorMessage(MsgConstant mc)
+    {
+        return ErrorMessageBundle.getMessage(mc);
+    }
+
+    public static String getErrorCode(MsgConstant mc)
+    {
+        return ErrorMessageBundle.getMessageCode(mc);
+    }
     /**
      * Updates EMV parameters.
      * <p/>
      * @param paramListFromRequest
      * @param storedParamsIt
-     * @param updateType     Delete (1) or Update (2)
+     * @param updateType           Delete (1) or Update (2)
      */
     private void updateEMVParamvalues(ESPScriptUpdateStatus scriptUpdateData,
-                                      ESPScriptStatusParameter storedparams,
+                                      Vector storedparams,
                                       Iterator<NVPType> paramListFromRequest,
-                                      Vector configuredParamList, int updateType)
+                                      List<ESPBusinessParameter> configuredParamList, boolean isDeleted)
     {
         while (paramListFromRequest.hasNext())
         {
             NVPType requestParamItem = paramListFromRequest.next();
-            Iterator definedParams = configuredParamList.iterator();
-            
+            Iterator<ESPBusinessParameter> definedParams = configuredParamList.iterator();
+            boolean isParamFound = false;
             while (definedParams.hasNext())
             {
-                ESPBusinessParameter definedInstance = (ESPBusinessParameter) definedParams.next();
-                NVPType definedNVP = createNewType(definedInstance.getName(), definedInstance.getValueDefault());
+                ESPBusinessParameter definedInstance = definedParams.next();
+                NVPType definedNVP = createNewType(definedInstance.getAlias(), definedInstance.getValueDefault());
                 boolean isParamInRequestDefined = definedNVP.getName().equals(requestParamItem.getName());
                 //if defined params is in the request.
                 if (isParamInRequestDefined)
                 {
-                    if (storedparams == null)
+                    isParamFound = true;
+                    if (storedparams == null || storedparams.isEmpty()
+                            || !isRequestedParamStored(requestParamItem, storedparams))
                     {
+                        //logger.info("Param in message " + requestParamItem.getName() + " "
+                               // + "is not already stored. So continuing with storing it.");
                         ESPScriptStatusParameter pInstance = getBusinessParameterStatusInstance(true);
                         pInstance.setEspBusinessParameters(definedInstance);
                         pInstance.setParameterValue(requestParamItem.getValue());
                         pInstance.setScriptUpdateStatus(scriptUpdateData);
                         pInstance.setDateCreated(DateHelper.today());
-                        pInstance.setDateModified(DateHelper.today());
-                        scriptUpdateData.setScriptStatusParameters(pInstance);
+                        scriptUpdateData.addScriptStatusParameter(pInstance);
                     }
                     else
                     {
-                        //Iterator storedIt = storedparams.iterator();
-                        //while (storedIt.hasNext())
-                        //{
-                            ESPScriptStatusParameter storedInstance = storedparams;//(ESPScriptStatusParameter) storedIt.next();            //Convert it to NVPType so that we can compare easily.
-                            NVPType storedNVP = createNewType(storedInstance.getEspBusinessParameters().getName(),
+                        Iterator storedIt = storedparams.iterator();
+                        while (storedIt.hasNext())
+                        {
+                            ESPScriptStatusParameter storedInstance = (ESPScriptStatusParameter) storedIt.next();
+                            //Convert it to NVPType so that we can compare easily.
+                            NVPType storedNVP = createNewType(storedInstance.getEspBusinessParameters().getAlias(),
                                                               storedInstance.getParameterValue());
-                            boolean storedParamIsDefined = storedNVP.equals(definedNVP);
-                            boolean isStoredSameAsInRequest = storedNVP.equals(requestParamItem);
-                            //if both request and store params are defined
+                            boolean storedParamIsDefined = storedNVP.getName().equals(definedNVP.getName());
+                            //if both request and stored params are defined
                             if (storedParamIsDefined)
                             {
-                                if (isStoredSameAsInRequest)
+                                if (isDeleted)
                                 {
-                                    //If deleted then remove
-                                    if (updateType == 1)
-                                    {
-                                        //storedparams.remove(storedInstance);
-                                        //Ideally to default
-                                        ESPScriptStatusParameter statsuParam = scriptUpdateData.getScriptStatusParameters();
-                                        ESPBusinessParameter defaultParam = statsuParam.getEspBusinessParameters();
-                                        statsuParam.setParameterValue(defaultParam.getValueDefault());
-                                        //scriptUpdateData.setScriptStatusParameters(storedparams.getEspBusinessParameters());
-                                    }
-                                    else
-                                    {
-                                        //Else change the param value
-                                        storedInstance.setParameterValue(requestParamItem.getValue());                                        
-                                    }                                    
+                                    logger.info("Setting param value to default.");
+                                    storedInstance.setParameterValue(null);
                                 }
                                 else
                                 {
-                                    //this means the request param is defined but not stored for updates.
-                                    //for this tracking ref and card
-                                    ESPScriptStatusParameter pInstance = getBusinessParameterStatusInstance(true);
-                                    pInstance.setEspBusinessParameters(definedInstance);
-                                    pInstance.setParameterValue(requestParamItem.getValue());
-                                    scriptUpdateData.setScriptStatusParameters(pInstance);
-                                    //storedparams.add(pInstance);
+                                    //Else change the param value
+                                    //logger.info("Param in message " + requestParamItem.getName() + " "
+                                     //       + "is already stored. So continuing with "
+                                     //       + "updating it with new value.");
+                                    storedInstance.setParameterValue(requestParamItem.getValue());
                                 }
                             }
-                        //}
+                        }
                     }
-                    
                 }
             }
+            if (!isParamFound)
+            {
+                //logger.info("Param in message " + requestParamItem.getName() + " is not defined. So ignoring");
+            }
         }
-        
     }
-    
-//    private boolean 
+
+    /**
+     *
+     * @param ssu
+     */
+    private Result<List<ESPBusinessParameter>> getResultOfAllDefinedParametersInRequest(List<NVPType> paramList)
+    {
+        List<String> paramnamesList = extractParameterAliasListFromMessage(paramList);
+        List<NVPType> localParamList = new ArrayList<NVPType>(paramList);
+        Vector params = getESPBusinessParameters(paramnamesList);
+        boolean isSuccess = params != null && params.size() == paramList.size();
+        List<ESPBusinessParameter> bpList = new ArrayList<ESPBusinessParameter>();
+        if (isSuccess)
+        {
+            Iterator it = params.iterator();
+            while (it.hasNext())
+            {
+                ESPBusinessParameter bp = (ESPBusinessParameter) it.next();
+                bp = (ESPBusinessParameter) persistent.getRegisteredExistingObject(bp);
+                bpList.add(bp);
+            }
+        }  
+        else
+        {
+            if(params != null)
+            {
+                Iterator it = params.iterator();            
+                while (it.hasNext())
+                {
+                    ESPBusinessParameter bp = (ESPBusinessParameter) it.next();
+                    bp = (ESPBusinessParameter) persistent.getRegisteredExistingObject(bp);
+                    Iterator<NVPType> pIt = localParamList.iterator();
+                    while(pIt.hasNext())
+                    {
+                        NVPType nvp = pIt.next();
+                        if(!bp.getName().equals(nvp.getName()))
+                        {
+                            bpList.add(bp);
+                            pIt.remove();
+                        }
+                    } 
+                }
+            }
+            else
+            {
+                Iterator<NVPType> pIt = paramList.iterator();
+                while(pIt.hasNext())
+                {
+                    NVPType nvp = pIt.next();
+                    ESPBusinessParameter bp = new ESPBusinessParameter();
+                    bp.setName(nvp.getName());
+                    bp.setAlias(nvp.getName());
+                    bpList.add(bp);                   
+                } 
+            }
+        }
+        Result<List<ESPBusinessParameter>> res = Result.<List<ESPBusinessParameter>>getInstance(isSuccess, bpList);
+        return res;
+    }
+
+    /**
+     *
+     * @param ssu
+     * <
+     * p/>
+     * @return
+     */
+    private List<String> extractParameterAliasListFromMessage(List<NVPType> paramList)
+    {
+        if (paramList.isEmpty())
+        {
+            return null;
+        }
+        List<String> paramnamesList = new ArrayList<String>();
+        Iterator<NVPType> it = paramList.iterator();
+        while (it.hasNext())
+        {
+            NVPType nvpType = it.next();
+            paramnamesList.add(nvpType.getName());
+        }
+        return paramnamesList;
+    }
+
+    private String extractParamterAliasesFromMessage(List<NVPType> paramList)
+    {
+        StringBuilder sb = new StringBuilder();
+        if (paramList.isEmpty())
+        {
+            return sb.toString();
+        }
+        Iterator<NVPType> it = paramList.iterator();
+        while (it.hasNext())
+        {
+            NVPType nvpType = it.next();
+            sb.append(nvpType.getName());
+        }
+        return sb.toString();
+    }
+
+    /**
+     *
+     * @param requestedParam
+     * @param storedList     < p/>
+     * <p/>
+     * @return
+     */
+    private boolean isRequestedParamStored(NVPType requestedParam, Vector storedList)
+    {
+        Iterator it = storedList.iterator();
+        boolean rParamExists = false;
+        while (it.hasNext())
+        {
+            ESPScriptStatusParameter storedInstance = (ESPScriptStatusParameter) it.next();
+            if (requestedParam.getName().equals(storedInstance.getEspBusinessParameters().getAlias()))
+            {
+                rParamExists = true;
+                break;
+            }
+            else
+            {
+                rParamExists = false;
+            }
+        }
+        return rParamExists;
+    }
 
     /**
      *
      * @param name
-     * @param value
-     * <
-     * p/>
+     * @param value < p/>
+     * <p/>
      * @return
      */
     private NVPType createNewType(String name, String value)
@@ -499,9 +897,8 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
 
     /**
      *
-     * @param createNew
-     * <
-     * p/>
+     * @param createNew < p/>
+     * <p/>
      * @return
      */
     private ESPScriptStatusParameter getBusinessParameterStatusInstance(boolean createNew)
@@ -509,10 +906,10 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
         ESPScriptStatusParameter parameterInstance = null;
         if (createNew)
         {
-            parameterInstance = peristent.getRegisteredObject(ESPScriptStatusParameter.class);
+            parameterInstance = persistent.getRegisteredObject(ESPScriptStatusParameter.class);
         }
         return parameterInstance;
-        
+
     }
 
     /**
@@ -528,25 +925,26 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
         //Date For Staged scripts
         if (isStaged(ssu))
         {
-            dateTime = DateHelper.getTimestampDefaultFormat(DateHelper.fromStringTolong(ssu.getDatePublished()));
+            dateTime = new java.sql.Timestamp(Long.parseLong(ssu.getDatePublished()));//DateHelper.getTimestampUSFormat(DateHelper.fromStringTolong(ssu.getDatePublished()));
         }
         //For Deleted scripts
         if (isDeleted(ssu))
         {
-            dateTime = DateHelper.getTimestampDefaultFormat(DateHelper.fromStringTolong(
-                    ssu.getDeletionDetails().getDeletedDate()));
+            dateTime = new java.sql.Timestamp(Long.parseLong(ssu.getDeletionDetails().getDeletedDate())); //DateHelper.getTimestampUSFormat(DateHelper.fromStringTolong(
+                                                                                        //ssu.getDeletionDetails().getDeletedDate()));
         }
         //For Delivered Scripts
         if (isDelivered(ssu))
         {
-            dateTime = DateHelper.getTimestampDefaultFormat(DateHelper.fromStringTolong(
-                    ssu.getTransactionDetails().getTransactionDate()));
+            dateTime = new java.sql.Timestamp(Long.parseLong(ssu.getTransactionDetails().getTransactionDate()));
+                    //DateHelper.getTimestampUSFormat(DateHelper.fromStringTolong(
+                    //ssu.getTransactionDetails().getTransactionDate()));
         }
         //If no status yet
         if (dateTime == null)
         {
             Date d = new Date();
-            dateTime = DateHelper.getTimestampUSFormat(d);
+            dateTime = new java.sql.Timestamp(new Date().getTime());//DateHelper.getTimestampUSFormat(d);
         }
         return dateTime;
     }
@@ -563,6 +961,17 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
     private ESPScriptUpdateStatus getExistingStatusUpdateData(String trackingRef)
     {
         Vector existingUpdateDataList = getESPScriptUpdateStatusByTrackingReference(trackingRef);
+        if (existingUpdateDataList.isEmpty())
+        {
+            return null;
+        }
+        ESPScriptUpdateStatus existingUpdateData = (ESPScriptUpdateStatus) existingUpdateDataList.get(0);
+        return existingUpdateData;
+    }
+
+    private ESPScriptUpdateStatus getExistingStatusUpdateData(String trackingRef, String scope)
+    {
+        Vector existingUpdateDataList = getESPScriptUpdateStatusByTrackingReference(trackingRef, scope);
         if (existingUpdateDataList.isEmpty())
         {
             return null;
@@ -594,7 +1003,7 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
      * <p/>
      * @return true as described above.
      */
-    private boolean doUpdateScriptStatus(int currentScriptOrder, int arrivedScriptOrder)
+    private boolean doUpdateScriptStatus(long currentScriptOrder, long arrivedScriptOrder)
     {
         return (currentScriptOrder < arrivedScriptOrder);
     }
@@ -609,14 +1018,12 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
      * <p/>
      * @return true or false as above.
      */
-    private boolean isCurrLifecycleStateEarlierOrRestagedScript(String curStatus, ScriptStatusUpdateType newStatus,
-                                                                ScriptDeliveryStatus sds)
+    private boolean isCurrLifecycleStateEarlierOrRestagedScript(String curStatus, ScriptStatusUpdate ssu)
     {
         int currStatusOrder = statusOrderMap.get(curStatus);
-        int newStatusOrder = statusOrderMap.get(newStatus.name());
-        boolean isCurrStateEarlier = currStatusOrder <= newStatusOrder;
-        return isCurrStateEarlier
-                || sds.getDeliveryStatus().equals(SEMScriptDeliveryStatus.DELIVERY_FAILED_SCRIPT_RESTAGED.toString());
+        int newStatusOrder = statusOrderMap.get(ssu.getScriptUpdateStatus().name());
+        boolean isCurrStateEarlier = currStatusOrder < newStatusOrder;
+        return isCurrStateEarlier || isScriptRestaged(ssu);
     }
 
     /**
@@ -625,9 +1032,11 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
      * <p/>
      * @return
      */
-    private boolean isDeliveryScript(ScriptStatusUpdate ssu)
+    private boolean isScriptRestaged(ScriptStatusUpdate ssu)
     {
-        return isDelivered(ssu);
+        return hasScriptDeliveryStatus(ssu)
+                && ssu.getScriptDeliveryStatus().
+                getDeliveryStatus().equals(SEMScriptDeliveryStatus.DELIVERY_FAILED_SCRIPT_RESTAGED.toString());
     }
 
     /**
@@ -637,18 +1046,6 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
      * @return
      */
     private boolean isStaged(ScriptStatusUpdate ssu)
-    {
-        return ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.STAGED;
-    }
-
-    /**
-     * REVIEW
-     * <p/>
-     * @param ssu < p/>
-     * <p/>
-     * @return
-     */
-    private boolean isPreStaged(ScriptStatusUpdate ssu)
     {
         return ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.STAGED;
     }
@@ -684,11 +1081,193 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
     private boolean hasScriptDeliveryStatus(ScriptStatusUpdate ssu)
     {
         boolean isDeliveryScript = ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELIVERED
-                || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.SENT
-                || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELETED;
-        return isDeliveryScript && ssu.getScriptDeliveryStatus() != null;
+                || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.SENT;
+        //|| ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELETED;
+        return isDeliveryScript && !DataUtil.isNull(ssu.getScriptDeliveryStatus());
     }
 
+    /**
+     *
+     * @param ssu
+     */
+    private void validateTransactionDetails(ScriptStatusUpdate ssu)
+    {
+        if (ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.SENT
+                || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELIVERED)
+        {
+            if (DataUtil.isNull(ssu.getTransactionDetails()))
+            {
+                isScriptValidationSuccessful = false;
+                throw new ScriptValidationException(getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
+                    getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
+                    getErrorCode(MsgConstant.DATA_ITEM_MISSING));
+            }
+            else
+            {
+                if (!DataUtil.isDate(ssu.getTransactionDetails().getTransactionDate()))
+                {
+                    isScriptValidationSuccessful = false;
+                    throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
+                        getErrorMessage(MsgConstant.INVALID_DATA),
+                        getErrorCode(MsgConstant.INVALID_DATA));
+                }
+                if (DataUtil.isEmpty(ssu.getTransactionDetails().getAtc()))
+                {
+                    isScriptValidationSuccessful = false;
+                    throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
+                        getErrorMessage(MsgConstant.INVALID_DATA),
+                        getErrorCode(MsgConstant.INVALID_DATA));
+                }
+                if (DataUtil.isNull(ssu.getTransactionDetails().getScriptBytes()))
+                {
+                    isScriptValidationSuccessful = false;
+                    throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
+                        getErrorMessage(MsgConstant.INVALID_DATA),
+                        getErrorCode(MsgConstant.INVALID_DATA));
+                }
+            }
+        }
+        else
+        {
+            if (!DataUtil.isNull(ssu.getTransactionDetails()))
+            {
+                isScriptValidationSuccessful = false;
+                throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
+                        getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
+                        getErrorCode(MsgConstant.INVALID_DATA_ITEM_SUPPLIED));
+            }
+        }
+        hasTransactionDetails = true;
+    }
+
+    /**
+     *
+     * @param ssu
+     */
+    private void validateDeviceDetails(ScriptStatusUpdate ssu)
+    {
+        if (ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.SENT
+                || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELIVERED)
+        {
+            if (DataUtil.isNull(ssu.getDeviceDetails()))
+            {
+                isScriptValidationSuccessful = false;
+                throw new ScriptValidationException(getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
+                    getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
+                    getErrorCode(MsgConstant.DATA_ITEM_MISSING));
+            }
+            else
+            {
+                if (DataUtil.isEmpty(ssu.getDeviceDetails().getDeviceCapabilities()))
+                {
+                    isScriptValidationSuccessful = false;
+                    throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
+                        getErrorMessage(MsgConstant.INVALID_DATA),
+                        getErrorCode(MsgConstant.INVALID_DATA));
+                }
+                if (DataUtil.isNull(ssu.getDeviceDetails().getDeviceType()))
+                {
+                    isScriptValidationSuccessful = false;
+                    throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
+                        getErrorMessage(MsgConstant.INVALID_DATA),
+                        getErrorCode(MsgConstant.INVALID_DATA));
+                }
+            }
+        }
+        hasDeviceDetails = true;
+    }
+
+    private void validateDeliveryStatus(ScriptStatusUpdate ssu)
+    {
+        if (ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.SENT
+                || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELIVERED)
+        {
+            if (DataUtil.isNull(ssu.getScriptDeliveryStatus()))
+            {
+                isScriptValidationSuccessful = false;
+                throw new ScriptValidationException(getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
+                    getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
+                    getErrorCode(MsgConstant.DATA_ITEM_MISSING));
+            }
+            else
+            {
+                if (DataUtil.isEmpty(ssu.getScriptDeliveryStatus().getDeliveryStatus()))
+                {
+                    isScriptValidationSuccessful = false;
+                    throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
+                        getErrorMessage(MsgConstant.INVALID_DATA),
+                        getErrorCode(MsgConstant.INVALID_DATA));
+                }
+                String delStatus = ssu.getScriptDeliveryStatus().getDeliveryStatus();
+                if(!SEMScriptDeliveryStatus.DELIVERY_FAILED.isIn(delStatus) ||
+                        !SEMScriptDeliveryStatus.DELIVERY_FAILED_SCRIPT_RESTAGED.isIn(delStatus) ||
+                        !SEMScriptDeliveryStatus.DELIVERY_SUCCEEDED.isIn(delStatus)
+                        )
+                {
+                    isScriptValidationSuccessful = false;
+                    throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
+                        getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SCRIPT_DELIVERY_STATUS_SUPPLIED),
+                        getErrorCode(MsgConstant.INVALID_DATA_ITEM_SUPPLIED));
+                }
+            }
+        }
+        else
+        {
+            if (!DataUtil.isNull(ssu.getScriptDeliveryStatus()))
+            {
+                isScriptValidationSuccessful = false;
+                throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
+                        getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
+                        getErrorCode(MsgConstant.INVALID_DATA_ITEM_SUPPLIED));
+            }
+        }
+        hasDeliveryStatus = true;
+    }
+
+    private void validateDeletionDetails(ScriptStatusUpdate ssu)
+    {
+        if (ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELETED)
+        {
+            if (DataUtil.isNull(ssu.getDeletionDetails()))
+            {
+                isScriptValidationSuccessful = false;
+                throw new ScriptValidationException(getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
+                    getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
+                    getErrorCode(MsgConstant.DATA_ITEM_MISSING));
+            }
+            else
+            {
+                if (!DataUtil.isDate(ssu.getDeletionDetails().getDeletedDate()))
+                {
+                    isScriptValidationSuccessful = false;
+                    throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
+                        getErrorMessage(MsgConstant.INVALID_DATA),
+                        getErrorCode(MsgConstant.INVALID_DATA));
+                }
+            }
+        }
+        else
+        {
+            if (!DataUtil.isNull(ssu.getDeletionDetails()))
+            {
+                isScriptValidationSuccessful = false;
+                throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
+                        getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
+                        getErrorCode(MsgConstant.INVALID_DATA_ITEM_SUPPLIED));
+            }
+        }
+        hasDeletionDetails = true;
+    }
+
+    private boolean isValidScriptUpdateStatus(ScriptStatusUpdate ssu)
+    {
+        ScriptStatusUpdateType ssut = ssu.getScriptUpdateStatus();
+        boolean isValidStatus = SEMScriptStatus.DELETED.isIn(ssut.toString()) ||
+        SEMScriptStatus.DELIVERED.isIn(ssut.toString())||
+        SEMScriptStatus.SENT.isIn(ssut.toString()) ||
+        SEMScriptStatus.STAGED.isIn(ssut.toString());
+        return isValidStatus;
+    }
     /**
      * Helper method to extract ESPParameter.
      * <p/>
@@ -696,9 +1275,19 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
      * <p/>
      * @return Collection of matching ESPParameter objects.
      */
-    public static Vector getESPScriptUpdateStatusByTrackingReference(String trackingRef)
+    public Vector getESPScriptUpdateStatusByTrackingReference(String trackingRef)
     {
-        return peristent.getObjectByName(trackingRef, ESPScriptUpdateStatus.class, "trackingReference");
+        return persistent.getObjectByName(trackingRef, ESPScriptUpdateStatus.class, "trackingReference");
+    }
+
+    public Vector getESPScriptUpdateStatusByTrackingReference(String trackingRef, String scope)
+    {
+        ExpressionBuilder builder = new ExpressionBuilder();
+        Expression expTR = builder.get("trackingReference").equal(trackingRef);
+        Expression expScope = builder.get("scope").get("name").equal(scope);
+        Expression expAll = expTR.and(expScope);
+        String [] partialAttributes = null;
+        return persistent.executeReadQuery(expAll, ESPScriptUpdateStatus.class, null, partialAttributes);
     }
 
     /**
@@ -707,30 +1296,103 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
      * <p/>
      * @return
      */
-    public static ESPScriptUpdateStatus getESPScriptUpdateStatusBySoftCardOID(SoftCard softCard)
+    public ESPScriptUpdateStatus getESPScriptUpdateStatusBySoftCardOID(SoftCard softCard)
     {
-        return peristent.getObjectByReferencingObject(softCard, ESPScriptUpdateStatus.class, "softCard");
+        return persistent.getObjectByReferencingObject(softCard, ESPScriptUpdateStatus.class, "softCard");
     }
 
     /**
      *
-     * @param ssu
-     * <
-     * p/>
+     * @param ssu < p/>
+     * <p/>
      * @return
      */
-    public static ESPScriptUpdateStatus getESPScriptUpdateStatusBySoftCardOID(ScriptStatusUpdate ssu)
+    public ESPScriptUpdateStatus getESPScriptUpdateStatusByCardData(ScriptStatusUpdate ssu)
     {
+        //Get max script order
+        ReportQuery rq = new ReportQuery();
+        rq.setReferenceClass(ESPScriptUpdateStatus.class);
+        rq.addMaximum("scriptOrder");
+
         ExpressionBuilder builder = new ExpressionBuilder();
-        Expression expPAN = builder.get("pan").equal(ssu.getCard().getPAN());        
-        Expression expPSN = builder.get("psn").equal(ssu.getCard().getPANSequence());        
-        long expDate = DateHelper.fromStringTolong(ssu.getCard().getExpirationDate());
-        Expression expEXPD = builder.get("expiryDate").equal(DateHelper.getTimestampUSFormat(expDate));        
-        Expression expAll = expPAN.and(expPSN).and(expEXPD);
-        Vector v = peristent.executeReadQuery(expAll, ESPScriptUpdateStatus.class, null, (String[]) null);
+        Expression expPAN = builder.get("espApplicationDetail").get("pan").equal(ssu.getCard().getPAN());
+        Expression expPSN = builder.get("espApplicationDetail").get("panSequenceNumber").equal(ssu.getCard().getPANSequence());
+        Expression expTR = builder.get("trackingReference").equal(ssu.getTrackingReference());
+        long expDate = generateExpiryDate(ssu);
+        Expression expEXPD = builder.get("espApplicationDetail").get("expiryDate").equal(DateHelper.getTimestampUSFormat(expDate));
+        Expression expScope = builder.get("espApplicationDetail").get("scope").get("name").equal(scope);
+        Expression expScopeSU = builder.get("scope").get("name").equal(scope);
+
+        Expression expAll = expPAN.and(expPSN).and(expEXPD).and(expTR).and(expScope).and(expScopeSU);
+        rq.setSelectionCriteria(expAll);
+        rq.addGrouping(builder.get("espApplicationDetail").get("pan"));
+        rq.addGrouping(builder.get("espApplicationDetail").get("panSequenceNumber"));
+        rq.addGrouping(builder.get("espApplicationDetail").get("expiryDate"));
+        rq.addGrouping(builder.get("trackingReference"));
+
+        Vector v = (Vector) persistent.executeReportQuery(rq);
+        //Get ESPScriptUpdateStatus with max sxript order.
         if (v != null && !v.isEmpty())
         {
-            return (ESPScriptUpdateStatus) v.get(0);
+            ReportQueryResult result = (ReportQueryResult) v.get(0);
+            if (result.isEmpty())
+            {
+                return null;
+            }
+            builder = new ExpressionBuilder();
+            expAll = expAll.and(builder.get("scriptOrder").equal(result.get("scriptOrder")));
+            String [] partialAttributes = null;
+            Vector essu = persistent.executeReadQuery(expAll, ESPScriptUpdateStatus.class, null, partialAttributes);
+            if (essu.isEmpty())
+            {
+                return null;
+            }
+            return (ESPScriptUpdateStatus) essu.get(0);
+        }
+        return null;
+    }
+
+    public ESPScriptUpdateStatus getESPScriptUpdateStatusByCardDataAndNoTR(ScriptStatusUpdate ssu)
+    {
+        //Get max script order
+        ReportQuery rq = new ReportQuery();
+        rq.setReferenceClass(ESPScriptUpdateStatus.class);
+        rq.addMaximum("scriptOrder");
+
+        ExpressionBuilder builder = new ExpressionBuilder();
+        Expression expPAN = builder.get("espApplicationDetail").get("pan").equal(ssu.getCard().getPAN());
+        Expression expPSN = builder.get("espApplicationDetail").get("panSequenceNumber").equal(ssu.getCard().getPANSequence());
+        //Expression expTR = builder.get("trackingReference").equal(ssu.getTrackingReference());
+        long expDate = generateExpiryDate(ssu);
+        Expression expEXPD = builder.get("espApplicationDetail").get("expiryDate").equal(DateHelper.getTimestampUSFormat(expDate));
+        Expression expScope = builder.get("espApplicationDetail").get("scope").get("name").equal(scope);
+        Expression expScopeSU = builder.get("scope").get("name").equal(scope);
+
+        Expression expAll = expPAN.and(expPSN).and(expEXPD).and(expScope).and(expScopeSU);
+        rq.setSelectionCriteria(expAll);
+        rq.addGrouping(builder.get("espApplicationDetail").get("pan"));
+        rq.addGrouping(builder.get("espApplicationDetail").get("panSequenceNumber"));
+        rq.addGrouping(builder.get("espApplicationDetail").get("expiryDate"));
+        //rq.addGrouping(builder.get("trackingReference"));
+
+        Vector v = (Vector) persistent.executeReportQuery(rq);
+        //Get ESPScriptUpdateStatus with max sxript order.
+        if (v != null && !v.isEmpty())
+        {
+            ReportQueryResult result = (ReportQueryResult) v.get(0);
+            if (result.isEmpty())
+            {
+                return null;
+            }
+            builder = new ExpressionBuilder();
+            expAll = expAll.and(builder.get("scriptOrder").equal(result.get("scriptOrder")));
+            String [] partialAttributes = null;
+            Vector essu = persistent.executeReadQuery(expAll, ESPScriptUpdateStatus.class, null, partialAttributes);
+            if (essu.isEmpty())
+            {
+                return null;
+            }
+            return (ESPScriptUpdateStatus) essu.get(0);
         }
         return null;
     }
@@ -741,9 +1403,48 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
      * <p/>
      * @return
      */
-    public static Vector getESPBusinessParameterByBusinessFunction(ESPBusinessFunction bf)
+    public Vector getESPBusinessParameterByBusinessFunction(ESPBusinessFunction bf)
     {
-        return peristent.getAllObjectsByReferencingObject(bf, ESPBusinessParameter.class, "businessFunction");
+        return persistent.getAllObjectsByReferencingObject(bf, ESPBusinessParameter.class, "businessFunction");
+    }
+
+    public Vector getESPBusinessParameters()
+    {
+        Application app = this.app;
+        ExpressionBuilder builder = new ExpressionBuilder();
+        Expression expApp = builder.get("application").equal(app);
+        String [] partialAttributes = null;
+        Expression appAll = expApp;
+        Vector v = persistent.executeReadQuery(appAll, ESPBusinessParameter.class, null,
+                                                                                  partialAttributes);
+        if (v.isEmpty())
+        {
+            return null;
+        }
+        return v;
+    }
+
+    /**
+     *
+     * @param paramAliasList List of parameters to search for.
+     * <p/>
+     * @return
+     */
+    public Vector getESPBusinessParameters(List<String> paramAliasList)
+    {
+        Application app = this.app;
+        app = (Application) persistent.getRegisteredExistingObject(app);
+        ExpressionBuilder builder = new ExpressionBuilder();
+        Expression expApp = builder.get("application").equal(app);
+        Expression expParamAlias = builder.get("alias").in(paramAliasList);
+        Expression appAll = expApp.and(expParamAlias);
+        String [] partialAttributes = null;
+        Vector v = persistent.executeReadQuery(appAll, ESPBusinessParameter.class, null,  partialAttributes);
+        if (v.isEmpty())
+        {
+            return null;
+        }
+        return v;
     }
 
     /**
@@ -752,20 +1453,45 @@ public class ScriptUpdateProcessor implements ScriptProcessable<ScriptStatusUpda
      * <p/>
      * @return
      */
-    public static Vector getESPBusinessFunctionByAlias(String bfName)
+    public ESPBusinessFunction getESPBusinessFunctionByAlias(String bfName, Application app)
     {
-        return peristent.getObjectByName(bfName, ESPBusinessFunction.class, "alias");
+        //by alias that matches the Application.
+        ExpressionBuilder builder = new ExpressionBuilder();
+        Expression expBFName = builder.get("alias").equal(bfName);
+        Expression expApplication = builder.get("application").equal(app);
+        Expression expAll = expBFName.and(expApplication);
+        String [] partialAttributes = null;
+        Vector bfs = persistent.executeReadQuery(expAll, ESPBusinessFunction.class, null, partialAttributes);
+        if (bfs.isEmpty())
+        {
+            return null;
+        }
+        ESPBusinessFunction businessFunction = (ESPBusinessFunction) bfs.get(0);
+        return businessFunction;
+
+    }
+
+    /**
+     *
+     * @param pan
+     * @param psn
+     * @param expDate < p/>
+     * <p/>
+     * @return
+     */
+    public ESPCardSetup getCardSetupData(String pan, String psn, long expDate)
+    {
+        ExpressionBuilder builder = new ExpressionBuilder();
+        Expression expPAN = builder.get("pan").equal(pan);
+        Expression expPSN = builder.get("psn").equal(psn);
+        Expression expEXPD = builder.get("expiryDate").equal(expDate);
+        Expression expAll = expPAN.and(expPSN).and(expEXPD);
+        String [] partialAttributes = null;
+        Vector v = persistent.executeReadQuery(expAll, ESPCardSetup.class, null, partialAttributes);
+        if (v != null && !v.isEmpty())
+        {
+            return (ESPCardSetup) v.get(0);
+        }
+        return null;
     }
 }
-/**
- *
- * else { while (fromRequest.hasNext()) { NVPType requestParamItem = fromRequest.next(); Iterator storedParamsIt =
- * paramDefinition.iterator(); while (storedParamsIt.hasNext()) { //ESPScriptStatusParameter ESPBusinessParameter emvP =
- * (ESPBusinessParameter) storedParamsIt.next(); boolean nameIsSame =
- * emvP.getName().equalsIgnoreCase(requestParamItem.getName()); boolean valueIsSame =
- * emvP.getValueDefault().equalsIgnoreCase(requestParamItem.getValue()); String value = requestParamItem.getValue(); if
- * (updateType == 2) { if (nameIsSame) { emvP.setValueDefault(value); break; } } else if (updateType == 1) { if
- * (nameIsSame && valueIsSame) { //Set this to null or default value. Presently it is set to null.
- * emvP.setValueDefault(null); break; } } } } }
- * <p/>
- */

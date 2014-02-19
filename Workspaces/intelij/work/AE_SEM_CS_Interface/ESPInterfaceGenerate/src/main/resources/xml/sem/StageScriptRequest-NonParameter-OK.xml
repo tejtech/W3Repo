@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StageScriptRequest>
+    <TrackingReference>CTH00112M1006492896</TrackingReference>
+    <Card PAN="0129002312" PANSequence="01" expirationYear="2017" expirationMonth="03"/>
+    <BusinessFunction FunctionName="BlockCard"/>	
+	<action startDate="1389789723234" endDate="1399789723234" restageAutomatically="5"/>
+</StageScriptRequest>

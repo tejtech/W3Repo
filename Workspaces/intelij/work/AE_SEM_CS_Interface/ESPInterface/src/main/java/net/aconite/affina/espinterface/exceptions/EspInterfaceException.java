@@ -10,7 +10,7 @@ package net.aconite.affina.espinterface.exceptions;
 public class EspInterfaceException extends Exception
 {
     private static final long serialVersionUID = 4233390499647614871L;
-
+    private String errorCode="0";
 
     public EspInterfaceException()
     {
@@ -21,10 +21,22 @@ public class EspInterfaceException extends Exception
     {
         super(message);
     }
+    
+    public EspInterfaceException(String message,String errorCode)
+    {
+        super(message);
+        this.errorCode=errorCode;
+    }
 
     public EspInterfaceException(String message, Throwable cause)
     {
         super(message, cause);
+    }
+    
+    public EspInterfaceException(String message, Throwable cause,String errorCode)
+    {
+        super(message, cause);
+        this.errorCode=errorCode;
     }
 
     public EspInterfaceException(Throwable cause)

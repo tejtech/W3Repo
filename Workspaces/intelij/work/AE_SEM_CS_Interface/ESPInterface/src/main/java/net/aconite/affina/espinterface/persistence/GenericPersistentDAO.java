@@ -7,12 +7,15 @@ package net.aconite.affina.espinterface.persistence;
 import com.platform7.standardinfrastructure.database.*;
 import java.util.*;
 import net.aconite.affina.espinterface.constants.*;
+import net.aconite.affina.espinterface.exceptions.PersistentException;
 import net.aconite.affina.espinterface.factory.*;
+import org.eclipse.persistence.exceptions.OptimisticLockException;
 import org.eclipse.persistence.expressions.Expression;
 import org.eclipse.persistence.expressions.ExpressionBuilder;
 import org.eclipse.persistence.queries.ReadAllQuery;
 import org.eclipse.persistence.queries.ReportQuery;
 import org.eclipse.persistence.sessions.UnitOfWork;
+import org.slf4j.*;
 
 /**
  * NOTE: This class is Spring framework dependent in obtaining data sources.
@@ -21,8 +24,8 @@ import org.eclipse.persistence.sessions.UnitOfWork;
  * <p/>
  * The second constructor allows the caller to specify its own db related details.
  * <p/>
- * <p/>
- * This is a generic Data Access Object class for convenience that encapsulates lot of the work that would otherwise
+ * <
+ * p/> This is a generic Data Access Object class for convenience that encapsulates lot of the work that would otherwise
  * have to be repeated.
  * <p/>
  * Also this class provides a method (doTransactionAndCommit()) to do work in single transaction while managing its
@@ -35,8 +38,8 @@ import org.eclipse.persistence.sessions.UnitOfWork;
  */
 public class GenericPersistentDAO implements Persistent
 {
-
-    private Workable workable;    
+    private static final Logger logger = LoggerFactory.getLogger(GenericPersistentDAO.class);
+    private Workable workable;
     /**
      *
      */
@@ -49,28 +52,28 @@ public class GenericPersistentDAO implements Persistent
      *
      */
     private UnitOfWork transUOW;
-    
     private final static Map<String, String> dbConnectionTypeMap = new HashMap<String, String>();
-    
+
     static
     {
         dbConnectionTypeMap.put("JNDI", "sessionManager_pma");
         dbConnectionTypeMap.put("NONE_JNDI", "local_sessionManager_pma");
     }
+
     /**
      * Default connection to PMA that uses JNDI based connection.
      */
     protected GenericPersistentDAO()
-    {      
-        this(dbConnectionTypeMap.get("sessionManager_pma"));              
+    {
+        this(dbConnectionTypeMap.get("sessionManager_pma"));
     }
-    
+
     /**
-     * 
+     *
      */
     protected GenericPersistentDAO(DBConnectionType dnConType)
-    {      
-        this(dbConnectionTypeMap.get(dnConType.name()));              
+    {
+        this(dbConnectionTypeMap.get(dnConType.name()));
     }
 
     /**
@@ -80,18 +83,19 @@ public class GenericPersistentDAO implements Persistent
      * @param dbContext Application context obtained via spring.
      */
     protected GenericPersistentDAO(String dbManagerBeanName)
-    {        
+    {
         sm = PersistentContextFactory.getSessionManager(dbManagerBeanName);
-    }    
+    }
+
     /**
-     * 
-     * @return 
+     *
+     * @return
      */
     public static Persistent getPersistent()
     {
-        String conType = System.getProperty("DBConnectionType", "JNDI");        
+        String conType = System.getProperty("DBConnectionType", "JNDI");
         return new GenericPersistentDAO(DBConnectionType.valueOf(conType));
-    }    
+    }
 
     /**
      * Implement this method if a set of operations is required to be executed a within a transaction via the
@@ -103,47 +107,80 @@ public class GenericPersistentDAO implements Persistent
     {
         doWork(arg);
     }
-    
+
     /**
      * Will perform the transactional work as defined by the implementation class.
      */
     private <T> void doWork(T arg)
-    {        
+    {
         workable.doWork(arg);
     }
+
     /**
-     * 
-     * @param workable 
+     *
+     * @param workable
      */
     @Override
     public void addTransactionalWorker(Workable workable)
     {
         this.workable = workable;
-    }    
+    }
 
     /**
-     * Performs Transactional work.
+     * Performs Transactional work. This method throws PersistentException which is a RuntimeException.
      */
     @Override
     public synchronized <T> void doTransactionalWorkAndCommit(T arg)
     {
-        try
+        boolean transactionComplete = false;
+
+        while(!transactionComplete)
         {
-            transUOW = getUnitOfWork();
-            inTrans = true;
-            sm.getSession().beginTransaction();
-            doTransactionalWork(arg);            
-            sm.getSession().commitTransaction();
-            transUOW.commit();
+            try
+            {
+                transactionComplete = true;
+                transUOW = getUnitOfWork();
+                inTrans = true;
+                doTransactionalWork(arg);
+                transUOW.commit();
+            }
+            catch (PersistentException ex)
+            {
+                logger.error("Error trying to commit work." + ex.getStackTrace().toString(), ex);
+                rollBack();
+                throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
+            }
+            catch (OptimisticLockException ex)
+            {
+                logger.warn("Optimistic lock exception, will retry",  ex);
+                transactionComplete = false;
+                rollBack();
+            }
+            // let other runtime exceptions propagate
+            finally
+            {
+                try
+                {
+                    inTrans = false;
+                    sm.release();
+                }
+                catch (PersistentException ex)
+                {
+                    throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
+                }
+                catch (RuntimeException ex)
+                {
+                    throw ex;
+                }
+            }
         }
-        catch (Exception ex)
+    }
+
+    private synchronized void rollBack()
+    {
+        if (sm != null && sm.getUnitOfWork() != null && transUOW != null)
         {
-            ex.printStackTrace();
-            sm.release();
-        }
-        finally
-        {
-            inTrans = false;
+            transUOW.release();
         }
     }
 
@@ -167,7 +204,8 @@ public class GenericPersistentDAO implements Persistent
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
+            logger.error("Error trying to delete data.", ex);
+            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
         }
     }
 
@@ -179,28 +217,45 @@ public class GenericPersistentDAO implements Persistent
     @Override
     public synchronized void deleteAll(Collection obj)
     {
-        UnitOfWork uow = getUnitOfWork();
-        uow.registerAllObjects(obj);
-        uow.deleteAllObjects(obj);
-        if (!inTrans)
+        try
         {
-            uow.commit();
+            UnitOfWork uow = getUnitOfWork();
+            uow.registerAllObjects(obj);
+            uow.deleteAllObjects(obj);
+            if (!inTrans)
+            {
+                uow.commit();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.error("Error trying to delete data.", ex);
+            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
         }
     }
 
     /**
-     *
+     * This method throws PersistentException which is a RuntimeException.
+     * <p/>
      * @param <T>
      * @param obj
      */
     @Override
     public synchronized <T> void save(T obj)
     {
-        UnitOfWork uow = getUnitOfWork();
-        uow.registerObject(obj);
-        if (!inTrans)
+        try
         {
-            uow.commit();
+            UnitOfWork uow = getUnitOfWork();
+            uow.registerObject(obj);
+            if (!inTrans)
+            {
+                uow.commit();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.error("Error trying to save data.", ex);
+            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
         }
     }
 
@@ -208,13 +263,13 @@ public class GenericPersistentDAO implements Persistent
      *
      * @return
      */
-    private UnitOfWork getUnitOfWork()
+    private synchronized UnitOfWork getUnitOfWork()
     {
         if (inTrans)
         {
             return transUOW;
         }
-        return sm.getSession().acquireUnitOfWork();
+        return sm.getUnitOfWork();
     }
 
     /**
@@ -227,7 +282,7 @@ public class GenericPersistentDAO implements Persistent
      * @return Returns the object after registering with the persistence cache.
      */
     @Override
-    public <R> R getRegisteredObject(Class<R> cls)
+    public synchronized <R> R getRegisteredObject(Class<R> cls)
     {
         Object v = null;
         try
@@ -237,40 +292,47 @@ public class GenericPersistentDAO implements Persistent
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
+            logger.error("Error trying to register object with the ORM cache.", ex);
+            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
         }
         return cls.cast(v);
     }
+
     /**
-     * 
+     *
      * @param <R>
-     * @param cls
-     * @return 
+     * @param cls < p/>
+     * <p/>
+     * @return
      */
     @Override
-    public <R> Vector getRegisteredAllObjects(Collection<R> cls)
+    public synchronized <R> Vector getRegisteredAllObjects(Collection<R> cls)
     {
         return getUnitOfWork().registerAllObjects(cls);
     }
+
     /**
-     * 
-     * @param cls
-     * @return 
+     *
+     * @param cls < p/>
+     * <p/>
+     * @return
      */
     @Override
-    public Object getRegisteredExistingObject(Object cls)
+    public synchronized Object getRegisteredExistingObject(Object cls)
     {
         Object v = null;
         try
-        {            
+        {
             v = getUnitOfWork().registerExistingObject(cls);
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
+            logger.error("Error trying to register object with the ORM cache.", ex);
+            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
         }
         return v;
     }
+
     /**
      * Retrieves a DB object that matches the given ID.
      * <p/>
@@ -283,7 +345,7 @@ public class GenericPersistentDAO implements Persistent
      * @return The object that matches th ID.
      */
     @Override
-    public <T> T getObjectById(long id, Class<T> cls, String idField)
+    public synchronized <T> T getObjectById(long id, Class<T> cls, String idField)
     {
         Object retValue = null;
         try
@@ -294,16 +356,20 @@ public class GenericPersistentDAO implements Persistent
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
+            logger.error("Error trying trying to query data.", ex);
+            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
         }
         return cls.cast(retValue);
     }
+
     /**
      * Returns an object by a foreign key object.
-     * @param <T> Generic type parameter.
-     * @param obj Foreign key object value.
-     * @param cls Class of the object to be fetched.
+     * <p/>
+     * @param <T>      Generic type parameter.
+     * @param obj      Foreign key object value.
+     * @param cls      Class of the object to be fetched.
      * @param objField The foreign key as defined in the object to be fetched.
+     * <p/>
      * @return The object defined by the cls parameter..
      */
     @Override
@@ -318,20 +384,24 @@ public class GenericPersistentDAO implements Persistent
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
+            logger.error("Error trying to query data.", ex);
+            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
         }
         return cls.cast(retValue);
     }
-     /**
+
+    /**
      * Returns an object by a foreign key object.
-     * @param <T> Generic type parameter.
-     * @param obj Foreign key object value.
-     * @param cls Class of the object to be fetched.
+     * <p/>
+     * @param <T>      Generic type parameter.
+     * @param obj      Foreign key object value.
+     * @param cls      Class of the object to be fetched.
      * @param objField The foreign key as defined in the object to be fetched.
+     * <p/>
      * @return The object defined by the cls parameter..
      */
     @Override
-    public <T> Vector getAllObjectsByReferencingObject(Object obj, Class<T> cls, String objField)
+    public synchronized <T> Vector getAllObjectsByReferencingObject(Object obj, Class<T> cls, String objField)
     {
         Vector retValue = null;
         try
@@ -342,10 +412,12 @@ public class GenericPersistentDAO implements Persistent
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
+            logger.error("Error trying to query data.", ex);
+            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
         }
         return retValue;
-    } 
+    }
+
     /**
      * Fetches an object from DB by its name.
      * <p/>
@@ -357,7 +429,7 @@ public class GenericPersistentDAO implements Persistent
      * @return
      */
     @Override
-    public <T> Vector getObjectByName(String value, Class<T> cls, String nameField)
+    public synchronized <T> Vector getObjectByName(String value, Class<T> cls, String nameField)
     {
         Vector retValue = new Vector();
         try
@@ -368,7 +440,8 @@ public class GenericPersistentDAO implements Persistent
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
+            logger.error("Error trying to query data.", ex);
+            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
         }
         finally
         {
@@ -376,15 +449,29 @@ public class GenericPersistentDAO implements Persistent
         return retValue;
     }
 
+    public com.platform7.standardinfrastructure.multiissuer.Scope getScope(String name)
+    {
+        try
+        {
+            UnitOfWork uow = getUnitOfWork();
+            return com.platform7.standardinfrastructure.multiissuer.Scope.locate(uow, name);
+        }
+        catch(Exception ex)
+        {
+            logger.error("Error trying to fetch scope.", ex);
+            throw new PersistentException("Error trying to fetch scope." + ex.toString(), ex);
+        }
+    }
+
     /**
      * Executes update, delete queries.
      * <p/>
-     * @param sql
+     * @param sql < p/>
      * <p/>
      * @return
      */
     @Override
-    public boolean executeUpdateQuery(String sql)
+    public synchronized boolean executeUpdateQuery(String sql)
     {
         try
         {
@@ -405,12 +492,12 @@ public class GenericPersistentDAO implements Persistent
     /**
      * Executes a results bearing select query.
      * <p/>
-     * @param sql
+     * @param sql < p/>
      * <p/>
      * @return
      */
     @Override
-    public Vector executeSelectQuery(String sql)
+    public synchronized Vector executeSelectQuery(String sql)
     {
         Vector res = new Vector();
         try
@@ -431,88 +518,119 @@ public class GenericPersistentDAO implements Persistent
      * @param table
      */
     @Override
-    public void emptyTable(String table)
+    public synchronized void emptyTable(String table)
     {
-        String sql = "delete from " + table;
-        executeUpdateQuery(sql);
+        try
+        {
+            String sql = "delete from " + table;
+            executeUpdateQuery(sql);
+        }
+        catch (Exception ex)
+        {
+            logger.error("Error trying to query data.", ex);
+            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
+        }
     }
 
     /**
      * Reads the whole table represented by the parameter cls
      * <p/>
-     * @param cls
+     * @param cls < p/>
      * <p/>
      * @return
      */
     @Override
     public Vector readTable(Class cls)
     {
-        UnitOfWork uow = getUnitOfWork();
-        return uow.readAllObjects(cls);
+        try
+        {
+            UnitOfWork uow = getUnitOfWork();
+            return uow.readAllObjects(cls);
+        }
+        catch (Exception ex)
+        {
+            logger.error("Error trying to query data.", ex);
+            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
+        }
     }
+
     /**
-     * 
+     *
      * @param selectionCriteria
      * @param cls
      * @param ordering
-     * @param partialAttributes
-     * @return 
+     * @param partialAttributes < p/>
+     * <p/>
+     * @return
      */
     @Override
-    public Vector executeReadQuery(Expression selectionCriteria, Class cls, Expression ordering, String... partialAttributes)
+    public synchronized Vector executeReadQuery(Expression selectionCriteria, Class cls, Expression ordering,
+                                   String... partialAttributes)
     {
-        ReadAllQuery q = new ReadAllQuery();
-        q.setReferenceClass(cls);
-        q.setSelectionCriteria(selectionCriteria);
-        if(partialAttributes != null)
+        try
         {
-            for(String attr : partialAttributes)
+            ReadAllQuery q = new ReadAllQuery();
+            q.setReferenceClass(cls);
+            q.setSelectionCriteria(selectionCriteria);
+            q.conformResultsInUnitOfWork();
+            q.bindAllParameters();
+            if (partialAttributes != null)
             {
-                q.addPartialAttribute(attr);
+                for (String attr : partialAttributes)
+                {
+                    q.addPartialAttribute(attr);
+                }
             }
+            if (ordering != null)
+            {
+                q.addOrdering(ordering);
+            }
+            return (Vector) getUnitOfWork().executeQuery(q);
         }
-        if(ordering != null)
+        catch (Exception ex)
         {
-            q.addOrdering(ordering);
+            logger.error("Error trying to query data.", ex);
+            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
         }
-        return (Vector) getUnitOfWork().executeQuery(q);
     }
+
     /**
-     * 
-     * @param query
-     * @return 
+     *
+     * @param query < p/>
+     * <p/>
+     * @return
      */
     @Override
-    public Vector executeQuery(ReadAllQuery query)
-    {        
-        return (Vector) getUnitOfWork().executeQuery(query);
+    public synchronized Vector executeQuery(ReadAllQuery query)
+    {
+        try
+        {
+            return (Vector) getUnitOfWork().executeQuery(query);
+        }
+        catch (Exception ex)
+        {
+            logger.error("Error trying to query data.", ex);
+            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
+        }
     }
+
     /**
-     * 
-     * @param query
-     * @return 
+     *
+     * @param query < p/>
+     * <p/>
+     * @return
      */
     @Override
-    public Object executeReportQuery(ReportQuery query)
-    {        
-        return (Vector) getUnitOfWork().executeQuery(query);
+    public synchronized Object executeReportQuery(ReportQuery query)
+    {
+        try
+        {
+            return (Vector) getUnitOfWork().executeQuery(query);
+        }
+        catch (Exception ex)
+        {
+            logger.error("Error trying to query data.", ex);
+            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
+        }
     }
-    
-//        ExpressionBuilder builder = new ExpressionBuilder();
-//        ReadAllQuery icquery = new ReadAllQuery();
-//        Expression typeTest1 = null;
-//        typeTest1 = builder.get("consignmentdata").get("processing_start_time").between(start, stop);
-//
-//        icquery.setSelectionCriteria(typeTest1);
-//        icquery.addPartialAttribute("completed");
-//        icquery.addPartialAttribute("primaryKey");
-//        icquery.addPartialAttribute("sourceFilename");
-//        icquery.addPartialAttribute("terminalError");
-//        icquery.addPartialAttribute("consignmentdata");
-//        icquery.addPartialAttribute("providedRequestsCount");
-//        icquery.addPartialAttribute("context");
-//        icquery.addPartialAttribute("workflowContext");
-//        icquery.addOrdering(builder.get("consignmentdata").get("processing_start_time").ascending());
-//
-//        icquery.dontMaintainCache();
 }
