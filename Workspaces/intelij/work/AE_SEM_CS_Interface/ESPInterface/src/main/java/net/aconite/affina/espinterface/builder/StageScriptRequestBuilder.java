@@ -16,6 +16,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import net.acointe.affina.esp.AffinaEspUtilException;
+import net.acointe.affina.esp.AffinaEspUtils;
 
 /**
  * @author wakkir.muzammil
@@ -39,32 +42,43 @@ public class StageScriptRequestBuilder implements IMessageBuilder
 
         for (int i = 0; i < 1; i++)
         {
-            StageScriptRequest request = new StageScriptRequest();
-            request.setTrackingReference(outTrackId);
+            try 
+            {
+                StageScriptRequest request = new StageScriptRequest();
+                request.setTrackingReference(outTrackId);
 
-            CardType cardType = new CardType();
-            cardType.setExpirationDate("1385855999999");
-            cardType.setPAN("0129002312");
-            cardType.setPANSequence("01");
-            request.setCard(cardType);
+                CardType cardType = new CardType();
+                //Accoding to the SEM specification, the expiration date value must be hex of the java milliseconds
+                //cardType.setExpirationDate(Long.toHexString(1475190000000l).toUpperCase());
+                
+                cardType.setExpirationYear(AffinaEspUtils.getYearInYYYY(date));
+                cardType.setExpirationMonth(AffinaEspUtils.getMonthInMM(date));
+                cardType.setPAN("0129002312");
+                cardType.setPANSequence("01");
+                request.setCard(cardType);
 
-            StageScriptRequest.BusinessFunction bs = new StageScriptRequest.BusinessFunction();
-            bs.setFunctionName("Function One");
-            request.setBusinessFunction(bs);
+                StageScriptRequest.BusinessFunction bs = new StageScriptRequest.BusinessFunction();
+                bs.setFunctionName("Function One");
+                request.setBusinessFunction(bs);
 
-            StageScriptRequest.Action ac = new StageScriptRequest.Action();
-            ac.setEndDate("20");
-            ac.setRestageAutomatically(BigInteger.ONE);
-            ac.setStartDate("0");
-            request.setAction(ac);
+                StageScriptRequest.Action ac = new StageScriptRequest.Action();
+                ac.setEndDate("20");
+                ac.setRestageAutomatically(BigInteger.ONE);
+                ac.setStartDate("0");
+                request.setAction(ac);
 
-            NVPType nvp1 = new NVPType();
-            nvp1.setName("MyName");
-            nvp1.setValue("MyValue");
+                NVPType nvp1 = new NVPType();
+                nvp1.setName("MyName");
+                nvp1.setValue("MyValue");
 
-            request.getScriptDataItem().add(nvp1);
+                request.getScriptDataItem().add(nvp1);
 
-            requests.add(request);
+                requests.add(request);
+            } 
+            catch (AffinaEspUtilException ex) 
+            {
+                throw new EspMessageBuilderException(ex);
+            }
         }
 
         logger.debug("Stage Script Request generated for AE Tracking Reference : "+outTrackId+"\n" +requests.toString());

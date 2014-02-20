@@ -1,0 +1,5 @@
+##parse("messageHeader.vm")
+Stage script request sent
+  Type : ${responseType}
+  Tracking Reference : ${trackingReference}
+  Status : ${status}

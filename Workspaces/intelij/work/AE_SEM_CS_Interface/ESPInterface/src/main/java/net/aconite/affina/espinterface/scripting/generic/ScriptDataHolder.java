@@ -12,6 +12,7 @@ public abstract class ScriptDataHolder<T>
 {
     /** The object mapped to the ScriptStatusUpdate xml schema. */
     private T ssUpdate;
+    private String scopeName;
     
     /**
      * Constructs a ScriptStatusUpdateDataHolder with a ScriptStatusUpdate message.
@@ -21,6 +22,12 @@ public abstract class ScriptDataHolder<T>
     {
         ssUpdate = ssupd;
     }
+    
+    public ScriptDataHolder(T ssupd, String scope)
+    {
+        ssUpdate = ssupd;
+        scopeName = scope;
+    }
     /**
      * Returns a ScriptStatusUpdate object.
      * @return ScriptStatusUpdate
@@ -29,4 +36,11 @@ public abstract class ScriptDataHolder<T>
     {
         return ssUpdate;
     }
+
+    public String getScopeName()
+    {
+        return scopeName;
+    }
+    
+    
 }

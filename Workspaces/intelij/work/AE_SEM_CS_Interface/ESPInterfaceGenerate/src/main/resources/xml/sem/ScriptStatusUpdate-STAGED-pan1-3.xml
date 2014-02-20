@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ScriptStatusUpdate source="Perm" target="Affina" datePublished="0" scriptUpdateStatus="STAGED" scriptSequenceNumber="15" autoRetryCount="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<TrackingReference>NIMCCSU1391517660000</TrackingReference>
+	<Card PAN="1100000000" PANSequence="03" expirationYear="2017" expirationMonth="02"/>
+	<BusinessFunction FunctionName="Change eId Status"/>
+	<ScriptOrder>500</ScriptOrder>
+	<ScriptDataItem name="eID Status" value="inactive"/>
+</ScriptStatusUpdate>
+
+
+<!-- C:\JDrive\modules\Affina\AE_SEM_CS_Interface\ESPInterfaceGenerate\src\main\resources\xml\sem -->

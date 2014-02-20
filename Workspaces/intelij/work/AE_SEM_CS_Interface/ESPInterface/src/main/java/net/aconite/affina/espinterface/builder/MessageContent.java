@@ -7,6 +7,7 @@ package net.aconite.affina.espinterface.builder;
 import net.aconite.affina.espinterface.xmlmapping.sem.StatusType;
 
 import java.io.Serializable;
+import net.aconite.affina.espinterface.xmlmapping.sem.ErrorType;
 
 /**
  * @author wakkir.muzammil
@@ -14,14 +15,19 @@ import java.io.Serializable;
 public class MessageContent implements Serializable
 {
     private static final long serialVersionUID = 7526472295622776147L;  // unique id
-
+    
+    private String scopeName;    
     private String type;
     private String trackingReference;
     private StatusType status;
+    private ErrorType error;
+    //private ErrorType validation;
+    private boolean isValid;
 
-    private String errorData;
-    private String errorDescription;
-    private String errorCode;
+    
+    //private String errorData;
+    //private String errorDescription;
+    //private String errorCode;
 
     public MessageContent(String type, String trackingReference)
     {
@@ -37,21 +43,52 @@ public class MessageContent implements Serializable
         this.status = status;
     }
 
-    public MessageContent(String type, String trackingReference, StatusType status, String errorData, String errorDescription, String errorCode)
+    public MessageContent(String type, String trackingReference, StatusType status,ErrorType error)//String errorData, String errorDescription, String errorCode)
     {
         this.type = type;
         this.trackingReference = trackingReference;
         this.status = status;
-        this.errorData = errorData;
-        this.errorDescription = errorDescription;
-        this.errorCode = errorCode;
+        this.error=error;
+        //this.errorData = errorData;
+        //this.errorDescription = errorDescription;
+        //this.errorCode = errorCode;
     }
 
 
     @Override
     public String toString()
     {
-        return "MessageContent{" + "type=" + type + ", trackingReference=" + trackingReference + ", status=" + status + ", errorData=" + errorData + ", errorDescription=" + errorDescription + ", errorCode=" + errorCode + '}';
+        StringBuffer sb=new StringBuffer();
+        sb.append("MessageContent{ ");
+        sb.append("ScopeName=" + scopeName);
+        sb.append(", ");
+        sb.append("Type=" + type );
+        sb.append(", ");
+        sb.append("TrackingReference=" + trackingReference);
+        sb.append(", ");
+        sb.append("Status=" + status);
+        if(getError()!=null)
+        {
+            sb.append(", ");
+            sb.append("ErrorData=" + getError().getData());
+            sb.append(", ");
+            sb.append("ErrorDescription=" + getError().getDescription());
+            sb.append(", ");
+            sb.append("ErrorCode=" + getError().getErrorCode());
+        }
+        sb.append("}");
+                
+        return sb.toString();
+    }
+    
+    public String getScopeName() 
+    {
+        return scopeName;
+    }
+
+    public void setScopeName(String scopeName) 
+    {
+        this.scopeName = scopeName;
     }
     
     public String getType()
@@ -84,35 +121,25 @@ public class MessageContent implements Serializable
         this.status = status;
     }
 
-    public String getErrorData()
+    public ErrorType getError() 
     {
-        return errorData;
+        return error;
     }
 
-    public void setErrorData(String errorData)
+    public void setError(ErrorType error) 
     {
-        this.errorData = errorData;
+        this.error = error;
     }
 
-    public String getErrorDescription()
+   
+    public boolean isValid() 
     {
-        return errorDescription;
+        return isValid;
     }
 
-    public void setErrorDescription(String errorDescription)
+    public void setIsValid(boolean isValid) 
     {
-        this.errorDescription = errorDescription;
+        this.isValid = isValid;
     }
-
-    public String getErrorCode()
-    {
-        return errorCode;
-    }
-
-    public void setErrorCode(String errorCode)
-    {
-        this.errorCode = errorCode;
-    }
-
 
 }

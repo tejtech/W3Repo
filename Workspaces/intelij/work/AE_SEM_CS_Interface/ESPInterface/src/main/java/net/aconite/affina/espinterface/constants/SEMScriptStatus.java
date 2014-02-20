@@ -11,4 +11,9 @@ package net.aconite.affina.espinterface.constants;
 public enum SEMScriptStatus
 {
     DELIVERED, SENT, DELETED, STAGED, PRESTAGED;
+    
+    public boolean isIn(String status)
+    {
+        return this.toString().equals(status);
+    }
 }

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import net.aconite.affina.espinterface.xmlmapping.sem.ErrorType;
 
 /**
  * @author wakkir.muzammil
@@ -29,8 +30,18 @@ public class ScriptStatusResponseBuilder implements IMessageBuilder
         }
 
         ScriptStatusResponse response = new ScriptStatusResponse();
-        response.setTrackingReference(messageContent.getTrackingReference());
-        response.setStatus(StatusType.STATUS_OK);
+        response.setTrackingReference(messageContent.getTrackingReference());        
+        response.setStatus(messageContent.getStatus());
+        
+        if (StatusType.ERROR.value().equalsIgnoreCase(messageContent.getStatus().value()))        
+        {  
+            //ErrorType errorType=new ErrorType();
+            //errorType.setErrorCode(messageContent.getErrorCode());
+            //errorType.setData(messageContent.getErrorData());
+            //errorType.setDescription(messageContent.getErrorDescription());
+            response.setError(messageContent.getError());
+        }
+
 
         logger.debug("Script Status Response generated for AE Tracking Reference : "+messageContent.getTrackingReference()+"\n" +response.toString());
 

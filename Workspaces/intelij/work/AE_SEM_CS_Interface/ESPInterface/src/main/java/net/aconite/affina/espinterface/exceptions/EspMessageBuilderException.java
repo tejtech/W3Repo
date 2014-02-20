@@ -20,10 +20,20 @@ public class EspMessageBuilderException extends EspInterfaceException
     {
         super(message);
     }
+    
+    public EspMessageBuilderException(String message,String errCode)
+    {
+        super(message,errCode);        
+    }
 
     public EspMessageBuilderException(String message, Throwable cause)
     {
         super(message, cause);
+    }
+    
+    public EspMessageBuilderException(String message, Throwable cause,String errCode)
+    {
+        super(message, cause,errCode);
     }
 
     public EspMessageBuilderException(Throwable cause)

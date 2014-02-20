@@ -10,20 +10,24 @@ package net.aconite.affina.espinterface.helper;
  */
 public class DataUtil
 {
+
     /**
-     * 
+     *
      * @param value
-     * @return 
+     * <p/>
+     * @return
      */
     public static boolean isNull(Object value)
     {
         return value == null;
     }
+
     /**
      * Checks whether string is empty if it is not null.
      * <p/>
      * @param value
-     * <p/>
+     * <
+     * p/>
      * @return
      */
     public static boolean isEmpty(String value)
@@ -49,5 +53,37 @@ public class DataUtil
             return false;
         }
         return DateHelper.isDate(date);
-    }  
+    }
+
+    /**
+     * Should be double digit with a range of 0-99.
+     * <p/>
+     * @param value
+     * <p/>
+     * @return true or false
+     */
+    public static boolean isPSNValid(String value)
+    {
+        boolean valid = true;
+        if (value.trim().length() != 2)
+        {
+            valid = false;
+        }
+        if (valid)
+        {
+            try
+            {
+                int parsedValue = Integer.parseInt(value);
+                if (parsedValue < 0 || parsedValue > 99)
+                {
+                    valid = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                valid = false;
+            }
+        }
+        return valid;
+    }
 }

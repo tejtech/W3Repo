@@ -25,13 +25,69 @@
     <listener>
         <listener-class>net.aconite.affina.espinterface.context.EspWebContextListener</listener-class>
     </listener>
+
+    <servlet>
+        <servlet-name>ContainerExtensionServlet</servlet-name>
+        <display-name>ContainerExtensionServlet</display-name>
+        <servlet-class>com.platform7.standardinfrastructure.websphere.ContainerExtensionServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+	<!-- 
+	<servlet>
+		<servlet-name>DispatcherServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>2</load-on-startup>
+		<init-param>
+          <param-name>contextClass</param-name>
+          <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+        </init-param>
+		<init-param>
+          <param-name>contextConfigLocation</param-name>
+		  <param-value>/WEB-INF/mvc-dispatcher-servlet.xml</param-value>
+        </init-param>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>DispatcherServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+ -->
+	
+	
+
+	<servlet>
+        <servlet-name>DispatcherServlet</servlet-name>
+        <display-name>DispatcherServlet</display-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>2</load-on-startup>
+        <init-param>
+          <param-name>contextClass</param-name>
+          <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+        </init-param>
+        <init-param>
+          <param-name>contextConfigLocation</param-name>
+          <param-value>net.aconite.affina.espinterface.webservice.springconfig</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>DispatcherServlet</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+    <welcome-file-list>
+        <welcome-file>/</welcome-file>
+    </welcome-file-list>
+	
     <!--
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
     -->
 
-    <!--     <welcome-file-list>
-            <welcome-file>index.jsp</welcome-file>
-        </welcome-file-list> -->
+    <!--     
+	<welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+     </welcome-file-list> 
+	-->
 </web-app>

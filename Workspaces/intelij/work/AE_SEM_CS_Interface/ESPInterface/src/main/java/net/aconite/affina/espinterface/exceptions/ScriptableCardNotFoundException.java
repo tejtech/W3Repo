@@ -10,15 +10,27 @@ package net.aconite.affina.espinterface.exceptions;
  */
 public class ScriptableCardNotFoundException extends ScriptProcessingRuntimeException
 {
+
     static final long serialVersionUID = -3387516993124229942L;
+
     public ScriptableCardNotFoundException()
     {
         super();
     }
-    
+
     public ScriptableCardNotFoundException(String message)
     {
         super(message);
     }
-            
+
+    public ScriptableCardNotFoundException(String message, String errCode)
+    {
+        super(message, errCode);
+    }
+
+    public ScriptableCardNotFoundException(String message, String eReason , String errCode)
+    {
+        super(message, eReason, errCode);
+
+    }
 }

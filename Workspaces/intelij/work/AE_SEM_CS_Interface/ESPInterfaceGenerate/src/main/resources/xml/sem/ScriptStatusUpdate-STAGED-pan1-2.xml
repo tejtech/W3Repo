@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ScriptStatusUpdate source="MDE-0001" target="AFFINA" datePublished="1389789723234" scriptUpdateStatus="STAGED" scriptSequenceNumber="241" autoRetryCount="0">
+    <TrackingReference>1389789723234_staged-2</TrackingReference>
+    <Card PAN="5888490010000006" PANSequence="00" expirationYear="2015" expirationMonth="09"/>
+    <BusinessFunction FunctionName="Apply Risk Profile 1"/>
+    <ScriptOrder>1389789715002</ScriptOrder>
+    <ScriptDataItem name="LCOL" value="0x00"/>
+    <ScriptDataItem name="UCOL" value="0x04"/>
+    <ScriptDataItem name="UCOTA" value="0x000000000005"/>
+</ScriptStatusUpdate>
+
+
+<!-- C:\JDrive\modules\Affina\AE_SEM_CS_Interface\ESPInterfaceGenerate\src\main\resources\xml\sem -->

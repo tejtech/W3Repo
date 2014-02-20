@@ -11,4 +11,9 @@ package net.aconite.affina.espinterface.constants;
 public enum SEMScriptDeliveryStatus
 {
     DELIVERY_SUCCEEDED, DELIVERY_FAILED_SCRIPT_RESTAGED, DELIVERY_FAILED;
+    
+    public boolean isIn(String val)
+    {
+        return this.toString().equals(val);
+    }
 }

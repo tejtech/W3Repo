@@ -97,6 +97,7 @@ public class PCIEnforcer implements IPCIEnforcer
         {
             throw new EspMessageSecurityException("Invalid JMS Message received!");
         }
+        logger.debug("Message Received : "+outMessage.toString());
         return outMessage;
     }
 
@@ -138,25 +139,25 @@ public class PCIEnforcer implements IPCIEnforcer
 
     private Message<String> generateDecryptedMessage(MessageHeaders headers, String sourceData)
     {
-        logger.info("DecryptedMessage body : " + sourceData);
+        logger.debug("DecryptedMessage body : " + sourceData);
 
         return MessageBuilder.withPayload(sourceData)
                 .copyHeaders(headers)
-                .setHeader(JmsHeaders.TYPE, EspConstant.JMS_TEXT_MESSAGE)
-                .setHeader(EspConstant.MQ_MESSAGE_TYPE, EspConstant.SC_DECRYPTED_MESSAGE)
+                //.setHeader(JmsHeaders.TYPE, EspConstant.JMS_TEXT_MESSAGE)
+                //.setHeader(EspConstant.MQ_MESSAGE_TYPE, EspConstant.SC_DECRYPTED_MESSAGE)
                 .setCorrelationId(sourceData.hashCode())
                 .build();
     }
 
     private Message<byte[]> generateEncryptedMessage(MessageHeaders headers, byte[] sourceData)
     {
-        logger.info("EncryptedMessage body : " + Arrays.toString(sourceData));
+        logger.debug("EncryptedMessage body : " + Arrays.toString(sourceData));
 
         // Set the correlation id to original fileName.
         return MessageBuilder.withPayload(sourceData)
                 .copyHeaders(headers)
-                .setHeader(JmsHeaders.TYPE, EspConstant.JMS_BYTES_MESSAGE)
-                .setHeader(EspConstant.MQ_MESSAGE_TYPE, EspConstant.SC_ENCRYPTED_MESSAGE)
+                //.setHeader(JmsHeaders.TYPE, EspConstant.JMS_BYTES_MESSAGE)
+                //.setHeader(EspConstant.MQ_MESSAGE_TYPE, EspConstant.SC_ENCRYPTED_MESSAGE)
                 .setCorrelationId(Arrays.hashCode(sourceData))
                 .build();
     }

@@ -7,6 +7,7 @@ import org.springframework.integration.MessagingException;
 public interface IEspFeedbackHandler
 {
     public Message process(Message<MessagingException> message);
+    public void endProcess(Message<MessagingException> message);
 
 
 }

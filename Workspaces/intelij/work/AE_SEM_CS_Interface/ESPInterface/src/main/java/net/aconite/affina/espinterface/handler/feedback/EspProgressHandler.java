@@ -4,12 +4,9 @@
  */
 package net.aconite.affina.espinterface.handler.feedback;
 
-import net.aconite.affina.espinterface.builder.MessageContent;
 import net.aconite.affina.espinterface.constants.EspConstant;
-import net.aconite.affina.espinterface.utils.ESPUtils;
 import net.aconite.affina.espinterface.xmlmapping.sem.CardSetupResponse;
 import net.aconite.affina.espinterface.xmlmapping.sem.StageScriptResponse;
-import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.Message;
@@ -18,8 +15,12 @@ import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Hashtable;
+import net.aconite.affina.espinterface.xmlmapping.sem.CardSetupRequest;
+import net.aconite.affina.espinterface.xmlmapping.sem.ScriptStatusResponse;
+import net.aconite.affina.espinterface.xmlmapping.sem.StageScriptRequest;
+import org.springframework.integration.MessagingException;
+import org.springframework.integration.jms.JmsHeaders;
 
 /**
  * @author wakkir.muzammil
@@ -28,15 +29,28 @@ public class EspProgressHandler implements IEspFeedbackHandler
 {
     private static final Logger logger = LoggerFactory.getLogger(EspProgressHandler.class.getName());
 
-    private VelocityEngine velocityEngine;
-
-    public EspProgressHandler(VelocityEngine velocityEngine)
+    private EspFeedbackHeader espFeedbackHeader;
+   
+    public EspProgressHandler(EspFeedbackHeader espFeedbackHeader)
     {
-        this.velocityEngine = velocityEngine;
+        this.espFeedbackHeader = espFeedbackHeader;
     }
-
+    
     @ServiceActivator
-    public Message process(Message inMessage)
+    public Message process(Message<MessagingException> inMessage) 
+    {
+         Message outMessage = processProgressMessage(inMessage);
+         return outMessage;
+    }
+    
+    @ServiceActivator
+    public void endProcess(Message inMessage)
+    {        
+        Message outMessage = processProgressMessage(inMessage);
+    }   
+    
+    
+    private Message processProgressMessage(Message inMessage)
     {
         MessageHeaders inHeaders = inMessage.getHeaders();
         Object inPayload = inMessage.getPayload();
@@ -44,32 +58,49 @@ public class EspProgressHandler implements IEspFeedbackHandler
         logger.debug("process : Incoming Message header: ", inHeaders);
         logger.debug("process : Message payload: ", inPayload);
 
-        String msg = buildProgressPayload(inPayload);
+        EspPayload msgPayload = buildProgressPayload(inHeaders,inPayload);
 
-
-        Message outMessage = generateProgressMessage(inHeaders, msg);
+        logger.debug("Progress Message: ", msgPayload.toString());
+        
+        Message outMessage = generateProgressMessage(inHeaders, msgPayload);
 
         return outMessage;
     }
 
 
-    private Message<String> generateProgressMessage(MessageHeaders headers, String sourceData)
-    {
-        logger.info("Created Progress Message. Identfier: " + sourceData);
-
-        return MessageBuilder.withPayload(sourceData)
+    private Message<String> generateProgressMessage(MessageHeaders headers, EspPayload msgPayload)
+    {   
+        String message="";
+        boolean showValidationError=false;
+        boolean showProgressMessage=false;
+        if(msgPayload.isError())
+        {
+            message=msgPayload.getMessageInOneLineWithHeader();
+            showValidationError=espFeedbackHeader.isShowValidationError(String.valueOf(headers.get(JmsHeaders.TYPE)));
+            logger.error(msgPayload.getMessageBody());
+        }
+        else
+        {
+            message=msgPayload.getMessageWithHeader();
+            showProgressMessage=espFeedbackHeader.isShowProgressMessage(String.valueOf(headers.get(JmsHeaders.TYPE)));
+            logger.debug(msgPayload.getMessageBody());
+        }
+        
+        return MessageBuilder.withPayload(message)
                 .copyHeaders(headers)
-                .setHeader("jms_type", EspConstant.PROGRESS_MESSAGE)
+                .setHeader(JmsHeaders.TYPE, headers.get(JmsHeaders.TYPE))
+                .setHeader(EspConstant.MQ_ESP_ERROR, msgPayload.isError())
+                .setHeader(EspConstant.MQ_SHOW_VALIDATION_ERROR, showValidationError)
+                .setHeader(EspConstant.MQ_SHOW_PROGRESS_MESSAGE, showProgressMessage)
                 .build();
     }
 
-    private String buildProgressPayload(Object inPayload)
+    private EspPayload buildProgressPayload(MessageHeaders headers,Object inPayload)
     {
-        Map<String, Object> props = new HashMap<String, Object>();
-        props.put(EspConstant.VT_CURRENT_TIME, "");
-
+        Hashtable<String, Object> props = new Hashtable<String, Object>();
         StringBuilder sb = new StringBuilder();
-        sb.append(ESPUtils.getDefaultPayloadHeader());
+        
+        boolean isError=false;        
 
         if (inPayload instanceof StageScriptResponse)
         {
@@ -79,12 +110,17 @@ public class EspProgressHandler implements IEspFeedbackHandler
             props.put(EspConstant.VT_STATUS, res.getStatus());
             if (res.getError() != null)
             {
-                props.put(EspConstant.VT_ERROR_DATA, res.getError().getData());
+                props.put(EspConstant.VT_ERROR_DATA, res.getError().getData() != null ? res.getError().getData() : "");
                 props.put(EspConstant.VT_ERROR_DESCRIPTION, res.getError().getDescription());
                 props.put(EspConstant.VT_ERROR_CODE, res.getError().getErrorCode());
+                isError=true;                 
             }
-            sb.append(VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "/SemResponse.vm", "UTF-8", props));
-
+            else
+            {
+                isError=false;
+                logger.info("Received stage script response with tracking reference "+res.getTrackingReference());                
+            }
+            sb.append(VelocityEngineUtils.mergeTemplateIntoString(espFeedbackHeader.getVelocityEngine(), "/stageScriptResponse.vm", espFeedbackHeader.getEspMessageEncoding(), props));
         }
         else if (inPayload instanceof CardSetupResponse)
         {
@@ -94,21 +130,66 @@ public class EspProgressHandler implements IEspFeedbackHandler
             props.put(EspConstant.VT_STATUS, res.getStatus());
             if (res.getError() != null)
             {
-                props.put(EspConstant.VT_ERROR_DATA, res.getError().getData());
+                props.put(EspConstant.VT_ERROR_DATA, res.getError().getData() != null ? res.getError().getData() : "");
                 props.put(EspConstant.VT_ERROR_DESCRIPTION, res.getError().getDescription());
                 props.put(EspConstant.VT_ERROR_CODE, res.getError().getErrorCode());
+                isError=true;                
             }
-            sb.append(VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "/SemResponse.vm", "UTF-8", props));
-
+            else
+            {
+                isError=false;                
+                logger.info("Received card setup response with tracking reference "+res.getTrackingReference());                
+            }
+            sb.append(VelocityEngineUtils.mergeTemplateIntoString(espFeedbackHeader.getVelocityEngine(), "/cardSetupResponse.vm", espFeedbackHeader.getEspMessageEncoding(), props));
+            
+        } 
+        else if (inPayload instanceof ScriptStatusResponse)
+        {
+            ScriptStatusResponse res = (ScriptStatusResponse) inPayload;
+            props.put(EspConstant.VT_RESPONSE_TYPE, EspConstant.SCRIPT_STATUS_RESPONSE);
+            props.put(EspConstant.VT_TRACKING_REFERENCE, res.getTrackingReference());
+            props.put(EspConstant.VT_STATUS, res.getStatus());
+            if (res.getError() != null)
+            {
+                props.put(EspConstant.VT_ERROR_DATA, res.getError().getData() != null ? res.getError().getData() : "");
+                props.put(EspConstant.VT_ERROR_DESCRIPTION, res.getError().getDescription());
+                props.put(EspConstant.VT_ERROR_CODE, res.getError().getErrorCode());
+                isError=true;                
+            }
+            else
+            {
+                isError=false;                
+                logger.info("Sent script update status response with tracking reference "+res.getTrackingReference());
+            }
+            sb.append(VelocityEngineUtils.mergeTemplateIntoString(espFeedbackHeader.getVelocityEngine(), "/scriptStatusResponse.vm",espFeedbackHeader.getEspMessageEncoding(), props));
+        }
+        else if (inPayload instanceof CardSetupRequest)
+        {
+            CardSetupRequest req = (CardSetupRequest) inPayload;
+            props.put(EspConstant.VT_RESPONSE_TYPE, EspConstant.CARD_SETUP_REQUEST);
+            props.put(EspConstant.VT_TRACKING_REFERENCE, req.getTrackingReference());
+            props.put(EspConstant.VT_STATUS, "Cardsetup request sent to SEM");
+            logger.info("Sent card setup request with tracking reference "+req.getTrackingReference());
+            sb.append(VelocityEngineUtils.mergeTemplateIntoString(espFeedbackHeader.getVelocityEngine(), "/cardSetupRequest.vm", espFeedbackHeader.getEspMessageEncoding(), props));
+            
+        }
+        else if (inPayload instanceof StageScriptRequest)
+        {
+            StageScriptRequest req = (StageScriptRequest) inPayload;
+            props.put(EspConstant.VT_RESPONSE_TYPE, EspConstant.SCRIPT_STATUS_RESPONSE);
+            props.put(EspConstant.VT_TRACKING_REFERENCE, req.getTrackingReference());
+            props.put(EspConstant.VT_STATUS, "StageScript request sent to SEM");   
+            logger.info("Sent stage script request with tracking reference "+req.getTrackingReference());
+            sb.append(VelocityEngineUtils.mergeTemplateIntoString(espFeedbackHeader.getVelocityEngine(), "/stageScriptRequest.vm", espFeedbackHeader.getEspMessageEncoding(), props));
         }
         else
         {
             sb.append(inPayload.toString());
         }
-
-        logger.debug(sb.toString());
-
-        return sb.toString();
+         
+        EspPayload espPayload=new EspPayload(espFeedbackHeader.generateMessageHeader(),sb.toString(),isError);
+                 
+        return espPayload;
     }
-
+    
 }

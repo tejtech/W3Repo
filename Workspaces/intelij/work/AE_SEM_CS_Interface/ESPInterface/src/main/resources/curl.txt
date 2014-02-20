@@ -1,0 +1,27 @@
+http://localhost:20013/esp-interface-web/
+
+curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/api/person/random"
+
+curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/api/person/1"
+
+curl -X POST -H "Content-Type: application/json"  --data {\'name\':\'wakkir\',\'age\':29} "http://localhost:20013/esp-interface-web/api/person"
+
+------------------------------------------------
+
+curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/api/product"
+
+curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/api/product/random"
+
+curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/api/product/1"
+
+curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/api/product?id=3"
+
+curl -X POST -H "Content-Type: application/json" --data {\"id\":\"232\",\"name\":\"wakkir\"} "http://localhost:20013/esp-interface-web/api/product"
+
+curl -X PUT -H "Content-Type: application/json"  --data {\"id\":15,\"name\":\"wakkir\"} "http://localhost:20013/esp-interface-web/api/product/15"
+
+curl -X DELETE -H "Content-Type: application/json"  "http://localhost:20013/esp-interface-web/api/product/2"
+
+-------------------------------------------------
+
+http://www.webdevdoor.com/jquery/cross-domain-browser-json-ajax/

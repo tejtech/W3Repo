@@ -4,7 +4,7 @@
  */
 package net.aconite.affina.espinterface.model;
 
-import java.util.*;
+import com.platform7.pma.application.Application;
 
 /**
  *
@@ -12,8 +12,15 @@ import java.util.*;
  */
 public class ScriptableApplication
 {
-    private String applicationName;
-    private String version;
-    private String appType;
+    private Application application;
     
+    public ScriptableApplication(Application app)
+    {
+        application = app;
+    }
+
+    public Application getApplication()
+    {
+        return application;
+    }
 }

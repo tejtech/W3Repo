@@ -35,8 +35,10 @@ public class CardType
     protected String pan;
     @XmlAttribute(name = "PANSequence", required = true)
     protected String panSequence;
-    @XmlAttribute(name = "ExpirationDate", required = true)
-    protected String expirationDate;
+    @XmlAttribute(name = "expirationYear", required = true)
+    protected String expirationYear;
+    @XmlAttribute(name = "expirationMonth", required = true)
+    protected String expirationMonth;
 
     /**
      * Gets the value of the pan property.
@@ -83,25 +85,46 @@ public class CardType
     }
 
     /**
-     * Gets the value of the expirationDate property.
+     * Gets the value of the expirationYear property.
      *
      * @return possible object is
      *         {@link String }
      */
-    public String getExpirationDate()
+    public String getExpirationYear()
     {
-        return expirationDate;
+        return expirationYear;
     }
-
     /**
-     * Sets the value of the expirationDate property.
+     * Sets the value of the expirationYear property.
      *
      * @param value allowed object is
      *              {@link String }
      */
-    public void setExpirationDate(String value)
+    public void setExpirationYear(String value)
     {
-        this.expirationDate = value;
+        this.expirationYear = value;
+    }
+    
+     /**
+     * Gets the value of the expirationMonth property.
+     *
+     * @return possible object is
+     *         {@link String }
+     */
+    public String getExpirationMonth()
+    {
+        return expirationMonth;
+    }
+
+    /**
+     * Sets the value of the expirationMonth property.
+     *
+     * @param value allowed object is
+     *              {@link String }
+     */
+    public void setExpirationMonth(String value)
+    {
+        this.expirationMonth = value;
     }
 
 }

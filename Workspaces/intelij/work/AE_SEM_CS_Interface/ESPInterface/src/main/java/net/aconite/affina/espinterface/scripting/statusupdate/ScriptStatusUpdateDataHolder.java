@@ -21,6 +21,11 @@ public class ScriptStatusUpdateDataHolder extends ScriptDataHolder<ScriptStatusU
     {
         super(ssupd);
     }
+    
+    public ScriptStatusUpdateDataHolder(ScriptStatusUpdate ssupd, String scopeName)
+    {
+        super(ssupd, scopeName);
+    }
     /**
      * Returns a ScriptStatusUpdate object.
      * @return ScriptStatusUpdate
