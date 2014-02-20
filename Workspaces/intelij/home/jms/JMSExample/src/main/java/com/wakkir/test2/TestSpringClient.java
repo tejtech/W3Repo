@@ -1,12 +1,7 @@
 package com.wakkir.test2;
 
-import org.apache.activemq.broker.BrokerService;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.context.support.FileSystemXmlApplicationContext;
-import org.springframework.core.io.ClassPathResource;
 
 /**
  * Created with IntelliJ IDEA.
@@ -33,8 +28,8 @@ public class TestSpringClient
             ConfigurableApplicationContext context =  new ClassPathXmlApplicationContext("spring-context.xml");
             //SpringPublisher publisher = (SpringPublisher)context.getBean("stockPublisher");
             //publisher.start();
-            MyAppContext app=new MyAppContext();
-            app.printBean();
+            //MyAppContext app=new MyAppContext();
+            //app.printBean();
 
 
         }

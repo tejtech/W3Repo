@@ -137,12 +137,12 @@ public class DownloadFiles
         if(keepSameFolderStructure)
         {
             savingFilePath=(destinationImagePath+url.getPath()).replace(fileName,"");
-            //System.out.println("dest: " + savingFilePath + fileName);
+            System.out.println("dest: " + savingFilePath + fileName);
         }
         else
         {
             savingFilePath=destinationImagePath;
-            //System.out.println("dest: " + savingFilePath +File.separator+ fileName);
+            System.out.println("dest: " + savingFilePath +File.separator+ fileName);
         }
 
         //------------------------------------------------
@@ -188,10 +188,11 @@ public class DownloadFiles
     {
         DownloadFiles df=new DownloadFiles();
 
+
         boolean keepSameFolderStructure=false;
 
         //String destPath="\\\\fs01\\WakSpace\\Business\\08.eBay\\Pictures\\Shoes\\06.MS-Mark&Spencer\\Boots";
-        String destPath="\\\\fs01\\WakSpace\\Business\\08.eBay\\Pictures\\Shoes\\07.Debenhams\\Heels\\Stilleto";
+        String destPath="F:\\NAS-BACKUP\\WakSpace\\Business\\08.eBay\\Pictures\\Shoes\\07.DB-Debenhams\\temp";
 
         try
         {
@@ -213,12 +214,18 @@ public class DownloadFiles
             //map.put("T026404W-04","http://ecx.images-amazon.com/images/I/81wnBHvmk7L._SX1400_SY1820_.jpg");
             //map.put("T026404W-05","http://ecx.images-amazon.com/images/I/81wnBHvmk7L._SX1400_SY1820_.jpg");
 
-            //Debenhams
-            map.put("0530101115-00","http://debenhams.scene7.com/is/image/Debenhams/053010111560?wid=1250&hei=1250&qlt=95");
-            map.put("0530101115-01","http://debenhams.scene7.com/is/image/Debenhams/053010111560_1?wid=1250&hei=1250&qlt=95");
-            map.put("0530101115-02","http://debenhams.scene7.com/is/image/Debenhams/053010111560_2?wid=1250&hei=1250&qlt=95");
-            map.put("0530101115-03","http://debenhams.scene7.com/is/image/Debenhams/053010111560_3?wid=1250&hei=1250&qlt=95");
+//            map.put("T026404W-01","http://ecx.images-amazon.com/images/I/817FrdV08aL._SX1000_SY1300_.jpg");
+//            map.put("T026404W-02","http://ecx.images-amazon.com/images/I/81wnBHvmk7L._SX1000_SY1300_.jpg");
+//            map.put("T026404W-03","http://ecx.images-amazon.com/images/I/91-mG6UZjTL._SX1000_SY1300_.jpg");
+//            map.put("T026404W-04","http://ecx.images-amazon.com/images/I/81wnBHvmk7L._SX1000_SY1300_.jpg");
 
+            //Debenhams
+            String shoeId="61252_264996";
+            map.put(shoeId+"-00","http://debenhams.scene7.com/is/image/Debenhams/"+shoeId+"?wid=1250&hei=1250&qlt=95");
+            map.put(shoeId+"-01","http://debenhams.scene7.com/is/image/Debenhams/"+shoeId+"_1?wid=1250&hei=1250&qlt=95");
+            map.put(shoeId+"-02","http://debenhams.scene7.com/is/image/Debenhams/"+shoeId+"_2?wid=1250&hei=1250&qlt=95");
+            map.put(shoeId+"-03","http://debenhams.scene7.com/is/image/Debenhams/"+shoeId+"_3?wid=1250&hei=1250&qlt=95");
+            String productDetails=df.getProductDetails("http://www.debenhams.com/webapp/wcs/stores/servlet/prod_10701_10001_"+shoeId+"_-1","span[class=breadcrumb_current]","div[id=info1]","li");
 
             Set keys=map.keySet();
             Iterator<String> it=keys.iterator();
@@ -233,6 +240,8 @@ public class DownloadFiles
                 sb.append("\n");
             }
 
+            boolean doneIt=FileUtils.saveFile(productDetails,destPath,shoeId+".txt");
+
         }
         catch (IOException e)
         {
@@ -242,4 +251,31 @@ public class DownloadFiles
 
     //===================================================================================
     //===================================================================================
+
+    public String getProductDetails(String baseUrl,String nameElement,String detailElement,String childElement)   throws IOException
+    {
+        Document doc = Jsoup.connect(baseUrl).userAgent("Mozilla").get();
+        Elements name = doc.select(nameElement);    //element : a[href]
+        StringBuffer sb2=new StringBuffer();
+        sb2.delete(0,sb2.length());
+        sb2.append("\n");
+        sb2.append(name.text());
+        sb2.append("\n");
+
+        for (Element div : doc.select(detailElement))
+        {
+            for (Element ul : div.children())
+            {
+                if(ul.getElementsByTag(childElement).size()>0)
+                {
+                    //System.out.println(ul.getElementsByTag("li"));
+                    sb2.append(ul.getElementsByTag(childElement));
+                    sb2.append("\n");
+                }
+            }
+        }
+        //System.out.println(sb2.toString());
+        return  sb2.toString();
+
+    }
 }

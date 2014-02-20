@@ -168,14 +168,23 @@
 
     <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
     <!-- FROM Customer Service TO ESP -->
-    <!-- <int-jms:message-driven-channel-adapter
+	<!-- 
+		http://forum.spring.io/forum/spring-projects/integration/128489-enable-multithreading-in-jms-message-driven-channel-adapter #
+		http://forum.spring.io/forum/spring-projects/integration/115601-jms-message-driven-channel-adapter-selector-expression
+	-->
+    <!-- 
+	<int-jms:message-driven-channel-adapter
             id="jmsFromCustServToEsp"
             destination="fromCustServToEsp"
             channel="fromCustServToEspUnmarshallerChannel"
             connection-factory="affinaMQConnectionFactory"
             header-mapper="defaultJmsHeaderMapper"
             acknowledge="transacted"
-            transaction-manager="affinaEspTxManager"/> -->
+            transaction-manager="affinaEspTxManager"
+			selector="APPLICATION_NAME = 'XYZ' AND NOTIFICATION_TYPE = 'OPEN'"
+			concurrent-consumers="2" 
+			max-concurrent-consumers="2"/> 
+	-->
 
     <!-- FROM ESP TO Customer Service -->
     <!-- <int-jms:outbound-channel-adapter
