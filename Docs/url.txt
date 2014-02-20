@@ -37,3 +37,13 @@ http://www.newthinktank.com/videos/design-patterns-tutorial/
 #to download you tube
 http://keepvid.com
 
+#xa-transactions-using-spring
+http://stackoverflow.com/questions/7461513/spring-jms-2-phase-commit-in-java-se
+http://www.javaworld.com/article/2077714/java-web-development/xa-transactions-using-spring.html
+http://spring.io/blog/2011/08/15/configuring-spring-and-jta-without-full-java-ee/
+
+http://stackoverflow.com/questions/10451728/transaction-handling-while-using-message-driven-channel-adapter-service-activa
+http://www.javaworld.com/article/2077963/open-source-tools/distributed-transactions-in-spring--with-and-without-xa.html
+
+http://www.narendranaidu.com/2006/01/what-are-xa-transactions-what-is-xa.html
+
