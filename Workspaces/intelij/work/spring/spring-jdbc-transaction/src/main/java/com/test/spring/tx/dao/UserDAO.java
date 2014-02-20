@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Service;
 
-import com.test.spring.tx.orm.User;
+import com.test.spring.tx.model.User;
 
 @Service
 public class UserDAO extends JdbcDaoSupport implements IUserDAO {

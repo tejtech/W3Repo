@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.test.spring.tx.orm.User;
+import com.test.spring.tx.model.User;
 import com.test.spring.tx.user.IUserManager;
 
 public class Main 

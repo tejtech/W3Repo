@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd 
+    http://www.springframework.org/schema/tx 
+    http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<tx:annotation-driven />
+
+	<context:component-scan base-package="com.byteslounge.spring.tx.dao" />
+	<context:component-scan base-package="com.byteslounge.spring.tx.user" />
+        <!--
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/TESTS" />
+		<property name="username" value="user" />
+		<property name="password" value="passwd" />
+	</bean>
+        -->
+        <bean id="dataSource" class="oracle.jdbc.pool.OracleDataSource">
+            <property name="connectionCachingEnabled" value="true"/>
+            <property name="URL" value="jdbc:oracle:thin:@///AffinaDB"/>
+            <property name="user" value="pma"/>
+            <property name="password" value="affina"/>
+        </bean> 
+
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="persistenceUnitName" value="testPU" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+	
+	<!--bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean-->
+
+</beans>
+
+
+<!--
+http://stackoverflow.com/questions/13706788/jboss-as7-oracle-11g-spring-3-1-jpa-2-multiple-dss-pus-ems-tms
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns:jee="http://www.springframework.org/schema/jee"
+  xmlns:tx="http://www.springframework.org/schema/tx"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+                      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                      http://www.springframework.org/schema/tx
+                      http://www.springframework.org/schema/tx/spring-tx.xsd
+                      http://www.springframework.org/schema/jee         
+                      http://www.springframework.org/schema/jee/spring-jee.xsd">
+
+  <jee:jndi-lookup id="ds1" jndi-name="java:jboss/datasources/DS1"
+    expected-type="javax.sql.DataSource" />
+  <jee:jndi-lookup id="ds2" jndi-name="java:jboss/datasources/DS2"
+    expected-type="javax.sql.DataSource" />     
+
+  <bean id="em1" class="org.springframework.orm.jpa.support.SharedEntityManagerBean">
+    <property name="entityManagerFactory" ref="emf1" />
+    <property name="persistenceUnitName" value="pu1" />
+  </bean>
+  <bean id="em2" class="org.springframework.orm.jpa.support.SharedEntityManagerBean">
+    <property name="entityManagerFactory" ref="emf2" />
+    <property name="persistenceUnitName" value="pu2" />
+  </bean>
+
+  <bean id="emf1" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+    <property name="persistenceXmlLocation" value="classpath*:META-INF/persistence-ds1.xml"/>
+    <property name="dataSource" ref="ds1" />
+    <property name="jpaVendorAdapter">
+      <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="true" />
+        <property name="databasePlatform" value="org.hibernate.dialect.Oracle10gDialect" />
+      </bean>
+    </property>
+    <property name="jpaDialect">
+      <bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+    </property>
+  </bean>
+  
+  <bean id="emf2" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+    <property name="persistenceXmlLocation" value="classpath*:META-INF/persistence-ds2.xml"/>
+    <property name="dataSource" ref="ds2" />
+    <property name="jpaVendorAdapter">
+      <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="true" />
+        <property name="databasePlatform" value="org.hibernate.dialect.Oracle10gDialect" />
+      </bean>
+    </property>
+    <property name="jpaDialect">
+      <bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+    </property>
+  </bean>
+
+  <tx:annotation-driven transaction-manager="txm1" />
+  <tx:annotation-driven transaction-manager="txm2" />
+
+  <bean id="txm1" class="org.springframework.orm.jpa.JpaTransactionManager">
+    <qualifier value="txMgr1"/>
+    <property name="entityManagerFactory" ref="emf1" />
+    <property name="jpaDialect">
+      <bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+    </property>
+  </bean>
+  <bean id="txm2" class="org.springframework.orm.jpa.JpaTransactionManager">
+    <qualifier value="txMgr2"/>
+    <property name="entityManagerFactory" ref="emf2" />
+    <property name="jpaDialect">
+      <bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+    </property>
+  </bean>   
+
+</beans>
+
+-->
