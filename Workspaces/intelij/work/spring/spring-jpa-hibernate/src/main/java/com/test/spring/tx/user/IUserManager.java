@@ -1,8 +1,8 @@
-package com.byteslounge.spring.tx.user;
+package com.test.spring.tx.user;
 
 import java.util.List;
 
-import com.byteslounge.spring.tx.model.User;
+import com.test.spring.tx.model.User;
 
 public interface IUserManager {
 

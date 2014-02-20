@@ -11,8 +11,8 @@
 
 	<tx:annotation-driven />
 
-	<context:component-scan base-package="com.byteslounge.spring.tx.dao" />
-	<context:component-scan base-package="com.byteslounge.spring.tx.user" />
+	<context:component-scan base-package="com.test.spring.tx.dao" />
+	<context:component-scan base-package="com.test.spring.tx.user" />
         <!--
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
@@ -21,28 +21,130 @@
 		<property name="password" value="passwd" />
 	</bean>
         -->
-        <bean id="dataSource" class="oracle.jdbc.pool.OracleDataSource">
-            <property name="connectionCachingEnabled" value="true"/>
-            <property name="URL" value="jdbc:oracle:thin:@///AffinaDB"/>
-            <property name="user" value="pma"/>
-            <property name="password" value="affina"/>
-        </bean> 
-
+	<bean id="dataSource" class="oracle.jdbc.pool.OracleDataSource">
+		<property name="connectionCachingEnabled" value="true"/>
+		<property name="URL" value="jdbc:oracle:thin:@///AffinaDB"/>
+		<property name="user" value="pma"/>
+		<property name="password" value="affina"/>
+	</bean> 
+	
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-		<property name="persistenceUnitName" value="testPU" />
+		<property name="persistenceXmlLocation" value="classpath*:META-INF/persistence/local.xml"/>	
+		<property name="persistenceUnitName" value="Oracle11gPU" />
 		<property name="dataSource" ref="dataSource" />
 	</bean>
-
+	 	 
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
 	</bean>
-	
-	<!--bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource" ref="dataSource" />
-	</bean-->
+		
 
 </beans>
 
+<!-- 
+http://stackoverflow.com/questions/1902997/multiple-database-with-springhibernatejpa
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+    	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+    	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+    	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd"
+    xmlns:p="http://www.springframework.org/schema/p" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:util="http://www.springframework.org/schema/util">
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+    	destroy-method="close" p:driverClassName="${local.jdbc.driver}" p:url="${local.jdbc.url}"
+    	p:username="${local.jdbc.username}" p:password="${local.jdbc.password}">
+    </bean>
+
+    <bean id="dataSourceRemote" class="org.apache.commons.dbcp.BasicDataSource"
+    	destroy-method="close" p:driverClassName="${remote.jdbc.driver}"
+    	p:url="${remote.jdbc.url}" p:username="${remote.jdbc.username}"
+    	p:password="${remote.jdbc.password}">
+    </bean>
+
+    <bean
+    	class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor">
+    	<property name="defaultPersistenceUnitName" value="pu1" />
+    </bean>
+
+    <bean id="persistenceUnitManager" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
+	    <property name="persistenceXmlLocations">
+		  <list>
+			<value>classpath*:config/persistence.local.xml</value>
+			<value>classpath*:config/persistence.remote.xml</value>
+		  </list>
+	    </property>
+    	<property name="defaultDataSource" ref="dataSource" /> 
+    	<property name="dataSources">
+    		<map>
+    			<entry key="local" value-ref="dataSource" />
+    			<entry key="remote" value-ref="dataSourceRemote" />
+    		</map>
+    	</property>
+    </bean>
+
+    <bean id="entityManagerFactory"
+    	class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+    	<property name="jpaVendorAdapter">
+    		<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
+    			p:showSql="true" p:generateDdl="true">
+    		</bean>
+    	</property>
+    	<property name="persistenceUnitManager" ref="persistenceUnitManager" />
+    	<property name="persistenceUnitName" value="pu1" />
+    	<property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <bean id="entityManagerFactoryRemote"
+    	class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+    	<property name="jpaVendorAdapter">
+    		<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
+    			p:showSql="true" p:generateDdl="true">
+    		</bean>
+    	</property>
+    	<property name="persistenceUnitManager" ref="persistenceUnitManager" />
+    	<property name="persistenceUnitName" value="pu2" />
+    	<property name="dataSource" ref="dataSourceRemote" />
+    </bean>
+
+    <tx:annotation-driven />
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
+    	p:entity-manager-factory-ref="entityManagerFactory" />
+
+
+    <bean id="transactionManagerRemote" class="org.springframework.orm.jpa.JpaTransactionManager"
+    	p:entity-manager-factory-ref="entityManagerFactoryRemote" />
+
+</beans>
+
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
+    			 http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
+    version="1.0">
+
+    <persistence-unit name="pu1" transaction-type="RESOURCE_LOCAL">
+    	<properties>
+    		<property name="hibernate.ejb.naming_strategy" value="org.hibernate.cfg.DefaultNamingStrategy" />
+    		<property name="hibernate.dialect" value="${local.hibernate.dialect}" />
+    		<property name="hibernate.hbm2ddl.auto" value="${local.hibernate.hbm2ddl.auto}" />    						
+    	</properties>
+    </persistence-unit>
+
+    <persistence-unit name="pu2" transaction-type="RESOURCE_LOCAL">
+    	<properties>
+    		<property name="hibernate.ejb.naming_strategy" value="org.hibernate.cfg.DefaultNamingStrategy" />
+    		<property name="hibernate.dialect" value="${remote.hibernate.dialect}" />
+    		<property name="hibernate.hbm2ddl.auto" value="${remote.hibernate.hbm2ddl.auto}" />
+    	</properties>
+    </persistence-unit>
+
+</persistence>
+
+-->
 
 <!--
 http://stackoverflow.com/questions/13706788/jboss-as7-oracle-11g-spring-3-1-jpa-2-multiple-dss-pus-ems-tms

@@ -1,8 +1,8 @@
-package com.byteslounge.spring.tx.dao;
+package com.test.spring.tx.dao;
 
 import java.util.List;
 
-import com.byteslounge.spring.tx.model.User;
+import com.test.spring.tx.model.User;
 
 public interface IUserDAO 
 {

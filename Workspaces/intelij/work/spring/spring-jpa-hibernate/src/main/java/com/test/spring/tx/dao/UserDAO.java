@@ -1,4 +1,4 @@
-package com.byteslounge.spring.tx.dao;
+package com.test.spring.tx.dao;
 
 import java.util.List;
 
@@ -10,8 +10,8 @@ import javax.persistence.criteria.Root;
 
 import org.springframework.stereotype.Repository;
 
-import com.byteslounge.spring.tx.dao.IUserDAO;
-import com.byteslounge.spring.tx.model.User;
+import com.test.spring.tx.dao.IUserDAO;
+import com.test.spring.tx.model.User;
 
 @Repository
 public class UserDAO implements IUserDAO {
