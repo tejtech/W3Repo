@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/TESTS" />
+		<property name="username" value="user" />
+		<property name="password" value="passwd" />
+	</bean>
+    -->
+	<bean id="dataSource" class="oracle.jdbc.pool.OracleDataSource">
+		<property name="connectionCachingEnabled" value="true"/>
+		<property name="URL" value="jdbc:oracle:thin:@///AffinaDB"/>
+        <property name="user" value="#{appProperties['database.pma.user']}"/>
+        <property name="password" value="#{appProperties['database.pma.password']}"/>
+	</bean> 
+	
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="persistenceXmlLocation" value="classpath*:META-INF/persistence/local.xml"/>	
+		<property name="persistenceUnitName" value="Oracle11gPU" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	 	 
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>	
+		
+</beans>

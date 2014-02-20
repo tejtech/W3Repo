@@ -9,6 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.test.spring.tx.dao.IUserDAO;
 import com.test.spring.tx.model.User;
 
+/**
+ *
+ * @author wakkir.muzammil
+ */
+
 @Service
 public class UserManager implements IUserManager 
 {
