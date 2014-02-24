@@ -26,8 +26,8 @@ public class TestSpringClient
             //ApplicationContext context= new ClassPathXmlApplicationContext("spring-context.xml");
 
             ConfigurableApplicationContext context =  new ClassPathXmlApplicationContext("spring-context.xml");
-            //SpringPublisher publisher = (SpringPublisher)context.getBean("stockPublisher");
-            //publisher.start();
+            SpringPublisher publisher = (SpringPublisher)context.getBean("stockPublisher");
+            publisher.start();
             //MyAppContext app=new MyAppContext();
             //app.printBean();
 
