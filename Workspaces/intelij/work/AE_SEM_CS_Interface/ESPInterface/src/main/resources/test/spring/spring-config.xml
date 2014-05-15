@@ -15,6 +15,7 @@
 	<context:component-scan base-package="net.aconite.affina.espinterface.security"/>
 	<context:component-scan base-package="net.aconite.affina.espinterface.scripting.statusupdate"/>
 	<context:component-scan base-package="net.aconite.affina.espinterface.config"/>
+	<context:component-scan base-package="net.aconite.common.util"/>
 						   
     <!-- //////////////////////// -->
     <bean id="startServiceHandler" class="net.aconite.affina.espinterface.context.StartServiceHandler"/>
@@ -171,7 +172,8 @@
 
     <!-- <bean id="cardSetupRequestSplitter" class="net.aconite.affina.espinterface.spliter.CardSetupRequestSplitter"/> -->
 	
-	
+ 
+
 
 
 </beans>

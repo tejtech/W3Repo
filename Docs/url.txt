@@ -47,3 +47,4 @@ http://www.javaworld.com/article/2077963/open-source-tools/distributed-transacti
 
 http://www.narendranaidu.com/2006/01/what-are-xa-transactions-what-is-xa.html
 
+https://jira.spring.io/browse/BATCH-1848

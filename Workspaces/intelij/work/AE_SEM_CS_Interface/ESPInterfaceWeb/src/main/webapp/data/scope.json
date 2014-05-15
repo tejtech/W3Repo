@@ -1,0 +1,21 @@
+{
+	"totalCount" : "4",
+	"recordName" : "scopes",
+	"records" : [{
+			id : "1",
+			name : "NIMC"
+			}, 
+			{
+			id : "2",
+			name : "RB"
+			}, 
+			{
+			id : "3",
+			name : "ICS"
+			}, 
+			{
+			id : "4",
+			name : "LK"
+			}, 
+	]
+}

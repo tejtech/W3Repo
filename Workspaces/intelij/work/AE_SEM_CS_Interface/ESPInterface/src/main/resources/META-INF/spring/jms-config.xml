@@ -64,13 +64,15 @@
         </property>
     </bean>
 
-    <bean id="fromEspToAffina" class="com.ibm.mq.jms.MQQueue">
+    <!-- 
+	<bean id="fromEspToAffina" class="com.ibm.mq.jms.MQQueue">
         <constructor-arg value="${from.esp.to.affina.queue.name}"/>
         <property name="targetClient">
             <util:constant static-field="com.ibm.msg.client.wmq.common.CommonConstants.WMQ_CLIENT_JMS_COMPLIANT"/>
         </property>
-    </bean>
-
+    </bean> 
+	-->
+	<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
     <!-- SEM-ESP Queues -->
     <bean id="fromSemToEsp" class="com.ibm.mq.jms.MQQueue">
         <constructor-arg value="${from.sem.to.esp.queue.name}"/>
@@ -79,13 +81,15 @@
         </property>
     </bean>
 
-    <bean id="fromEspToSem" class="com.ibm.mq.jms.MQQueue">
+    <!-- 
+	<bean id="fromEspToSem" class="com.ibm.mq.jms.MQQueue">
         <constructor-arg value="${from.esp.to.sem.queue.name}"/>
         <property name="targetClient">
             <util:constant static-field="com.ibm.msg.client.wmq.common.CommonConstants.WMQ_CLIENT_JMS_COMPLIANT"/>
         </property>
     </bean>
-
+	-->
+	<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
     <!-- CustomerService-ESP Queues
     <bean id="fromCustServToEsp" class="com.ibm.mq.jms.MQQueue">
         <constructor-arg value="${from.custserv.to.esp.queue.name}" />
@@ -127,19 +131,84 @@
             channel="fromAffinaToEspJMSChannel"
             connection-factory="affinaCachedMQConnectionFactory"
             error-channel="errorChannel"
-            header-mapper="defaultJmsHeaderMapper"
+            header-mapper="priorityHeaderMapper"
             acknowledge="transacted"
-            transaction-manager="affinaEspTxManager"/>
+            transaction-manager="affinaEspTxManager"
+            concurrent-consumers="${affinaEsp.concurrent.consumers}" 
+            max-concurrent-consumers="${affinaEsp.max.concurrent.consumers}"/>
 
     <!-- FROM ESP TO Affina -->
-    <int-jms:outbound-channel-adapter
+     <!-- 
+	<int-jms:outbound-channel-adapter
             id="jmsFromEspToAffina"
             destination="fromEspToAffina"
             channel="fromEspToAffinaJMSChannel"
             connection-factory="affinaCachedMQConnectionFactory"
-            header-mapper="defaultJmsHeaderMapper"/>
+            header-mapper="priorityHeaderMapper"/>
+	-->
+	<!-- it is required to overwrite header-mapper & jms-template to pass JMSPriority to JMS message-->
+	<!-- https://jira.springsource.org/browse/INT-3259 -->
+	<int-jms:outbound-channel-adapter 
+			id="jmsFromEspToAffina"			
+			channel="fromEspToAffinaJMSChannel"
+			header-mapper="priorityHeaderMapper"
+			jms-template="fromEspToAffinaOutboundPriorityJmsTemplate"/>
+    
+    <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+	
+    <!-- FROM SEM TO ESP -->
+    <int-jms:message-driven-channel-adapter
+            id="jmsFromSemToEsp"
+            destination="fromSemToEsp"
+            channel="fromSemToEspJMSChannel"
+            connection-factory="affinaCachedMQConnectionFactory"
+            error-channel="errorChannel"
+            header-mapper="priorityHeaderMapper"
+            acknowledge="transacted"
+            transaction-manager="semEspTxManager"
+            concurrent-consumers="${semEsp.concurrent.consumers}" 
+            max-concurrent-consumers="${semEsp.max.concurrent.consumers}"/>
 
-    <!-- ~~~~~~~~Error / progress Adaptor~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- FROM ESP TO SEM -->
+    <!-- 
+	<int-jms:outbound-channel-adapter
+            id="jmsFromEspToSem"
+            destination="fromEspToSem"
+            channel="fromEspToSemJMSChannel"
+            connection-factory="affinaCachedMQConnectionFactory"
+            header-mapper="priorityHeaderMapper"/>
+	-->
+	<!-- it is required to overwrite header-mapper & jms-template to pass JMSPriority to JMS message-->
+	<!-- https://jira.springsource.org/browse/INT-3259 -->
+	<int-jms:outbound-channel-adapter 
+			id="jmsFromEspToSem"			
+			channel="fromEspToSemJMSChannel"
+			header-mapper="priorityHeaderMapper"
+			jms-template="fromEspToSemOutboundPriorityJmsTemplate"/>
+
+    <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+	
+    <!-- FROM Customer Service TO ESP -->
+    <!-- <int-jms:message-driven-channel-adapter
+            id="jmsFromCustServToEsp"
+            destination="fromCustServToEsp"
+            channel="fromCustServToEspUnmarshallerChannel"
+            connection-factory="affinaCachedMQConnectionFactory"
+            header-mapper="priorityHeaderMapper"
+            acknowledge="transacted"
+            transaction-manager="affinaEspTxManager"/> -->
+
+    <!-- FROM ESP TO Customer Service -->
+    <!-- <int-jms:outbound-channel-adapter
+            id="jmsFromEspToCustServ"
+            destination="fromEspToCustServ"
+            channel="fromEspToCustServJMSChannel"
+            connection-factory="affinaCachedMQConnectionFactory"
+            header-mapper="priorityHeaderMapper"/> -->
+
+
+    <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->	
+	<!-- ~~~~~~~~Error / progress Adaptor~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- FROM ESP TO Affina ALARM TOPIC-->
     <int-jms:outbound-channel-adapter
             id="jmsFromEspToAffinaAlarm"
@@ -156,56 +225,51 @@
             connection-factory="affinaCachedMTConnectionFactory"
             header-mapper="defaultJmsHeaderMapper"/>
 
-    <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-    <!-- FROM SEM TO ESP -->
-    <int-jms:message-driven-channel-adapter
-            id="jmsFromSemToEsp"
-            destination="fromSemToEsp"
-            channel="fromSemToEspJMSChannel"
-            connection-factory="affinaCachedMQConnectionFactory"
-            error-channel="errorChannel"
-            header-mapper="defaultJmsHeaderMapper"
-            acknowledge="transacted"
-            transaction-manager="semEspTxManager"/>
-
-    <!-- FROM ESP TO SEM -->
-    <int-jms:outbound-channel-adapter
-            id="jmsFromEspToSem"
-            destination="fromEspToSem"
-            channel="fromEspToSemJMSChannel"
-            connection-factory="affinaCachedMQConnectionFactory"
-            header-mapper="defaultJmsHeaderMapper"/>
-
-    <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-    <!-- FROM Customer Service TO ESP -->
-	<!-- 
-		http://forum.spring.io/forum/spring-projects/integration/128489-enable-multithreading-in-jms-message-driven-channel-adapter #
-		http://forum.spring.io/forum/spring-projects/integration/115601-jms-message-driven-channel-adapter-selector-expression
-	-->
-    <!-- 
-	<int-jms:message-driven-channel-adapter
-            id="jmsFromCustServToEsp"
-            destination="fromCustServToEsp"
-            channel="fromCustServToEspUnmarshallerChannel"
-            connection-factory="affinaCachedMQConnectionFactory"
-            header-mapper="defaultJmsHeaderMapper"
-            acknowledge="transacted"
-            transaction-manager="affinaEspTxManager"
-			selector="APPLICATION_NAME = 'XYZ' AND NOTIFICATION_TYPE = 'OPEN'"
-			concurrent-consumers="2" 
-			max-concurrent-consumers="2"/> 
-	-->
-
-    <!-- FROM ESP TO Customer Service -->
-    <!-- <int-jms:outbound-channel-adapter
-            id="jmsFromEspToCustServ"
-            destination="fromEspToCustServ"
-            channel="fromEspToCustServJMSChannel"
-            connection-factory="affinaCachedMQConnectionFactory"
-            header-mapper="defaultJmsHeaderMapper"/> -->
-
-
+	<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+		
     <!-- Allows to access the JMS message headers via the spring message header.-->
     <bean id="defaultJmsHeaderMapper" class="org.springframework.integration.jms.DefaultJmsHeaderMapper"/>
+	
+	<bean id="priorityHeaderMapper" class="net.aconite.affina.espinterface.jms.PriorityHeaderMapper"/>  
+	
+	<bean id="fromEspToAffinaOutboundPriorityJmsTemplate" class="net.aconite.affina.espinterface.jms.PriorityJmsTemplate">
+		<property name="connectionFactory" ref="affinaCachedMQConnectionFactory" />
+		<property name="defaultDestinationName" value="${from.esp.to.affina.queue.name}"/>
+		<!-- <property name="destinationResolver" ref="jmsDestinationResolver"/> -->
+		<property name="pubSubDomain" value="false"/>
+		<property name="receiveTimeout" value="${from.esp.to.affina.queue.receive.timeout}"/>
+		<property name="sessionTransacted" value="true" />
+		<property name="explicitQosEnabled" value="true" />
+	</bean>
+	
+	<bean id="fromEspToSemOutboundPriorityJmsTemplate" class="net.aconite.affina.espinterface.jms.PriorityJmsTemplate">
+		<property name="connectionFactory" ref="affinaCachedMQConnectionFactory" />
+		<property name="defaultDestinationName" value="${from.esp.to.sem.queue.name}"/>
+		<!-- <property name="destinationResolver" ref="jmsDestinationResolver"/> -->
+		<property name="pubSubDomain" value="false"/>
+		<property name="receiveTimeout" value="${from.esp.to.sem.queue.receive.timeout}"/>
+		<property name="sessionTransacted" value="true" />
+		<property name="explicitQosEnabled" value="true" />
+	</bean>
+	
+	<!-- 
+	<bean id="jmsDestinationResolver" class="org.springframework.jms.support.destination.JndiDestinationResolver">
+		<property name="cache">
+			 <value>true</value>
+		</property>
+	</bean>
+    -->
+	
+	<!--  Message sender - Stagescript request -->
+    <bean id="stgReqSender" class="net.aconite.common.util.MessageSenderServiceImpl">
+	   <property name="jmsTemplate">
+		   <ref bean="stgReqTemplate"/>
+	   </property>
+    </bean>
+
+   <bean id="stgReqTemplate" class="org.springframework.jms.core.JmsTemplate">
+	   <property name="connectionFactory" ref="affinaCachedMQConnectionFactory" />
+	   <property name="defaultDestinationName" value="${from.affina.to.esp.queue.name}""/>
+   </bean>
 
 </beans>

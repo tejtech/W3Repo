@@ -33,6 +33,7 @@ public class EspConstant
     public final static String MQ_SHOW_PROGRESS_MESSAGE = "show_progress_message";
     public final static String JMS_TEXT_MESSAGE = "jms_text";
     public final static String JMS_BYTES_MESSAGE = "jms_bytes";
+    public final static String JMS_Priority = "jms_priority";
 
     //------Security Related Constant-----------------------------------
     public final static String SC_ENCRYPTED_MESSAGE = "encryptedMessage";
@@ -75,6 +76,8 @@ public class EspConstant
     
     public final static String TRUE = "true";
     public final static String FALSE = "false";
+    
+    public final static String PARAMETERIZED_BUSINESS_FUNCTION_NAME="Parameter Script";
 
 
 }

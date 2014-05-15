@@ -5,12 +5,13 @@
 package net.aconite.affina.espinterface.demo;
 
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import net.acointe.affina.esp.AffinaEspUtilException;
 import net.acointe.affina.esp.AffinaEspUtils;
-import net.aconite.affina.espinterface.constants.EspConstant;
 import net.aconite.affina.espinterface.helper.DateHelper;
 
 /**
@@ -101,13 +102,34 @@ public class RunUtils
        
     }
     
-    public static void main(String[] args)
+    private void testString2DateTime() throws ParseException, AffinaEspUtilException
+    {
+        SimpleDateFormat dateFormat1 = new SimpleDateFormat(AffinaEspUtils.DATE_FORMAT_YYYY_MM_DD_HHMMSSmmm);
+       
+        
+        long end=AffinaEspUtils.getEndDateTime("2014-03-28",AffinaEspUtils.DATE_FORMAT_YYYY_MM_DD);
+        
+        long start=AffinaEspUtils.getStartDateTime("2014-03-28",AffinaEspUtils.DATE_FORMAT_YYYY_MM_DD);
+        
+        System.out.println("long-start : "+ start);
+        System.out.println("long-end : "+ end);  
+        
+  
+        
+        System.out.println("date-2-start : "+ dateFormat1.format(start).toUpperCase()); 
+        System.out.println("date-2-end : "+ dateFormat1.format(end).toUpperCase()); 
+
+       
+    }
+    
+    public static void main(String[] args) throws ParseException, AffinaEspUtilException
     {
         System.out.println("Hello World");
         
         RunUtils ru=new RunUtils();
-        ru.testEndDateTime();
+        //ru.testEndDateTime();
         //ru.testCurrentDateTime();
+        ru.testString2DateTime();
        
         
     }

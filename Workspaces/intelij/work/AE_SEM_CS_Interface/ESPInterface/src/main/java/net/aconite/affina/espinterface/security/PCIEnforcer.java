@@ -59,9 +59,12 @@ public class PCIEnforcer implements IPCIEnforcer
         MessageHeaders inHeaders = inMessage.getHeaders();
         Object inPayload = inMessage.getPayload();
 
-        logger.debug("DecryptMessage : Incoming Message header: ", inHeaders);
-        logger.debug("DecryptMessage : Message payload: ", inPayload);
-        logger.debug(toString());
+        if(logger.isDebugEnabled())
+        {
+            logger.debug("DecryptMessage : Incoming Message header: ", inHeaders);
+            logger.debug("DecryptMessage : Message payload: ", inPayload);
+            logger.debug(toString());
+        }
 
         Message outMessage;
 
@@ -71,7 +74,7 @@ public class PCIEnforcer implements IPCIEnforcer
             {
                 byte[] bytesMessage = (byte[]) inPayload;
                 String messagetext;
-                //if("true".equalsIgnoreCase(doDecrypt.trim()))   
+                //if("true".equalsIgnoreCase(doDecrypt.trim()))
                 if (doDecrypt)
                 {
                     //decrypt the bytearray and assign to message text
@@ -111,9 +114,12 @@ public class PCIEnforcer implements IPCIEnforcer
         MessageHeaders inHeaders = inMessage.getHeaders();
         Object inPayload = inMessage.getPayload();
 
-        logger.debug("EncryptMessage : Incoming Message header: ", inHeaders);
-        logger.debug("EncryptMessage : Message payload: ", inPayload);
-        logger.debug(toString());
+        if(logger.isDebugEnabled())
+        {
+            logger.debug("EncryptMessage : Incoming Message header: ", inHeaders);
+            logger.debug("EncryptMessage : Message payload: ", inPayload);
+            logger.debug(toString());
+        }
 
         Message outMessage;
 
@@ -139,7 +145,7 @@ public class PCIEnforcer implements IPCIEnforcer
 
     private Message<String> generateDecryptedMessage(MessageHeaders headers, String sourceData)
     {
-        logger.debug("DecryptedMessage body : " + sourceData);
+        logger.debug("DecryptedMessage body : ", sourceData);
 
         return MessageBuilder.withPayload(sourceData)
                 .copyHeaders(headers)
@@ -151,7 +157,8 @@ public class PCIEnforcer implements IPCIEnforcer
 
     private Message<byte[]> generateEncryptedMessage(MessageHeaders headers, byte[] sourceData)
     {
-        logger.debug("EncryptedMessage body : " + Arrays.toString(sourceData));
+        if(logger.isDebugEnabled())
+            logger.debug("EncryptedMessage body : " + Arrays.toString(sourceData));
 
         // Set the correlation id to original fileName.
         return MessageBuilder.withPayload(sourceData)

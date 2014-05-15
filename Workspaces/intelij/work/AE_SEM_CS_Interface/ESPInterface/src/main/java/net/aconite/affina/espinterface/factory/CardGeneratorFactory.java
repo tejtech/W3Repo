@@ -13,8 +13,8 @@ import net.aconite.affina.espinterface.persistence.Persistent;
  */
 public class CardGeneratorFactory
 {
-    public static CardGenerator getCardgenerator(Persistent p)
+    public static CardGenerator getCardgenerator()
     {
-        return new SelectableCardGenerator(p);
+        return new SelectableCardGenerator();
     }
 }

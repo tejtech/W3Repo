@@ -1,0 +1,49 @@
+.icon-user {
+    background-image: url(images/user.png) !important;
+}
+
+.icon-add {
+    background-image: url(images/add.png) !important;
+}
+
+.icon-delete {
+    background-image: url(images/delete.png) !important;
+}
+
+.icon-run {
+    background-image: url(images/run.png) !important;
+}
+
+.icon-sync {
+    background-image: url(images/sync.png) !important;
+}
+
+.icon-edit {
+    background-image: url(images/edit.png) !important;
+}
+
+
+.x-ie6 .icon-user {
+    background-image: url(images/user.gif) !important;
+}
+
+.x-ie6 .icon-add {
+    background-image: url(images/add.gif) !important;
+}
+
+.x-ie6 .icon-delete {
+    background-image: url(images/delete.gif) !important;
+}
+
+.x-ie6 .icon-run {
+    background-image: url(images/run.gif) !important;
+}
+
+
+.x-ie6 .icon-sync {
+    background-image: url(images/sync.png) !important;
+}
+
+.x-ie6 .icon-edit {
+    background-image: url(images/edit.png) !important;
+}

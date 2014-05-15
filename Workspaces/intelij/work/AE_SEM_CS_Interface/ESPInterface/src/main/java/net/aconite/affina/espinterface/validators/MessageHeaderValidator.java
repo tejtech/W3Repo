@@ -34,34 +34,37 @@ public class MessageHeaderValidator  implements IJMSValidator
         MessageHeaders inHeaders = inMessage.getHeaders();
         Object inPayload = inMessage.getPayload();
 
-        logger.debug("DecryptMessage : Incoming Message header: ", inHeaders);
-        logger.debug("DecryptMessage : Message payload: ", inPayload);
-        logger.debug(toString());
-        
-        logger.info("JMSType read from MQ message: "+ inHeaders.get(JmsHeaders.TYPE)); 
-        
+        if(logger.isDebugEnabled())
+        {
+            logger.debug("DecryptMessage : Incoming Message header: ", inHeaders);
+            logger.debug("DecryptMessage : Message payload: ", inPayload);
+            logger.debug(toString());
+        }
+
+        logger.info("JMSType read from MQ message: "+ inHeaders.get(JmsHeaders.TYPE));
+
         if(jmsTypes!=null && !jmsTypes.isEmpty())
-        {           
+        {
            if(!jmsTypes.contains(inHeaders.get(JmsHeaders.TYPE)))
            {
                logger.debug("received invalid jms_type : "+ inHeaders.get(JmsHeaders.TYPE));
                throw new EspMessageValidationException("Invalid JMS Type received {"+JmsHeaders.TYPE+" : "+inHeaders.get(JmsHeaders.TYPE)+"}");
            }
         }
-        
+
         return inMessage;
     }
 
-    public List<String> getJmsTypes() 
+    public List<String> getJmsTypes()
     {
         return jmsTypes;
     }
 
-    public void setJmsTypes(List<String> jmsTypes) 
+    public void setJmsTypes(List<String> jmsTypes)
     {
         this.jmsTypes = jmsTypes;
     }
-    
+
 
 }
 

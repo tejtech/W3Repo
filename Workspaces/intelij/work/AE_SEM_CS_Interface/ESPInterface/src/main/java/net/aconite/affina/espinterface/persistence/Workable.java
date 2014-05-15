@@ -5,14 +5,39 @@
 package net.aconite.affina.espinterface.persistence;
 
 /**
- * An interface that defines the work which can be carried out by database worker
- * in a transactional context.
+ * A class that defines the work which can be carried out by database worker,
+ * takes an  argument, and holds a response.
+ * The work is carried out in a (non-container) transactional context.
  * @author thushara.pethiyagoda
  */
-public interface Workable
+abstract public class Workable<T, R>
 {
+    private T data;
+    private R response;
+
+    public T getData()
+    {
+        return data;
+    }
+
+    public void setData(T data)
+    {
+        this.data = data;
+    }
+
+    public R getResult()
+    {
+        return response;
+    }
+
+    public void setResponse(R response)
+    {
+        this.response = response;
+    }
+
     /**
      * Implement this method to execute activities that can be done within a database transaction.
      */
-    public <T> void doWork(T arg);
+    abstract public void doWork();
+
 }

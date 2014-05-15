@@ -1,0 +1,21 @@
+{
+	"totalCount" : "4",
+	"recordName" : "productparts",
+	"records" : [{
+			id : "1",
+			name : "PRODPART1"
+			}, 
+			{
+			id : "2",
+			name : "PRODPART2"
+			}, 
+			{
+			id : "3",
+			name : "PRODPART3"
+			}, 
+			{
+			id : "4",
+			name : "PRODPART4"
+			}, 
+	]
+}

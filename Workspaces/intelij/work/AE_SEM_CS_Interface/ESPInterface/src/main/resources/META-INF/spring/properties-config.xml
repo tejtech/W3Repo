@@ -27,14 +27,14 @@
                 <!-- ESPInterface MQ Configuration -->
 				<!-- #AFFINA-ESP -->
                 <value>from.affina.to.esp.queue.name=${SERVICE_ESPINTERFACE_QUEUE_WORKFLOW_FROM_PMA}</value>
-                <value>from.esp.to.affina.queue.name=${SERVICE_ESPINTERFACE_QUEUE_WORKFLOW_TO_PMA}</value>
+                <value>from.esp.to.affina.queue.name=${SERVICE_ESPINTERFACE_QUEUE_WORKFLOW_TO_PMA}</value>				
 				<!-- #SEM-ESP : SEM_TO_AFF means SEM to ESPInteface -->
                 <value>from.sem.to.esp.queue.name=${SERVICE_ESPINTERFACE_QUEUE_FROM_SEM_TO_AFF}</value>
-                <value>from.esp.to.sem.queue.name=${SERVICE_ESPINTERFACE_QUEUE_FROM_AFF_TO_SEM}</value>
+                <value>from.esp.to.sem.queue.name=${SERVICE_ESPINTERFACE_QUEUE_FROM_AFF_TO_SEM}</value>				
 				<!-- #CS-ESP : CS_TO_AFF means Customer Service/Thrird Party Issuer to ESPInteface-->
                 <value>from.custserv.to.esp.queue.name=${SERVICE_ESPINTERFACE_QUEUE_FROM_CS_TO_AFF}</value>
                 <value>from.esp.to.custserv.queue.name=${SERVICE_ESPINTERFACE_QUEUE_FROM_AFF_TO_CS}</value>
-				
+								
 				<!-- Container specific properties -->
                 <value>esp.encryption.encoding=${ENCODING}</value>
 				<value>esp.xml.encoding=${ENCODING}</value>
@@ -49,9 +49,19 @@
                 <value>destName.progress=${PROGRESS_TOPIC}</value>
                 <value>destName.alarms=${ALARM_TOPIC}</value>
 				
+				<!-- jms concurrent consumers -->
+				<value>affinaEsp.concurrent.consumers=15</value> 
+				<value>affinaEsp.max.concurrent.consumers=15</value>
+				<value>semEsp.concurrent.consumers=15</value> 
+				<value>semEsp.max.concurrent.consumers=15</value>
+				
                 <value>mq.cacheSize=20</value>
                 <value>topic.cacheSize=20</value>
-
+				
+				<!-- #Outbound queue parameter configuration -->
+				<value>from.esp.to.affina.queue.receive.timeout=20000</value>
+				<value>from.esp.to.sem.queue.receive.timeout=20000</value>
+				<value>from.esp.to.custserv.queue.receive.timeout=20000</value>
 
                 <!-- Common properties - might not all be needed here -->
                 <value>database.pma.user=${PMAUSERNAME}</value>

@@ -9,17 +9,18 @@
     <dependencies>
     </dependencies>
     <modules>
-        <module>jms</module> 
-		<module>jsf</module>
-	    <module>rest</module>
-		<module>json</module>
-		<module>mytest</module>
-		<module>spring</module>
-		<module>report</module>	
+		<!-- <module>atomikos</module> -->
 		<module>convertor</module>
+        <module>jms</module> 
+		<module>jsf</module>	    
+		<module>json</module>
+		<module>mytest</module>		
+		<module>report</module>	
+		<module>rest</module>
+		<module>spring</module>
 		<module>study</module>
-		<module>wrapper</module>
 		<module>velocity</module>
+		<module>wrapper</module>		
     </modules>
 
 </project>
