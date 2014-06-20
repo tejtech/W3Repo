@@ -12,6 +12,13 @@ http://www.artima.com/lejava/articles/designprinciples.html
 http://www.whizlabs.com/examprep/mod/quiz/review.php?attempt=257695&showall=true
 
 
+#Design Pattern Videos
+http://www.newthinktank.com/videos/design-patterns-tutorial/
+
+#to download you tube
+http://keepvid.com
+
+--------------------------------------------------------------------------------------------------
 #Spring
 https://github.com/spring-projects/spring-integration-samples
 https://github.com/spring-projects/spring-integration-samples.git
@@ -30,13 +37,7 @@ http://www.jayway.com/2013/11/03/spring-and-autowiring-of-generic-types/
 
 #Spring 3 Part 5: Factory Beans 
 http://ojitha.blogspot.co.uk/2013/03/spring-3-part-5-factory-beans.html
-
-#Design Pattern Videos
-http://www.newthinktank.com/videos/design-patterns-tutorial/
-
-#to download you tube
-http://keepvid.com
-
+--------------------------------------------------------------------------------------------------
 #xa-transactions-using-spring
 http://stackoverflow.com/questions/7461513/spring-jms-2-phase-commit-in-java-se
 http://www.javaworld.com/article/2077714/java-web-development/xa-transactions-using-spring.html
@@ -46,4 +47,14 @@ http://stackoverflow.com/questions/10451728/transaction-handling-while-using-mes
 http://www.javaworld.com/article/2077963/open-source-tools/distributed-transactions-in-spring--with-and-without-xa.html
 
 http://www.narendranaidu.com/2006/01/what-are-xa-transactions-what-is-xa.html
-
+--------------------------------------------------------------------------------------------------
+#jms:message-driven-channel-adapter selector expression 
+http://forum.spring.io/forum/spring-projects/integration/115601-jms-message-driven-channel-adapter-selector-expression
+--------------------------------------------------------------------------------------------------
+#Enable Multithreading in JMS Message Driven Channel Adapter 
+http://forum.spring.io/forum/spring-projects/integration/128489-enable-multithreading-in-jms-message-driven-channel-adapter
+--------------------------------------------------------------------------------------------------
+#map jmspriority between jmsmessage and spring message
+https://jira.springsource.org/browse/INT-3259
+http://forum.spring.io/forum/spring-projects/integration/jms/741455-receive-and-pass-jmspriority-from-jmsmessage-with-defaultmessagelistenercontainer
+--------------------------------------------------------------------------------------------------

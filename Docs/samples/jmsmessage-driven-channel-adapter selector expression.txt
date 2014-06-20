@@ -1,0 +1,9 @@
+http://forum.spring.io/forum/spring-projects/integration/115601-jms-message-driven-channel-adapter-selector-expression
+
+One subscriber and many consumers (Each consumer configure to look into particular messages from the MQ)
+
+
+<jms:message-driven-channel-adapter 
+id="inChannel" destination="queueName" 
+channel="commStatusChannel" 
+selector="APPLICATION_NAME = 'XYZ' AND NOTIFICATION_TYPE = 'OPEN'"/>
