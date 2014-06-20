@@ -1,5 +1,6 @@
 package net.aconite.affina.espinterface.webservice.restful.model;
 
+import com.platform7.pma.product.PMAProduct;
 import java.util.ArrayList;
 import java.util.List;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -8,7 +9,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class UIProduct 
 {
         @JsonProperty
-	private String id;
+	private Integer id;
 
         @JsonProperty
 	private String name;
@@ -17,18 +18,24 @@ public class UIProduct
         {
         }
         
-        public UIProduct(String id,String name)//Product ormObject
+        public UIProduct(Integer id,String name)
         {
-            this.id = id;//ormObject.getCode();
-            this.name = name;//ormObject.getName();
+            this.id = id;
+            this.name = name;
+        }
+        
+        public UIProduct(PMAProduct ormObject)
+        {
+            this.id = ormObject.getOID().intValue();
+            this.name = ormObject.getName();
         }
 	
-        public String getId() 
+        public Integer getId() 
         {
             return id;
         }
 
-        public void setId(String id) 
+        public void setId(Integer id) 
         {
             this.id = id;
         }
@@ -42,19 +49,15 @@ public class UIProduct
         {
 		this.name = name;
 	}
+                
 	
-	public static List<UIProduct> convertList()//(List<Country> ormList)
-        {
+	public static List<UIProduct> convertList(List<PMAProduct> ormList)
+        {           
             List<UIProduct> uiList  = new ArrayList<UIProduct>();
-            //for(Country ormObject : ormList)
+            for(PMAProduct ormObject : ormList)
             {
-                //uiList.add(new UICountry(ormObject));
-                uiList.add(new UIProduct("10","Aasasas"));
-                uiList.add(new UIProduct("11","erterg"));
-                uiList.add(new UIProduct("12","fbvxvs"));
-                uiList.add(new UIProduct("13","sa45sef"));
-                uiList.add(new UIProduct("14","myyunmrxc"));
-            }
+                uiList.add(new UIProduct(ormObject));               
+            }            
             return uiList;
         }
 
@@ -63,6 +66,19 @@ public class UIProduct
         {
 		return "Product [name=" + name + ", id=" + id + "]";
 	}
-	
+	/*
+         if(!isTest)
+            {
+                
+            }
+            else
+            {
+                uiList.add(new UIProduct(10,"Product1")); 
+                uiList.add(new UIProduct(20,"Product2")); 
+                uiList.add(new UIProduct(30,"Product3")); 
+                uiList.add(new UIProduct(40,"Product4")); 
+                uiList.add(new UIProduct(50,"Product5")); 
+            }
+         */
 	
 }

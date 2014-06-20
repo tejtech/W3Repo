@@ -53,6 +53,20 @@
 	</servlet-mapping>
  -->
 	
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>ESP GUI Controller</web-resource-name>
+			<url-pattern>/services/*</url-pattern>
+			<url-pattern>/pages/*</url-pattern>
+			<url-pattern>/home.jsp</url-pattern>
+			<url-pattern>/Index.jsp</url-pattern>			
+			<http-method>GET</http-method>
+			<http-method>POST</http-method>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>Admin</role-name>		
+		</auth-constraint>
+	</security-constraint>
 	
 
 	<servlet>
@@ -72,7 +86,7 @@
 
     <servlet-mapping>
         <servlet-name>DispatcherServlet</servlet-name>
-        <url-pattern>/</url-pattern>
+        <url-pattern>/services/*</url-pattern>
     </servlet-mapping>
 
     <welcome-file-list>

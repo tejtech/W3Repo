@@ -15,16 +15,10 @@ import org.eclipse.persistence.expressions.*;
  * @author thushara.pethiyagoda
  */
 public class QueryScriptUpdateStatus
-{    
-    private static final Persistent persistent;
+{
     /**
-     * 
+     *
      */
-    static
-    {
-        persistent = GenericPersistentDAO.getPersistent();
-    }
- 
     /**
      * Fetches the ScriptUpdateStatus data.
      * @param pan PAN
@@ -34,28 +28,28 @@ public class QueryScriptUpdateStatus
      * @param appVersion Application version
      * @return Vector of ScriptUpdateStatus
      */
-    public static Vector getScriptUpdateStatus(final String pan, final String psn, 
-                                                              final long expDate, final String appType, 
+    public static Vector getScriptUpdateStatus(final String pan, final String psn,
+                                                              final long expDate, final String appType,
                                                               final String appVersion)
     {
         ExpressionBuilder builder = new ExpressionBuilder();
-        Expression expPAN = builder.get("pan").equal(pan);        
+        Expression expPAN = builder.get("pan").equal(pan);
         Expression expPSN = builder.get("psn").equal(psn);
-        Expression expEXPD = builder.get("expiryDate").equal(DateHelper.getTimestampUSFormat(expDate)); 
+        Expression expEXPD = builder.get("expiryDate").equal(DateHelper.getTimestampUSFormat(expDate));
         Expression expAppType = builder.get("businessFunction").get("application").get("applicationType").equal(appType);
         Expression expAppVersion = builder.get("businessFunction").get("application").get("applicationVersion").equal(appType);
         Expression expAll = expPAN.and(expPSN).and(expEXPD);
         if(appType.trim().length() > 0)
         {
             expAll = expAll.and(expAppType);
-        } 
+        }
         if(appVersion.trim().length() > 0)
         {
             expAll = expAll.and(expAppVersion);
-        }         
-        Vector v = persistent.
+        }
+        Vector v = GenericPersistentDAO.instance().
                 executeReadQuery(expAll, ESPScriptUpdateStatus.class, null, (String[]) null);
-        
+
         return v;
-    }        
+    }
 }

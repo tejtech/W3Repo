@@ -1,0 +1,89 @@
+http://localhost:20013/esp-interface-web/
+
+curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/api/person/random"
+
+curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/api/person/1"
+
+curl -X POST -H "Content-Type: application/json"  --data {\'name\':\'wakkir\',\'age\':29} "http://localhost:20013/esp-interface-web/api/person"
+
+------------------------------------------------
+
+curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/product"
+
+curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/product/random"
+
+curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/product/1"
+
+curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/product?id=3"
+
+curl -X POST -H "Content-Type: application/json" --data {\"id\":\"232\",\"name\":\"wakkir\"} "http://localhost:20013/esp-interface-web/services/api/product"
+
+curl -X PUT -H "Content-Type: application/json"  --data {\"id\":15,\"name\":\"wakkir\"} "http://localhost:20013/esp-interface-web/services/api/product/15"
+
+curl -X DELETE -H "Content-Type: application/json"  "http://localhost:20013/esp-interface-web/services/api/product/2"
+
+-------------------------------------------------
+
+http://www.webdevdoor.com/jquery/cross-domain-browser-json-ajax/
+
+
+
+////////////////////////////////////////////////////////////////////////////
+
+curl  --header "Accept: application/json" "http://localhost:14013/Operations/services/api/product"
+
+curl  --header "Accept: application/json" "http://localhost:14013/Operations/services/api/product"
+
+curl  --header "Accept: application/json" "http://localhost:14013/Operations/services/api/product/random"
+
+curl  --header "Accept: application/json" "http://localhost:14013/Operations/services/api/product/1"
+
+curl  --header "Accept: application/json" "http://localhost:14013/Operations/services/api/product?id=3"
+
+curl -X POST -H "Content-Type: application/json" --data {\"id\":\"232\",\"name\":\"wakkir\"} "http://localhost:14013/Operations/services/api/product"
+
+curl -X PUT -H "Content-Type: application/json"  --data {\"id\":15,\"name\":\"wakkir\"} "http://localhost:14013/Operations/services/api/product/15"
+
+curl -X DELETE -H "Content-Type: application/json"  "http://localhost:14013/Operations/services/api/product/2"
+
+
+web.xml
+=======
+<servlet>
+	<servlet-name>DispatcherServlet</servlet-name>
+	<display-name>DispatcherServlet</display-name>
+	<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+	<load-on-startup>3</load-on-startup>
+	<init-param>
+	  <param-name>contextClass</param-name>
+	  <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+	</init-param>
+	<init-param>
+	  <param-name>contextConfigLocation</param-name>
+	  <param-value>net.aconite.affina.espinterface.webservice.springconfig</param-value>
+	</init-param>
+</servlet>
+
+<servlet-mapping>
+	<servlet-name>DispatcherServlet</servlet-name>
+	<url-pattern>/services/*</url-pattern>
+</servlet-mapping>
+
+
+<security-constraint>
+	<web-resource-collection>
+		<web-resource-name>Controller Main Servlet</web-resource-name>
+		<url-pattern>/services/*</url-pattern>
+		<url-pattern>/home.jsp</url-pattern>
+		<url-pattern>/controllerMain</url-pattern>		
+		<http-method>GET</http-method>
+		<http-method>POST</http-method>
+	</web-resource-collection>
+	<auth-constraint>
+		<role-name>Operator</role-name>
+		<role-name>Auditor</role-name>
+		<role-name>Reporter</role-name>
+		<role-name>ConfigurationInstaller</role-name>
+		<role-name>ConfigurationValidator</role-name>
+	</auth-constraint>
+</security-constraint>

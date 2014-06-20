@@ -15,12 +15,12 @@
     <name>ESPInterfaceParent</name>
 
     <modules>
-        <module>SpringCore</module>
-        <!-- <module>ESPInterface</module>
+        <!-- <module>SpringCore</module> -->
+        <module>ESPInterface</module>
         <module>ESPInterfaceGenerate</module>
 
         <module>ESPInterfaceWeb</module>
-        <module>ESPInterfaceDeploy</module> -->
+        <module>ESPInterfaceDeploy</module> 
     </modules>
 
 

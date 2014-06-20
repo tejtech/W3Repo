@@ -4,14 +4,29 @@
  */
 package net.aconite.affina.espinterface.persistence;
 
+import com.platform7.pma.application.Application;
+import com.platform7.pma.card.manifestapplication.ManifestApplication;
+import com.platform7.pma.product.PMAProduct;
+import com.platform7.pma.product.PMAProductPart;
+import com.platform7.pma.product.PlatformDependentPart;
+import com.platform7.pma.request.emvscriptrequest.ESPBusinessFunction;
+import com.platform7.standardinfrastructure.appconfig.AppConfig;
 import com.platform7.standardinfrastructure.database.*;
+import com.platform7.standardinfrastructure.multiissuer.Scope;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
+
 import net.aconite.affina.espinterface.constants.*;
 import net.aconite.affina.espinterface.exceptions.PersistentException;
 import net.aconite.affina.espinterface.factory.*;
+import net.aconite.affina.espinterface.validators.IStageScriptValidator;
+import net.aconite.affina.espinterface.validators.StageScriptValidator;
+import net.aconite.affina.espinterface.webservice.restful.common.FilterCriteria;
+import net.aconite.affina.espinterface.webservice.restful.common.PagingCriteria;
+import net.aconite.affina.espinterface.webservice.restful.service.model.StageScript;
 import org.eclipse.persistence.exceptions.OptimisticLockException;
 import org.eclipse.persistence.expressions.Expression;
-import org.eclipse.persistence.expressions.ExpressionBuilder;
 import org.eclipse.persistence.queries.ReadAllQuery;
 import org.eclipse.persistence.queries.ReportQuery;
 import org.eclipse.persistence.sessions.UnitOfWork;
@@ -39,7 +54,7 @@ import org.slf4j.*;
 public class GenericPersistentDAO implements Persistent
 {
     private static final Logger logger = LoggerFactory.getLogger(GenericPersistentDAO.class);
-    private Workable workable;
+    private ThreadLocal<Workable> workable = new ThreadLocal<Workable>();
     /**
      *
      */
@@ -47,17 +62,21 @@ public class GenericPersistentDAO implements Persistent
     /**
      *
      */
-    private boolean inTrans = false;
+    private ThreadLocal<Boolean> inTrans = new ThreadLocal<Boolean>();
     /**
      *
      */
-    private UnitOfWork transUOW;
+
     private final static Map<String, String> dbConnectionTypeMap = new HashMap<String, String>();
+
+    private final static GenericPersistentDAO instance;
 
     static
     {
         dbConnectionTypeMap.put("JNDI", "sessionManager_pma");
         dbConnectionTypeMap.put("NONE_JNDI", "local_sessionManager_pma");
+        String conType = System.getProperty("DBConnectionType", "JNDI");
+        instance = new GenericPersistentDAO(DBConnectionType.valueOf(conType));
     }
 
     /**
@@ -80,7 +99,6 @@ public class GenericPersistentDAO implements Persistent
      * Constructs a DAO using pre configured bean with a database connection related properties. To use this constructor
      * a Spring Bean with id 'sessionManager_pma' that has a DB connection should exists.
      * <p/>
-     * @param dbContext Application context obtained via spring.
      */
     protected GenericPersistentDAO(String dbManagerBeanName)
     {
@@ -91,10 +109,19 @@ public class GenericPersistentDAO implements Persistent
      *
      * @return
      */
-    public static Persistent getPersistent()
+    public static Persistent instance()
     {
-        String conType = System.getProperty("DBConnectionType", "JNDI");
-        return new GenericPersistentDAO(DBConnectionType.valueOf(conType));
+        return instance;
+    }
+
+    public boolean isInNonContainerTransaction()
+    {
+        return inTrans.get() != null && inTrans.get();
+    }
+
+    public boolean isInContainerTransaction()
+    {
+        return !isInNonContainerTransaction() && sm.isInContainerTransaction();
     }
 
     /**
@@ -103,34 +130,38 @@ public class GenericPersistentDAO implements Persistent
      * <p/>
      * The by calling doTransactionAndCommit() above will do the work for you.
      */
-    private <T> void doTransactionalWork(T arg)
+    private void doTransactionalWork()
     {
-        doWork(arg);
+        doWork();
     }
 
     /**
      * Will perform the transactional work as defined by the implementation class.
      */
-    private <T> void doWork(T arg)
+    private <T> void doWork()
     {
-        workable.doWork(arg);
+        workable.get().doWork();
     }
 
     /**
      *
      * @param workable
      */
-    @Override
     public void addTransactionalWorker(Workable workable)
     {
-        this.workable = workable;
+        this.workable.set(workable);
+    }
+
+    public <T> void doTransactionalWorkAndCommit(Workable worker)
+    {
+        addTransactionalWorker(worker);
+        doTransactionalWorkAndCommit();
     }
 
     /**
      * Performs Transactional work. This method throws PersistentException which is a RuntimeException.
      */
-    @Override
-    public synchronized <T> void doTransactionalWorkAndCommit(T arg)
+    public void doTransactionalWorkAndCommit()
     {
         boolean transactionComplete = false;
 
@@ -139,16 +170,17 @@ public class GenericPersistentDAO implements Persistent
             try
             {
                 transactionComplete = true;
-                transUOW = getUnitOfWork();
-                inTrans = true;
-                doTransactionalWork(arg);
-                transUOW.commit();
+                inTrans.set(true);
+                sm.getUnitOfWork();
+                doTransactionalWork();
+                sm.getUnitOfWork().commit();
             }
             catch (PersistentException ex)
             {
-                logger.error("Error trying to commit work." + ex.getStackTrace().toString(), ex);
+                final String errorMsg = "Error trying to commit work: " + ex.getMessage();
+                logger.error(errorMsg, ex);
                 rollBack();
-                throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
+                throw new PersistentException(errorMsg, ex);
             }
             catch (OptimisticLockException ex)
             {
@@ -156,119 +188,35 @@ public class GenericPersistentDAO implements Persistent
                 transactionComplete = false;
                 rollBack();
             }
-            // let other runtime exceptions propagate
+            // Let runtime exceptions propagate, as this is how error responses are passed back to the caller.
             finally
             {
-                try
-                {
-                    inTrans = false;
-                    sm.release();
-                }
-                catch (PersistentException ex)
-                {
-                    throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
-                }
-                catch (RuntimeException ex)
-                {
-                    throw ex;
-                }
+                inTrans.set(false);
+                sm.release();
             }
         }
     }
 
-    private synchronized void rollBack()
+    private void rollBack()
     {
-        if (sm != null && sm.getUnitOfWork() != null && transUOW != null)
-        {
-            transUOW.release();
-        }
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param obj
-     */
-    @Override
-    public synchronized <T> void delete(T obj)
-    {
-        try
-        {
-            UnitOfWork uow = getUnitOfWork();
-            uow.registerObject(obj);
-            uow.deleteObject(obj);
-            if (!inTrans)
-            {
-                uow.commit();
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.error("Error trying to delete data.", ex);
-            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
-        }
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param obj
-     */
-    @Override
-    public synchronized void deleteAll(Collection obj)
-    {
-        try
-        {
-            UnitOfWork uow = getUnitOfWork();
-            uow.registerAllObjects(obj);
-            uow.deleteAllObjects(obj);
-            if (!inTrans)
-            {
-                uow.commit();
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.error("Error trying to delete data.", ex);
-            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
-        }
-    }
-
-    /**
-     * This method throws PersistentException which is a RuntimeException.
-     * <p/>
-     * @param <T>
-     * @param obj
-     */
-    @Override
-    public synchronized <T> void save(T obj)
-    {
-        try
-        {
-            UnitOfWork uow = getUnitOfWork();
-            uow.registerObject(obj);
-            if (!inTrans)
-            {
-                uow.commit();
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.error("Error trying to save data.", ex);
-            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
-        }
+        if(isInNonContainerTransaction())
+            sm.release();
+        else if(isInContainerTransaction())
+            sm.getUnitOfWork().revertAndResume();
     }
 
     /**
      *
      * @return
      */
-    private synchronized UnitOfWork getUnitOfWork()
+    public UnitOfWork getUnitOfWork()
     {
-        if (inTrans)
-        {
-            return transUOW;
-        }
+        if(!isInContainerTransaction() && !isInNonContainerTransaction())
+            // You must either be in a Container transaction (eg running in the Introduced Card container),
+            // or in a non-container manager transaction, eg running as a Workable in the GenericPersistentDAO.
+            // Any other attempts to use a UnitOfWork can result in a memory leak (unless you manage the UoW properly).
+            throw new RuntimeException("Attempting to access a UnitOfWork outside of a transaction");
+
         return sm.getUnitOfWork();
     }
 
@@ -281,8 +229,7 @@ public class GenericPersistentDAO implements Persistent
      * <p/>
      * @return Returns the object after registering with the persistence cache.
      */
-    @Override
-    public synchronized <R> R getRegisteredObject(Class<R> cls)
+    public <R> R getRegisteredObject(Class<R> cls)
     {
         Object v = null;
         try
@@ -292,161 +239,11 @@ public class GenericPersistentDAO implements Persistent
         }
         catch (Exception ex)
         {
-            logger.error("Error trying to register object with the ORM cache.", ex);
-            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
+            final String errorMsg = "Error trying to register object with the ORM cache.";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
         }
         return cls.cast(v);
-    }
-
-    /**
-     *
-     * @param <R>
-     * @param cls < p/>
-     * <p/>
-     * @return
-     */
-    @Override
-    public synchronized <R> Vector getRegisteredAllObjects(Collection<R> cls)
-    {
-        return getUnitOfWork().registerAllObjects(cls);
-    }
-
-    /**
-     *
-     * @param cls < p/>
-     * <p/>
-     * @return
-     */
-    @Override
-    public synchronized Object getRegisteredExistingObject(Object cls)
-    {
-        Object v = null;
-        try
-        {
-            v = getUnitOfWork().registerExistingObject(cls);
-        }
-        catch (Exception ex)
-        {
-            logger.error("Error trying to register object with the ORM cache.", ex);
-            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
-        }
-        return v;
-    }
-
-    /**
-     * Retrieves a DB object that matches the given ID.
-     * <p/>
-     * @param <T>     Generic type of the object.
-     * @param id      ID of the database object.
-     * @param cls
-     * @param idField The name of the field that represents the ID. This is taken as a parameter as there may be no
-     *                consistent naming mechanism for representing the id, so the caller can pass in the correct one.
-     * <p/>
-     * @return The object that matches th ID.
-     */
-    @Override
-    public synchronized <T> T getObjectById(long id, Class<T> cls, String idField)
-    {
-        Object retValue = null;
-        try
-        {
-            ExpressionBuilder builder = new ExpressionBuilder();
-            Expression exp = builder.get(idField).equal(id);
-            retValue = getUnitOfWork().readObject(cls, exp);
-        }
-        catch (Exception ex)
-        {
-            logger.error("Error trying trying to query data.", ex);
-            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
-        }
-        return cls.cast(retValue);
-    }
-
-    /**
-     * Returns an object by a foreign key object.
-     * <p/>
-     * @param <T>      Generic type parameter.
-     * @param obj      Foreign key object value.
-     * @param cls      Class of the object to be fetched.
-     * @param objField The foreign key as defined in the object to be fetched.
-     * <p/>
-     * @return The object defined by the cls parameter..
-     */
-    @Override
-    public <T> T getObjectByReferencingObject(Object obj, Class<T> cls, String objField)
-    {
-        Object retValue = null;
-        try
-        {
-            ExpressionBuilder builder = new ExpressionBuilder();
-            Expression exp = builder.get(objField).equal(obj);
-            retValue = getUnitOfWork().readObject(cls, exp);
-        }
-        catch (Exception ex)
-        {
-            logger.error("Error trying to query data.", ex);
-            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
-        }
-        return cls.cast(retValue);
-    }
-
-    /**
-     * Returns an object by a foreign key object.
-     * <p/>
-     * @param <T>      Generic type parameter.
-     * @param obj      Foreign key object value.
-     * @param cls      Class of the object to be fetched.
-     * @param objField The foreign key as defined in the object to be fetched.
-     * <p/>
-     * @return The object defined by the cls parameter..
-     */
-    @Override
-    public synchronized <T> Vector getAllObjectsByReferencingObject(Object obj, Class<T> cls, String objField)
-    {
-        Vector retValue = null;
-        try
-        {
-            ExpressionBuilder builder = new ExpressionBuilder();
-            Expression exp = builder.get(objField).equal(obj);
-            retValue = getUnitOfWork().readAllObjects(cls, exp);
-        }
-        catch (Exception ex)
-        {
-            logger.error("Error trying to query data.", ex);
-            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
-        }
-        return retValue;
-    }
-
-    /**
-     * Fetches an object from DB by its name.
-     * <p/>
-     * @param <T>
-     * @param name    Name of the item to bee looked up.
-     * @param cls     Class of the object.
-     * @param idField The field name of the column to be looked up, as mapped within the domain object
-     * <p/>
-     * @return
-     */
-    @Override
-    public synchronized <T> Vector getObjectByName(String value, Class<T> cls, String nameField)
-    {
-        Vector retValue = new Vector();
-        try
-        {
-            ExpressionBuilder builder = new ExpressionBuilder();
-            Expression exp = builder.get(nameField).equal(value);
-            retValue = getUnitOfWork().readAllObjects(cls, exp);
-        }
-        catch (Exception ex)
-        {
-            logger.error("Error trying to query data.", ex);
-            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
-        }
-        finally
-        {
-        }
-        return retValue;
     }
 
     public com.platform7.standardinfrastructure.multiissuer.Scope getScope(String name)
@@ -458,102 +255,12 @@ public class GenericPersistentDAO implements Persistent
         }
         catch(Exception ex)
         {
-            logger.error("Error trying to fetch scope.", ex);
-            throw new PersistentException("Error trying to fetch scope." + ex.toString(), ex);
+            final String errorMsg = "Error trying to fetch scope "+name;
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
         }
     }
-
-    /**
-     * Executes update, delete queries.
-     * <p/>
-     * @param sql < p/>
-     * <p/>
-     * @return
-     */
-    @Override
-    public synchronized boolean executeUpdateQuery(String sql)
-    {
-        try
-        {
-            UnitOfWork uow = getUnitOfWork();
-            uow.executeNonSelectingSQL(sql);
-            if (!inTrans)
-            {
-                uow.commit();
-            }
-        }
-        catch (Exception ex)
-        {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Executes a results bearing select query.
-     * <p/>
-     * @param sql < p/>
-     * <p/>
-     * @return
-     */
-    @Override
-    public synchronized Vector executeSelectQuery(String sql)
-    {
-        Vector res = new Vector();
-        try
-        {
-            UnitOfWork uow = getUnitOfWork();
-            res = uow.executeSQL(sql);
-        }
-        catch (Exception ex)
-        {
-            res = null;
-        }
-        return res;
-    }
-
-    /**
-     * removes all rows from the given table.
-     * <p/>
-     * @param table
-     */
-    @Override
-    public synchronized void emptyTable(String table)
-    {
-        try
-        {
-            String sql = "delete from " + table;
-            executeUpdateQuery(sql);
-        }
-        catch (Exception ex)
-        {
-            logger.error("Error trying to query data.", ex);
-            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
-        }
-    }
-
-    /**
-     * Reads the whole table represented by the parameter cls
-     * <p/>
-     * @param cls < p/>
-     * <p/>
-     * @return
-     */
-    @Override
-    public Vector readTable(Class cls)
-    {
-        try
-        {
-            UnitOfWork uow = getUnitOfWork();
-            return uow.readAllObjects(cls);
-        }
-        catch (Exception ex)
-        {
-            logger.error("Error trying to query data.", ex);
-            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
-        }
-    }
-
+    
     /**
      *
      * @param selectionCriteria
@@ -563,8 +270,7 @@ public class GenericPersistentDAO implements Persistent
      * <p/>
      * @return
      */
-    @Override
-    public synchronized Vector executeReadQuery(Expression selectionCriteria, Class cls, Expression ordering,
+    public Vector executeReadQuery(Expression selectionCriteria, Class cls, Expression ordering,
                                    String... partialAttributes)
     {
         try
@@ -589,8 +295,9 @@ public class GenericPersistentDAO implements Persistent
         }
         catch (Exception ex)
         {
-            logger.error("Error trying to query data.", ex);
-            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
+            final String errorMsg = "Error trying to query data.";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
         }
     }
 
@@ -600,8 +307,7 @@ public class GenericPersistentDAO implements Persistent
      * <p/>
      * @return
      */
-    @Override
-    public synchronized Vector executeQuery(ReadAllQuery query)
+    public Vector executeQuery(ReadAllQuery query)
     {
         try
         {
@@ -609,8 +315,9 @@ public class GenericPersistentDAO implements Persistent
         }
         catch (Exception ex)
         {
-            logger.error("Error trying to query data.", ex);
-            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
+            final String errorMsg = "Error trying to query data.";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
         }
     }
 
@@ -620,17 +327,273 @@ public class GenericPersistentDAO implements Persistent
      * <p/>
      * @return
      */
-    @Override
-    public synchronized Object executeReportQuery(ReportQuery query)
+    public Object executeReportQuery(ReportQuery query)
     {
         try
         {
-            return (Vector) getUnitOfWork().executeQuery(query);
+            return getUnitOfWork().executeQuery(query);
         }
         catch (Exception ex)
         {
-            logger.error("Error trying to query data.", ex);
-            throw new PersistentException("Error trying to commit work." + ex.toString(), ex);
+            final String errorMsg = "Error trying to query data.";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
         }
     }
+    
+    
+     /////////////////////////////////////////////////////////////////////////////
+    //Temporary added here and need Mark's help to replace this
+    AffinaTOPLinkSessionManager ses=(AffinaTOPLinkSessionManager) AppConfig.getBean("sessionManager_pma");
+    /**
+     * This method returns list of scopes for selected filter parameters
+     * @param filter
+     * @return  List<Scope>
+     */
+    public List<Scope> getScopes(FilterCriteria filter)//, PagingCriteria paging)
+    {        
+        List<Scope> recordList=new ArrayList<Scope>();
+        UnitOfWork uow=null;
+        try
+        {
+            //uow = getUnitOfWork();
+            uow=ses.getUnitOfWork();
+            Iterator it=com.platform7.standardinfrastructure.multiissuer.Scope.locateAll(uow); 
+            uow.release();
+            while(it.hasNext())
+            {
+                recordList.add((Scope)it.next());
+            }
+            
+            return recordList;
+        }
+        catch(Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch scopes ";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+        finally
+        {
+            if(uow!=null)
+            {
+                uow.release();
+            }
+        }
+    }
+
+    public List<PMAProduct> getProducts(FilterCriteria filter)//, PagingCriteria paging)
+    {
+        List<PMAProduct> recordList=null;//=new ArrayList<PMAProduct>();
+        UnitOfWork uow=null;
+        try
+        {
+            if(filter!=null && filter.getScopeId()!=null)
+            {
+                //uow = getUnitOfWork();
+                uow=ses.getUnitOfWork();
+                recordList=PMAProduct.locateAllByScope(uow,new BigDecimal(filter.getScopeId().intValue())); 
+                uow.release();
+            }            
+            return recordList;
+        }
+        catch(Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch products ";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+        finally
+        {
+            if(uow!=null)
+            {
+                uow.release();
+            }
+        }
+    }
+    
+    public List<PMAProductPart> getProductParts(FilterCriteria filter)//, PagingCriteria paging)
+    {
+        List<PMAProductPart> recordList=new ArrayList<PMAProductPart>();
+        UnitOfWork uow=null;
+        try
+        {
+            if(filter!=null && filter.getProductId()!=null)
+            {
+                //uow = getUnitOfWork();
+                uow=ses.getUnitOfWork();
+                
+                //Scope scope=Scope.locate(uow, new BigDecimal(filter.getScopeId().intValue()));               
+                //PMAProduct product=PMAProduct.locate(uow, new BigDecimal(filter.getProductId().intValue()));
+                
+                PMAProduct product=PMAProduct.locate(uow,new BigDecimal(filter.getProductId().intValue()));
+                
+                PMAProductPart[] partMandatory= product.getMandatoryPMAProductParts();
+                PMAProductPart[] partOptional= product.getOptionalPMAProductParts();
+                
+                for(int i=0; i<partMandatory.length;i++)
+                {
+                    recordList.add(partMandatory[i]);
+                }
+                for(int i=0; i<partOptional.length;i++)
+                {
+                    recordList.add(partOptional[i]);
+                }
+                
+                uow.release();
+            }            
+            return recordList;
+        }
+        catch(Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch productparts ";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+        finally
+        {
+            if(uow!=null)
+            {
+                uow.release();
+            }
+        }
+    }
+    
+    public List<Application> getApplications(FilterCriteria filter)//, PagingCriteria paging)
+    {
+        IStageScriptValidator ssValidator=new StageScriptValidator();
+        List<Application> recordList=new ArrayList<Application>();
+        UnitOfWork uow=null;
+        try
+        {
+            if(filter!=null && filter.getProductPartId()!=null)
+            {
+                //uow = getUnitOfWork();
+                uow=ses.getUnitOfWork();
+
+                PMAProductPart productPart=PMAProductPart.locate(uow,new BigDecimal(filter.getProductPartId().intValue()));
+                
+                HashMap platformDependentPartList=productPart.getPlatformDependentParts();//getApplications();                
+                
+                uow.release();
+                
+                Iterator it=platformDependentPartList.values().iterator();
+                
+                while(it.hasNext())
+                {
+                    PlatformDependentPart part=(PlatformDependentPart)it.next();                    
+                    
+                    ArrayList appList=part.getApplications();
+                    
+                    for(int j=0;j<appList.size();j++)
+                    {
+                        Application app=(Application)appList.get(j);
+
+                        if(ssValidator.isValidScriptableApplication(app))
+                        {
+                            recordList.add(app);
+                        }
+                    }
+                }
+                
+            }            
+            return recordList;
+        }
+        catch(Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch productparts ";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+        finally
+        {
+            if(uow!=null)
+            {
+                uow.release();
+            }
+        }
+    }
+    
+   
+    public List<ESPBusinessFunction> getBusinessFunctions(FilterCriteria filter)//, PagingCriteria paging)
+    {
+        List<ESPBusinessFunction> recordList=new ArrayList<ESPBusinessFunction>();
+        UnitOfWork uow=null;
+        try
+        {
+            if(filter!=null && filter.getApplicationId()!=null)
+            {
+                //uow = getUnitOfWork();
+                uow=ses.getUnitOfWork();
+
+                Application application=Application.locate(uow,new BigDecimal(filter.getApplicationId().intValue()));
+                
+                uow.release();
+                
+                if(EspConstant.TRUE.equalsIgnoreCase(application.getScriptable()))
+                {
+                    Iterator it=application.getBusinessFunctions().iterator();
+                    while(it.hasNext())
+                    {
+                        ESPBusinessFunction busFunc=(ESPBusinessFunction)it.next();
+                        
+                        if(!EspConstant.PARAMETERIZED_BUSINESS_FUNCTION_NAME.equalsIgnoreCase(busFunc.getName()))
+                        {
+                            recordList.add(busFunc);
+                        }
+                    }
+                }                
+            }            
+            return recordList;
+        }
+        catch(Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch productparts ";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+        finally
+        {
+            if(uow!=null)
+            {
+                uow.release();
+            }
+        }
+    }
+    
+    
+    public List<StageScript> getApplicationInstances(FilterCriteria filter)
+    {
+        List<StageScript> recordList=new ArrayList<StageScript>();
+        UnitOfWork uow=null;
+        try
+        {
+            if(filter!=null && filter.getApplicationId()!=null)
+            {
+                //uow = getUnitOfWork();
+                uow=ses.getUnitOfWork();
+
+                
+                uow.release();
+                
+                recordList.add(new StageScript());
+
+            }            
+            return recordList;
+        }
+        catch(Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch productparts ";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+        finally
+        {
+            if(uow!=null)
+            {
+                uow.release();
+            }
+        }
+    }
+    
 }

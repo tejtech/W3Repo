@@ -50,7 +50,7 @@
         <property name="connectionCacheProperties">
               <value>
                 MinLimit:1
-                MaxLimit:5
+                MaxLimit:15
                 InitialLimit:1
                 ConnectionWaitTimeout:120
                 InactivityTimeout:180
@@ -76,7 +76,7 @@
           init-method="initialize">
         <property name="user" value="${database.pma.user}"/>
         <property name="password" value="${database.pma.password}"/>
-        <property name="topLinkMappingClassName" value="com.platform7.stdpma.databaseproject.toplinkproject"/>
+        <property name="topLinkMappingClassName" value="com.platform7.stdpma.databaseproject.toplinkReferenceDataProject"/>
         <property name="dataSource" ref="dataSource_pma"/>
         <property name="showSQL"  value="${database.showSQL}"/>
     </bean>
@@ -91,7 +91,7 @@
           init-method="initialize">
         <property name="user" value="${database.pma.user}"/>
         <property name="password" value="${database.pma.password}"/>
-        <property name="topLinkMappingClassName" value="com.platform7.stdpma.databaseproject.toplinkproject"/>
+        <property name="topLinkMappingClassName" value="com.platform7.stdpma.databaseproject.toplinkReferenceDataProject"/>
         <property name="externalTransactionController">
             <bean class="com.platform7.standardinfrastructure.database.ToplinkWAS6_1ExternalTransactionController"/>
         </property>
@@ -102,5 +102,8 @@
     <!-- The default Non-Tx Session Manager (PMA in this container) -->
     <alias name="sessionManager_pma" alias="sessionManager_default"/>
 
+
+    <!-- The default Non-Tx Session Manager (PMA in this container) -->
+    <alias name="sessionManager_pma" alias="sessionManager_default_Tx"/>
 
 </beans>

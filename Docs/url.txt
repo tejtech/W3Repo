@@ -47,6 +47,7 @@ http://stackoverflow.com/questions/10451728/transaction-handling-while-using-mes
 http://www.javaworld.com/article/2077963/open-source-tools/distributed-transactions-in-spring--with-and-without-xa.html
 
 http://www.narendranaidu.com/2006/01/what-are-xa-transactions-what-is-xa.html
+<<<<<<< HEAD
 --------------------------------------------------------------------------------------------------
 #jms:message-driven-channel-adapter selector expression 
 http://forum.spring.io/forum/spring-projects/integration/115601-jms-message-driven-channel-adapter-selector-expression
@@ -58,3 +59,7 @@ http://forum.spring.io/forum/spring-projects/integration/128489-enable-multithre
 https://jira.springsource.org/browse/INT-3259
 http://forum.spring.io/forum/spring-projects/integration/jms/741455-receive-and-pass-jmspriority-from-jmsmessage-with-defaultmessagelistenercontainer
 --------------------------------------------------------------------------------------------------
+=======
+
+https://jira.spring.io/browse/BATCH-1848
+>>>>>>> d02655980528377a01be98d6aecae6326f471182
