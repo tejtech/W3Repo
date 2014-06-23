@@ -33,4 +33,10 @@ public class ScriptableCardNotFoundException extends ScriptProcessingRuntimeExce
         super(message, eReason, errCode);
 
     }
+    
+    public ScriptableCardNotFoundException(String message, String eReason , String errCode, int errType)
+    {
+        super(message, eReason, errCode, errType);
+
+    }
 }

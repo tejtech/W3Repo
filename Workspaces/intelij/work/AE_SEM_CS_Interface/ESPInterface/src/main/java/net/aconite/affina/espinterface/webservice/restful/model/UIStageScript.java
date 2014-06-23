@@ -1,6 +1,5 @@
 package net.aconite.affina.espinterface.webservice.restful.model;
 
-import com.platform7.pma.card.manifestapplication.ManifestApplication;
 import java.util.ArrayList;
 import java.util.List;
 import net.aconite.affina.espinterface.webservice.restful.service.model.StageScript;
@@ -65,7 +64,11 @@ public class UIStageScript
 	@Override
 	public String toString() 
         {
-		return "ApplicationInstance [name=" + name + ", id=" + id + "]";
+            StringBuilder sb = new StringBuilder();
+            sb.append("\nName  : ").append(name);
+            sb.append("\nId  : ").append(id);            
+            sb.append("\n");
+            return sb.toString(); 
 	}
 	
 	

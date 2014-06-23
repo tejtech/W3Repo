@@ -1,0 +1,21 @@
+{
+	"totalCount" : "4",
+	"recordName" : "applications",
+	"records" : [{
+			id : "1",
+			name : "APP1"
+			}, 
+			{
+			id : "2",
+			name : "APP2"
+			}, 
+			{
+			id : "3",
+			name : "APP3"
+			}, 
+			{
+			id : "4",
+			name : "APP4"
+			}, 
+	]
+}

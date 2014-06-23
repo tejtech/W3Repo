@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import net.aconite.affina.espinterface.xmlmapping.sem.ErrorType;
 
 /**
  * @author wakkir.muzammil

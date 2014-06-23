@@ -5,6 +5,7 @@
 package net.aconite.affina.espinterface.handler.feedback;
 
 import java.util.Hashtable;
+import net.acointe.affina.esp.AffinaEspUtils;
 import net.aconite.affina.espinterface.constants.EspConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,8 +98,8 @@ public class EspErrorHandler implements IEspFeedbackHandler
         //sb.append(errorMessage);
         //String request=inPayload.getCause().getMessage();//getFailedMessage().getPayload().toString();
         
-        props.put(EspConstant.VT_ERROR_DESCRIPTION, errorMessage);
-        props.put(EspConstant.VT_ERROR_CODE, "");
+        props.put(EspConstant.VT_ERROR_DESCRIPTION, AffinaEspUtils.getEmptyIfNull(errorMessage));
+        props.put(EspConstant.VT_ERROR_CODE, AffinaEspUtils.getEmptyIfNull(""));
 
         sb.append(VelocityEngineUtils.mergeTemplateIntoString(espFeedbackHeader.getVelocityEngine(), "/applicationError.vm", espFeedbackHeader.getEspMessageEncoding(), props));
 

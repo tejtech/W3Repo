@@ -1,21 +1,20 @@
 package net.aconite.affina.espinterface.webservice.restful.service.impl;
 
 import com.platform7.pma.product.PMAProduct;
-import com.platform7.standardinfrastructure.multiissuer.Scope;
-import java.util.ArrayList;
 import java.util.List;
-import net.aconite.affina.espinterface.persistence.GenericPersistentDAO;
+import net.aconite.affina.espinterface.dao.ProductDao;
 import net.aconite.affina.espinterface.webservice.restful.common.QueryResult;
 import net.aconite.affina.espinterface.webservice.restful.common.FilterCriteria;
 import net.aconite.affina.espinterface.webservice.restful.common.PagingCriteria;
 import net.aconite.affina.espinterface.webservice.restful.service.IProductService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("productService")
 public class ProductService implements IProductService
 {       
-    //@Autowired
-    //private PMAProductDao pmaProductDao;
+    @Autowired
+    private ProductDao productDao;
     
     public PMAProduct getById(Integer id) 
     {
@@ -35,7 +34,7 @@ public class ProductService implements IProductService
         //List<PMAProduct> recordList = pmaProductDao.getListPMAProducts(filter,pagingCriteria);
         //Integer totalCount = pmaProductDao.getTotalCount(filter);
         
-        List<PMAProduct> recordList =  GenericPersistentDAO.instance().getProducts(filter);//, paging);
+        List<PMAProduct> recordList =  productDao.getList(filter, paging);
         
         Integer totalCount;
         if(recordList!=null)

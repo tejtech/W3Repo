@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ScriptStatusUpdate source="MDE-0001" target="AFFINA" datePublished="1389789723234" scriptUpdateStatus="STAGED" scriptSequenceNumber="241" autoRetryCount="0">
     <TrackingReference>1389789723234_staged-1</TrackingReference>
-    <Card PAN="5888490010000006" PANSequence="00" expirationYear="2015" expirationMonth="09"/>
+    <Card PAN="4938311700000001" PANSequence="01" expirationYear="2016" expirationMonth="05"/>
     <BusinessFunction FunctionName="Apply Risk Profile 1"/>
     <ScriptOrder>1389789715001</ScriptOrder>
     <ScriptDataItem name="LCOL" value="0x02"/>

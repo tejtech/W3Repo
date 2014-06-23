@@ -29,8 +29,8 @@ import org.slf4j.*;
  * @author thushara.pethiyagoda
  */
 public class ScriptUpdateProcessor
-    extends Workable<ScriptStatusUpdate, Object>
-    implements ScriptProcessable<ScriptStatusUpdateDataHolder>
+        extends Workable<ScriptStatusUpdate, Object>
+        implements ScriptProcessable<ScriptStatusUpdateDataHolder, AbstractModel>
 {
 
     private static final Logger logger = LoggerFactory.getLogger(ScriptUpdateProcessor.class);
@@ -46,9 +46,7 @@ public class ScriptUpdateProcessor
      * Used to indicate whether script order should be checked or not.
      */
     private boolean isCheckScriptOrder;
-
     private Application app;
-
     private Scope scope;
     /**
      * Scriptable card.
@@ -60,6 +58,8 @@ public class ScriptUpdateProcessor
     private boolean hasDeliveryStatus = false;
     private boolean isNewScript = false;
     private String errorData;
+    private boolean enableProcessOnlyValidDataItems = true;
+    private boolean enableAlarmForMixedDataItems = false;
     /**
      * A helper Map to store script status life cycles and their processing order.
      */
@@ -69,8 +69,9 @@ public class ScriptUpdateProcessor
     {
         statusOrderMap.put("STAGED", 1);
         statusOrderMap.put("SENT", 2);
-        statusOrderMap.put("DELETED", 3);
-        statusOrderMap.put("DELIVERED", 4);
+        statusOrderMap.put("RESENT", 3);
+        statusOrderMap.put("DELETED", 4);
+        statusOrderMap.put("DELIVERED", 5);
     }
 
     /**
@@ -86,10 +87,10 @@ public class ScriptUpdateProcessor
      * <p/>
      * @return
      */
-    public static ScriptProcessable<ScriptStatusUpdateDataHolder> getProcessable()
+    public static ScriptProcessable<ScriptStatusUpdateDataHolder, AbstractModel> getProcessable()
     {
-        ScriptProcessable<ScriptStatusUpdateDataHolder> sp = new ScriptUpdateProcessor();
-        ((ScriptUpdateProcessor)sp).addWorker(sp);
+        ScriptProcessable<ScriptStatusUpdateDataHolder, AbstractModel> sp = new ScriptUpdateProcessor();
+        ((ScriptUpdateProcessor) sp).addWorker(sp);
         //peristent.addTransactionalWorker((Workable) sp);
         return sp;
     }
@@ -108,10 +109,10 @@ public class ScriptUpdateProcessor
      * <p/>
      * @param scriptData ScriptStatusUpdateDataHolder which encapsulates the XML object ScriptStatusUpdate
      */
-    public synchronized Result processScript(ScriptStatusUpdateDataHolder scriptData)
+    public synchronized Result<AbstractModel> processScript(ScriptStatusUpdateDataHolder scriptData)
     {
-        Result result;
-        ScriptStatusUpdate data = scriptData.getScriptStatusUpdate();
+        Result<AbstractModel> result;
+        ScriptStatusUpdate data = scriptData.getScriptData();
         try
         {
             scope = GenericPersistentDAO.instance().getScope(scriptData.getScopeName());
@@ -120,33 +121,36 @@ public class ScriptUpdateProcessor
             //If all is well do the transaction and commit.
             this.setData(data);
             GenericPersistentDAO.instance().<ScriptStatusUpdate>doTransactionalWorkAndCommit();
-            result = Result.getInstance(isScriptValidationSuccessful, null,
-                                        "Script processing completed successfully", "1", data.getTrackingReference());
+            result = Result.<AbstractModel>getInstance(isScriptValidationSuccessful, null,
+                                                       "Script processing completed successfully", "1",
+                                                       data.getTrackingReference());
             logger.info("Scripting successful: Tracking reference " + data.getTrackingReference());
         }
         catch (ScriptValidationException esvx)
         {
-            logger.error("Unable to complete Script processing successfully.", esvx);
-            result = Result.getInstance(isScriptValidationSuccessful, esvx,
-                                        "Unable to complete Script processing successfully.", esvx.getErrorCode(),
-                                        data == null ? "" : data.getTrackingReference());
+            logger.error("Unable to complete Script processing successfully: " + esvx.getErrReason());
+            result = Result.<AbstractModel>getInstance(isScriptValidationSuccessful, esvx,
+                                                       "Unable to complete Script processing successfully.",
+                                                       esvx.getErrorCode(),
+                                                       data == null ? "" : data.getTrackingReference());
             result.setErrorData(errorData);
         }
         catch (ScriptableCardNotFoundException esvx)
         {
-            logger.error("Unable to complete Script processing successfully.", esvx);
-            result = Result.getInstance(isScriptValidationSuccessful, esvx,
-                                        "Unable to complete Script processing successfully.", esvx.getErrorCode(),
-                                        data == null ? "" : data.getTrackingReference());
+            logger.error("Unable to complete Script processing successfully: " + esvx.getMessage());
+            result = Result.<AbstractModel>getInstance(isScriptValidationSuccessful, esvx,
+                                                       "Unable to complete Script processing successfully.",
+                                                       esvx.getErrorCode(),
+                                                       data == null ? "" : data.getTrackingReference());
             result.setErrorData(errorData);
         }
         catch (PersistentException pex)
         {
             logger.error("Persistent related error.", pex);
-            result = Result.getInstance(false, pex,
-                                        "Unable to complete Script processing successfully due to persistent issues.",
-                                        pex.getErrorCode(),
-                                        data == null ? "" : data.getTrackingReference());
+            result = Result.<AbstractModel>getInstance(false, pex,
+                                                       "Unable to complete Script processing successfully due to persistent issues.",
+                                                       pex.getErrorCode(),
+                                                       data == null ? "" : data.getTrackingReference());
             result.setErrorData(errorData);
         }
         finally
@@ -181,67 +185,67 @@ public class ScriptUpdateProcessor
         {
             isScriptValidationSuccessful = false;
             throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
-                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_SCRIPT),
-                    getErrorCode(MsgConstant.INVALID_MESSAGE));
+                                                getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_SCRIPT),
+                                                getErrorCode(MsgConstant.INVALID_MESSAGE));
         }
         if (DataUtil.isNull(ssu.getScriptUpdateStatus()))
         {
             isScriptValidationSuccessful = false;
             throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS),
-                    getErrorMessage(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS),
-                    getErrorCode(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS));
+                                                getErrorMessage(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS),
+                                                getErrorCode(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS));
         }
         if (DataUtil.isEmpty(ssu.getSource()))
         {
             isScriptValidationSuccessful = false;
             throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
-                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_SOURCE),
-                    getErrorCode(MsgConstant.INVALID_MESSAGE));
+                                                getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_SOURCE),
+                                                getErrorCode(MsgConstant.INVALID_MESSAGE));
         }
         if (DataUtil.isEmpty(ssu.getTarget()))
         {
             isScriptValidationSuccessful = false;
             throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
-                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_TARGET),
-                    getErrorCode(MsgConstant.INVALID_MESSAGE));
+                                                getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_TARGET),
+                                                getErrorCode(MsgConstant.INVALID_MESSAGE));
         }
         if (DataUtil.isNull(ssu.getScriptSequenceNumber()))
         {
             isScriptValidationSuccessful = false;
             throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
-                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_SEQ_NO),
-                    getErrorCode(MsgConstant.INVALID_MESSAGE));
+                                                getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_SEQ_NO),
+                                                getErrorCode(MsgConstant.INVALID_MESSAGE));
         }
         if (DataUtil.isNull(ssu.getAutoRetryCount()))
         {
             isScriptValidationSuccessful = false;
             throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
-                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_RETRY_COUNT),
-                    getErrorCode(MsgConstant.INVALID_MESSAGE));
+                                                getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_RETRY_COUNT),
+                                                getErrorCode(MsgConstant.INVALID_MESSAGE));
         }
 
         if (DataUtil.isEmpty(ssu.getTrackingReference()))
         {
             isScriptValidationSuccessful = false;
             throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
-                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_TRACKING_REF),
-                    getErrorCode(MsgConstant.INVALID_MESSAGE));
+                                                getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_TRACKING_REF),
+                                                getErrorCode(MsgConstant.INVALID_MESSAGE));
         }
 
         if (DataUtil.isNull(ssu.getCard()) || DataUtil.isEmpty(ssu.getCard().getPAN()))
         {
             isScriptValidationSuccessful = false;
             throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
-                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_PAN),
-                    getErrorCode(MsgConstant.INVALID_MESSAGE));
+                                                getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_PAN),
+                                                getErrorCode(MsgConstant.INVALID_MESSAGE));
         }
 
         if (DataUtil.isEmpty(ssu.getCard().getPANSequence()) || !DataUtil.isPSNValid(ssu.getCard().getPANSequence()))
         {
             isScriptValidationSuccessful = false;
             throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
-                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_PSN),
-                    getErrorCode(MsgConstant.INVALID_MESSAGE));
+                                                getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_PSN),
+                                                getErrorCode(MsgConstant.INVALID_MESSAGE));
         }
 
         long expDate = -1;
@@ -257,43 +261,42 @@ public class ScriptUpdateProcessor
 
         if (!DateHelper.isDate(expDate))
         {
+            setErrorData("Expiry Date");
             isScriptValidationSuccessful = false;
             throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
-                    getErrorMessage(MsgConstant.INVALID_DATA_INVALID_EXP_DATE_FORMAT),
-                    getErrorCode(MsgConstant.INVALID_DATA));
+                                                getErrorMessage(MsgConstant.INVALID_DATA_INVALID_EXP_DATE_FORMAT),
+                                                getErrorCode(MsgConstant.INVALID_DATA));
         }
 
         if (!DataUtil.isDate(ssu.getDatePublished()))
         {
+            setErrorData("Date Published");
             isScriptValidationSuccessful = false;
             throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
-                    getErrorMessage(MsgConstant.INVALID_DATA_INVALID_PUBLISHED_DATE_FORMAT),
-                    getErrorCode(MsgConstant.INVALID_DATA));
+                                                getErrorMessage(MsgConstant.INVALID_DATA_INVALID_PUBLISHED_DATE_FORMAT),
+                                                getErrorCode(MsgConstant.INVALID_DATA));
         }
 
         if (DataUtil.isNull(ssu.getScriptOrder()))
         {
             isScriptValidationSuccessful = false;
             throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
-                    getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_SCRIPT_ORDER),
-                    getErrorCode(MsgConstant.INVALID_DATA));
+                                                getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_SCRIPT_ORDER),
+                                                getErrorCode(MsgConstant.INVALID_DATA));
         }
         boolean isStatusValid = isValidScriptUpdateStatus(ssu);
-        if(!isStatusValid)
+        if (!isStatusValid)
         {
             isScriptValidationSuccessful = false;
             throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS),
-                    getErrorMessage(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS)
+                                                getErrorMessage(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS)
                     + ": " + ssu.getScriptUpdateStatus().toString(),
-                    getErrorCode(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS));
+                                                getErrorCode(MsgConstant.INVALID_SCRIPT_UPDATE_STATUS));
         }
         validateDeletionDetails(ssu);
         validateDeviceDetails(ssu);
         validateTransactionDetails(ssu);
         validateDeliveryStatus(ssu);
-        //ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELETED removed as per spec change
-        //ScriptDeliveryStatus required if SENT, DELIVERED OR DELETED, but later DELETED was removed.
-
 
         //Locate Card R.5-1
         long cadExpdate = generateExpiryDate(ssu);
@@ -301,11 +304,10 @@ public class ScriptUpdateProcessor
         {
             sc = cardGen.generateScriptableCard(ssu.getCard().getPAN(),
                                                 ssu.getCard().getPANSequence(), cadExpdate, scope);
-            if(sc != null)
+            if (sc != null)
             {
                 app = sc.getApplication().getApplication();
             }
-
         }
         catch (ScriptValidationException ex)
         {
@@ -325,65 +327,99 @@ public class ScriptUpdateProcessor
         ///If non parm script having the wrong business function.
 
 
-        if (ssu.getBusinessFunction() == null)
+        if (ssu.getBusinessFunction() == null || ssu.getBusinessFunction().getFunctionName().trim().length() == 0)
         {
+            //setErrorData("Business Function");
             isScriptValidationSuccessful = false;
-            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE),
-                                                      getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_BUSINESS_FUNCTION),
-                                                      getErrorCode(MsgConstant.INVALID_MESSAGE));
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_BUSINESS_FUNCTION),
+                                                getErrorMessage(MsgConstant.INVALID_MESSAGE_EMPTY_BUSINESS_FUNCTION),
+                                                getErrorCode(MsgConstant.INVALID_MESSAGE));
         }
 
-        if (!isParameterScript(ssu))
+        //Here the assumption is if the bus. function is configured then it is a non param business function.
+        ESPBusinessFunction bf = app.getESPBusinessFunctionWithAlias(ssu.getBusinessFunction().getFunctionName());
+        if (!isParameterScript(ssu) || bf != null)
         {
-            ESPBusinessFunction bf = app.getESPBusinessFunctionWithAlias(ssu.getBusinessFunction().getFunctionName());
+
             if (bf == null)
             {
+                setErrorData(ssu.getBusinessFunction().getFunctionName());
                 isScriptValidationSuccessful = false;
-                throw new ScriptValidationException(getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
-                                                      getErrorMessage(MsgConstant.
-                        DATA_ITEM_MISSING_NON_PARAM_SCRIPT_BUSINESS_FUNCTION),
-                                                      getErrorCode(MsgConstant.
-                        DATA_ITEM_MISSING_NON_PARAM_SCRIPT_BUSINESS_FUNCTION));
+                ScriptValidationException svex = new ScriptValidationException(
+                        getErrorMessage(MsgConstant.UNKNOWN_BUSINESS_FUNCTION),
+                         DataUtil.getErrorMessage(MsgConstant.DATA_ITEM_MISSING_NON_PARAM_SCRIPT_BUSINESS_FUNCTION),
+                        getErrorCode(MsgConstant.UNKNOWN_BUSINESS_FUNCTION));
+                svex.setBusinessError(false);
+                throw svex;
+            }
+            else
+            {
+                if (ssu.getScriptDataItem() != null && !ssu.getScriptDataItem().isEmpty())
+                {
+                    List<NVPType> dataItems = ssu.getScriptDataItem();
+                    String[] sb = new String[dataItems.size()];
+                    String diMsg = "";
+                    for (int x = 0; x < dataItems.size(); x++)
+                    {
+                        if (diMsg.trim().length() > 0)
+                        {
+                            diMsg += ",";
+                        }
+                        NVPType di = dataItems.get(x);
+                        sb[x] = di.getName();
+                        diMsg += di.getName();
+                    }
+                    setErrorData(diMsg);
+                    ScriptValidationException svex =
+                            new ScriptValidationException(DataUtil.getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
+                               DataUtil.getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED_FOR_NON_PARAM_BF, diMsg),
+                               DataUtil.getErrorCode(MsgConstant.INVALID_DATA_ITEM_SUPPLIED));
+                    svex.setBusinessError(false);
+                    throw svex;
+                }
             }
         }
         else
         {
-            ESPBusinessFunction bf = app.getESPBusinessFunctionWithAlias("Parameter Script");
+            bf = app.getESPBusinessFunctionWithAlias("Parameter Script");
             if (bf == null)
             {
                 isScriptValidationSuccessful = false;
-                throw new ScriptValidationException(getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
-                                                      getErrorMessage(MsgConstant.
-                        DATA_ITEM_MISSING_PARAMETER_SCRIPT_BUSINESS_FUNCTION),
-                                                      getErrorCode(MsgConstant.DATA_ITEM_MISSING));
+                ScriptValidationException svex = new ScriptValidationException(getErrorMessage(
+                        MsgConstant.UNKNOWN_BUSINESS_FUNCTION),
+                                                                               getErrorMessage(
+                        MsgConstant.DEFAULT_BF_FOR_PARAM_SCRIPT_MISSING),
+                                                                               getErrorCode(
+                        MsgConstant.UNKNOWN_BUSINESS_FUNCTION));
+                svex.setBusinessError(false);
+                throw svex;
             }
             else
             {
-                Result<List<ESPBusinessParameter>> result = getResultOfAllDefinedParametersInRequest(ssu.getScriptDataItem());
+                Result<BusinessParameterList> result = getResultOfAllDefinedParametersInRequest(ssu.getScriptDataItem());
                 boolean docontinue = result.isSuccessFul();
-                if(!docontinue)
+                List<NVPType> scriptData = ssu.getScriptDataItem();
+                BusinessParameterList edata = result.getData();
+                if (!docontinue)
                 {
-                    isScriptValidationSuccessful = false;
-                    List<ESPBusinessParameter> edata = result.getData();
-                    if(edata != null && !edata.isEmpty())
+                    //should throw error if all items are not found or enableProcessOnlyValidDataItems = true
+                    errorData = edata.getInvalidDataDescription();                    
                     {
-                        Iterator<ESPBusinessParameter> it = edata.iterator();
-                        StringBuilder sb = new StringBuilder();
-                        while(it.hasNext())
-                        {
-                            if(sb != null && sb.toString().trim().length() > 0)
-                            {
-                                sb.append(",");
-                            }
-                            ESPBusinessParameter bp = it.next();
-                            sb.append(bp.getAlias());
-                        }
-                        errorData = sb.toString();
+                        isScriptValidationSuccessful = false;
+                        throw new ScriptValidationException(getErrorMessage(MsgConstant.UNKNOWN_SCRIPT_DATA_ITEM),
+                                                            DataUtil.getErrorMessage(
+                                MsgConstant.SCRIPT_DATA_ITEM_NOT_RECOGNISED, errorData),
+                                                            getErrorCode(MsgConstant.UNKNOWN_SCRIPT_DATA_ITEM));
                     }
-                    throw new ScriptValidationException(getErrorMessage(MsgConstant.UNKNOWN_SCRIPT_DATA_ITEM),
-                                                      getErrorMessage(MsgConstant.
-                                                        UNKNOWN_SCRIPT_DATA_ITEM),
-                                                      getErrorCode(MsgConstant.UNKNOWN_SCRIPT_DATA_ITEM));
+                }
+                else
+                {
+                    if (enableProcessOnlyValidDataItems && edata.hasInvalidData() 
+                                                    && edata.getInvalidDataCount() != scriptData.size())
+                    {
+                        errorData = edata.getInvalidDataDescription(); 
+                        logger.warn(getErrorMessage(MsgConstant.UNKNOWN_SCRIPT_DATA_ITEM) + " " + errorData);                        
+                    }
                 }
             }
         }
@@ -395,7 +431,7 @@ public class ScriptUpdateProcessor
      * <p/>
      * @return
      */
-    private static long generateExpiryDate(ScriptStatusUpdate ssu)
+    private long generateExpiryDate(ScriptStatusUpdate ssu)
     {
         long expDate = 0;
         try
@@ -405,11 +441,22 @@ public class ScriptUpdateProcessor
         }
         catch (AffinaEspUtilException ex)
         {
-            throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
-                    getErrorMessage(MsgConstant.INVALID_DATA_INVALID_EXP_DATE_FORMAT),
-                    getErrorCode(MsgConstant.INVALID_DATA));
+            setErrorData("Expiry Date");
+            logger.error(ex.getMessage());
+            throw new ScriptValidationException(DataUtil.getErrorMessage(MsgConstant.INVALID_DATA, "Expiry Date"),
+                                                getErrorMessage(MsgConstant.INVALID_DATA_INVALID_EXP_DATE_FORMAT),
+                                                getErrorCode(MsgConstant.INVALID_DATA));
         }
         return expDate;
+    }
+
+    /**
+     *
+     * @param errData
+     */
+    private void setErrorData(String errData)
+    {
+        errorData = errData;
     }
 
     /**
@@ -440,7 +487,7 @@ public class ScriptUpdateProcessor
         try
         {
             //Get the stored record that matches the TrackingReference.
-            ESPScriptUpdateStatus statusUpdateData =  getExistingStatusUpdateData(ssu.getTrackingReference(), scope);
+            ESPScriptUpdateStatus statusUpdateData = getExistingStatusUpdateData(ssu.getTrackingReference(), scope);
             //1.Get the pan,psnexp date
             //2.See whether another ESPParameter exist with a similar PAN to the one fetched above via tracking ref.
             //3.if does not then fine and proceed. script order does not matter.
@@ -448,7 +495,7 @@ public class ScriptUpdateProcessor
             //Must get the soft card and test the PAN,PSN and EXP Date with the one arrived
             //And check the arived seq and if its greater than stored update else discard.
             Timestamp newDate = getScriptDate(ssu);
-            ESPScriptUpdateStatus statusUpdateDataWithSameCardData  = null;
+            ESPScriptUpdateStatus statusUpdateDataWithSameCardData = null;
             //Null statusUpdateData means that Script with this Tracking Ref does not exists yet. So create it new.
             if (statusUpdateData == null)
             {
@@ -456,42 +503,41 @@ public class ScriptUpdateProcessor
                 isNewScript = true;
                 //We are here means its a new script new tracking ref. So we check for existence of card for the new TR
                 statusUpdateDataWithSameCardData = getESPScriptUpdateStatusByCardData(ssu);
-                if(statusUpdateDataWithSameCardData == null)
+                if (statusUpdateDataWithSameCardData == null)
                 {
                     //We are here means no card found for new TR so we check if card exists at all
                     //This will check for PAN/PSN/EXPDATE and NO TR as in the above case.
-                    statusUpdateDataWithSameCardData = getESPScriptUpdateStatusByCardDataAndNoTR(ssu);
+                    //statusUpdateDataWithSameCardData = getESPScriptUpdateStatusByCardDataAndNoTR(ssu);
                 }
                 //if new TR same SO then update. New TR different SO then create new.
                 //statusUpdateDataWithSameCardData == null means TR is new and Card does not exist.
-                if(statusUpdateDataWithSameCardData == null ||
-                        doUpdateScriptStatus(statusUpdateDataWithSameCardData.getScriptOrder(),
-                                             ssu.getScriptOrder().longValue()))
+                if (statusUpdateDataWithSameCardData == null
+                        || doUpdateScriptStatus(statusUpdateDataWithSameCardData.getScriptOrder(),
+                                                ssu.getScriptOrder().longValue()))
                 {
                     //We are here means new script with new TR does not have that card in DB
                     statusUpdateData = GenericPersistentDAO.instance().getRegisteredObject(ESPScriptUpdateStatus.class);
                     updateModel(statusUpdateData, ssu, true);
                     //Get ESP Param that matches PAN, PSN and Ex Date of the card in request (ssu above)
                     SoftCard softCard = sc.getSoftCard();
-//                    softCard = (SoftCard) GenericPersistentDAO.instance().getRegisteredExistingObject(softCard);
-
                     statusUpdateData.setSoftCard(softCard);
                 }
             }
             else
             {
-                if(!statusUpdateData.getESPApplicationDetail().getPan().equals(ssu.getCard().getPAN())
-                        || !statusUpdateData.getESPApplicationDetail().getPanSequenceNumber().equals(ssu.getCard().getPANSequence())
-                        || statusUpdateData.getESPApplicationDetail().getExpiryDate().getTime() != generateExpiryDate(ssu))
+                if (!statusUpdateData.getESPApplicationDetail().getPan().equals(ssu.getCard().getPAN())
+                        || !statusUpdateData.getESPApplicationDetail().getPanSequenceNumber().equals(
+                        ssu.getCard().getPANSequence())
+                        || statusUpdateData.getESPApplicationDetail().getExpiryDate().getTime() != generateExpiryDate(
+                        ssu))
                 {
                     isScriptValidationSuccessful = false;
                     throw new ScriptValidationException(getErrorMessage(MsgConstant.DUPLICATE_TRACKING_REFERENCE),
-                                     getErrorMessage(MsgConstant.DUPLICATE_TRACKING_REFERENCE),
-                            getErrorCode(MsgConstant.DUPLICATE_TRACKING_REFERENCE));
+                                                        getErrorMessage(MsgConstant.DUPLICATE_TRACKING_REFERENCE),
+                                                        getErrorCode(MsgConstant.DUPLICATE_TRACKING_REFERENCE));
                 }
                 else
                 {
-
                 }
             }
 
@@ -519,11 +565,11 @@ public class ScriptUpdateProcessor
                 isCheckScriptOrder = true;
             }
             //Another record for the card exists (indicated by isCheckScriptOrder above) and script order is heigher.
-            boolean doUpdateScriptStatus = (statusUpdateData != null &&
-                    doUpdateScriptStatus(statusUpdateData.getScriptOrder(), ssu.getScriptOrder().longValue()))
-                                            || (isCheckScriptOrder
-                                            && doUpdateScriptStatus(statusUpdateDataWithSameCardData.getScriptOrder(),
-                                                                                    ssu.getScriptOrder().longValue()));
+            boolean doUpdateScriptStatus = (statusUpdateData != null
+                    && doUpdateScriptStatus(statusUpdateData.getScriptOrder(), ssu.getScriptOrder().longValue()))
+                    || (isCheckScriptOrder
+                    && doUpdateScriptStatus(statusUpdateDataWithSameCardData.getScriptOrder(),
+                                            ssu.getScriptOrder().longValue()));
             if (doUpdateScriptStatus || ssu.getScriptUpdateStatus().equals(ScriptStatusUpdateType.DELETED))
             {
                 //Update just the params..
@@ -623,15 +669,16 @@ public class ScriptUpdateProcessor
         {
             boolean docontinue;
             List<NVPType> paramData = ssu.getScriptDataItem();
-            Result<List<ESPBusinessParameter>> result = getResultOfAllDefinedParametersInRequest(paramData);
+            Result<BusinessParameterList> result = getResultOfAllDefinedParametersInRequest(paramData);
             docontinue = result.isSuccessFul();
             if (docontinue)
             {
                 //This is what we have configured.
                 //ESPBusinessFunction bf = (ESPBusinessFunction) bfList.get(0);
                 //Parameter Script
-                List<ESPBusinessParameter> paramDefinition = result.getData();//getESPBusinessParameters();
-                docontinue = !paramDefinition.isEmpty();
+                BusinessParameterList paramDefinition = result.getData();//getESPBusinessParameters();
+                List<BusinessParameter> bpList = paramDefinition.getValidBPList();//getProperty(AbstractModel.FIELD_BP_LIST);
+                docontinue = !bpList.isEmpty();
                 if (docontinue)
                 {
                     Vector storeParams = scriptUpdateData.getScriptStatusParameters();
@@ -647,15 +694,17 @@ public class ScriptUpdateProcessor
             {
                 isScriptValidationSuccessful = false;
                 throw new ScriptValidationException(getErrorMessage(MsgConstant.UNKNOWN_SCRIPT_DATA_ITEM),
-                                                    getErrorMessage(MsgConstant.UNKNOWN_SCRIPT_DATA_ITEM)
-                        + extractParamterAliasesFromMessage(paramData) + "'", getErrorCode(MsgConstant.UNKNOWN_SCRIPT_DATA_ITEM));
+                                                    DataUtil.getErrorMessage(MsgConstant.SCRIPT_DATA_ITEM_NOT_RECOGNISED,
+                                                                             extractParamterAliasesFromMessage(paramData)),
+                                                    getErrorCode(MsgConstant.UNKNOWN_SCRIPT_DATA_ITEM));
             }
         }
     }
 
     /**
      *
-     * @param mc
+     * @param mc < p/>
+     * <p/>
      * @return
      */
     public static String getErrorMessage(MsgConstant mc)
@@ -667,6 +716,7 @@ public class ScriptUpdateProcessor
     {
         return ErrorMessageBundle.getMessageCode(mc);
     }
+
     /**
      * Updates EMV parameters.
      * <p/>
@@ -677,17 +727,21 @@ public class ScriptUpdateProcessor
     private void updateEMVParamvalues(ESPScriptUpdateStatus scriptUpdateData,
                                       Vector storedparams,
                                       Iterator<NVPType> paramListFromRequest,
-                                      List<ESPBusinessParameter> configuredParamList, boolean isDeleted)
+                                      BusinessParameterList configuredParamList, boolean isDeleted)
     {
         while (paramListFromRequest.hasNext())
         {
             NVPType requestParamItem = paramListFromRequest.next();
-            Iterator<ESPBusinessParameter> definedParams = configuredParamList.iterator();
+            List<BusinessParameter> bpList = configuredParamList.getValidBPList();//getProperty(AbstractModel.FIELD_BP_LIST);
+
+            Iterator<BusinessParameter> definedParams = bpList.iterator();
             boolean isParamFound = false;
             while (definedParams.hasNext())
             {
-                ESPBusinessParameter definedInstance = definedParams.next();
-                NVPType definedNVP = createNewType(definedInstance.getAlias(), definedInstance.getValueDefault());
+                BusinessParameter definedInstance = definedParams.next();
+                String value = definedInstance.getParent().getValueDefault();
+                String paramAlias = definedInstance.getParent().getAlias();
+                NVPType definedNVP = createNewType(paramAlias, value);
                 boolean isParamInRequestDefined = definedNVP.getName().equals(requestParamItem.getName());
                 //if defined params is in the request.
                 if (isParamInRequestDefined)
@@ -697,10 +751,11 @@ public class ScriptUpdateProcessor
                             || !isRequestedParamStored(requestParamItem, storedparams))
                     {
                         //logger.info("Param in message " + requestParamItem.getName() + " "
-                               // + "is not already stored. So continuing with storing it.");
+                        // + "is not already stored. So continuing with storing it.");
                         ESPScriptStatusParameter pInstance = getBusinessParameterStatusInstance(true);
-                        pInstance.setEspBusinessParameter(definedInstance);
-                        pInstance.setParameterValue(requestParamItem.getValue());
+                        ESPBusinessParameter parentObject = definedInstance.getParent();
+                        pInstance.setEspBusinessParameter(parentObject);
+                        pInstance.setParameterValue(isDeleted ? null : requestParamItem.getValue());
                         pInstance.setScriptUpdateStatus(scriptUpdateData);
                         pInstance.setDateCreated(DateHelper.today());
                         scriptUpdateData.addScriptStatusParameter(pInstance);
@@ -725,10 +780,6 @@ public class ScriptUpdateProcessor
                                 }
                                 else
                                 {
-                                    //Else change the param value
-                                    //logger.info("Param in message " + requestParamItem.getName() + " "
-                                     //       + "is already stored. So continuing with "
-                                     //       + "updating it with new value.");
                                     storedInstance.setParameterValue(requestParamItem.getValue());
                                 }
                             }
@@ -747,66 +798,82 @@ public class ScriptUpdateProcessor
      *
      * @param paramList
      */
-    private Result<List<ESPBusinessParameter>> getResultOfAllDefinedParametersInRequest(List<NVPType> paramList)
+    private Result<BusinessParameterList> getResultOfAllDefinedParametersInRequest(List<NVPType> paramList)
     {
         List<String> paramnamesList = extractParameterAliasListFromMessage(paramList);
         List<NVPType> localParamList = new ArrayList<NVPType>(paramList);
         Vector params = getESPBusinessParameters(paramnamesList);
-        boolean isSuccess = params != null && params.size() == paramList.size();
-        List<ESPBusinessParameter> bpList = new ArrayList<ESPBusinessParameter>();
+        boolean isSuccess = params != null && ((params.size() == paramList.size())
+                || (enableProcessOnlyValidDataItems && params.size() != paramList.size()));
+        BusinessParameterList bpList = new BusinessParameterList();
         if (isSuccess)
         {
             Iterator it = params.iterator();
             while (it.hasNext())
             {
                 ESPBusinessParameter bp = (ESPBusinessParameter) it.next();
-//                bp = (ESPBusinessParameter) GenericPersistentDAO.instance().getRegisteredExistingObject(bp);
-                bpList.add(bp);
+                BusinessParameter busparam = new BusinessParameter(bp);
+                bpList.getValidBPList().add(busparam);
+            }
+        }
+
+        if (params != null)
+        {
+            Iterator it = params.iterator();
+            boolean found = false;
+            while (it.hasNext())
+            {
+                ESPBusinessParameter bp = (ESPBusinessParameter) it.next();
+                BusinessParameter busparam = new BusinessParameter(bp);
+                Iterator<NVPType> pIt = localParamList.iterator();
+                while (pIt.hasNext())
+                {
+                    NVPType nvp = pIt.next();
+                    if (bp.getAlias().equals(nvp.getName()))
+                    {
+                        found = true;
+                        pIt.remove();
+                        break;  
+                    }
+                }                
+            }
+            if(!localParamList.isEmpty())
+            {
+                Iterator<NVPType> pIt = localParamList.iterator();
+                while (pIt.hasNext())
+                {
+                    NVPType nvp = pIt.next();
+                    ESPBusinessParameter invalidbp = new ESPBusinessParameter();
+                    invalidbp.setName(nvp.getName());
+                    invalidbp.setAlias(nvp.getName());
+                    BusinessParameter invalidbusparam = new BusinessParameter(invalidbp);
+                    bpList.getInvalidBPList().add(invalidbusparam);
+                }
             }
         }
         else
         {
-            if(params != null)
+            Iterator<NVPType> pIt = paramList.iterator();
+            while (pIt.hasNext())
             {
-                Iterator it = params.iterator();
-                while (it.hasNext())
-                {
-                    ESPBusinessParameter bp = (ESPBusinessParameter) it.next();
-//                    bp = (ESPBusinessParameter) GenericPersistentDAO.instance().getRegisteredExistingObject(bp);
-                    Iterator<NVPType> pIt = localParamList.iterator();
-                    while(pIt.hasNext())
-                    {
-                        NVPType nvp = pIt.next();
-                        if(!bp.getName().equals(nvp.getName()))
-                        {
-                            bpList.add(bp);
-                            pIt.remove();
-                        }
-                    }
-                }
-            }
-            else
-            {
-                Iterator<NVPType> pIt = paramList.iterator();
-                while(pIt.hasNext())
-                {
-                    NVPType nvp = pIt.next();
-                    ESPBusinessParameter bp = new ESPBusinessParameter();
-                    bp.setName(nvp.getName());
-                    bp.setAlias(nvp.getName());
-                    bpList.add(bp);
-                }
+                NVPType nvp = pIt.next();
+                ESPBusinessParameter bp = new ESPBusinessParameter();
+                bp.setName(nvp.getName());
+                bp.setAlias(nvp.getName());
+                BusinessParameter busparam = new BusinessParameter(bp);
+                bpList.getInvalidBPList().add(busparam);
+                //bpList.add(bp);
             }
         }
-        Result<List<ESPBusinessParameter>> res = Result.<List<ESPBusinessParameter>>getInstance(isSuccess, bpList);
+
+        Result<BusinessParameterList> res = Result.<BusinessParameterList>getInstance(isSuccess, bpList);
         return res;
     }
 
     /**
      *
-     * @param paramList
-     * <
-     * p/>
+     * @param paramList < p/>
+     * <p/>
      * @return
      */
     private List<String> extractParameterAliasListFromMessage(List<NVPType> paramList)
@@ -817,9 +884,10 @@ public class ScriptUpdateProcessor
         }
         List<String> paramnamesList = new ArrayList<String>();
         Iterator<NVPType> it = paramList.iterator();
+        StringBuilder dataItems = new StringBuilder();
         while (it.hasNext())
         {
-            NVPType nvpType = it.next();
+            NVPType nvpType = it.next();           
             paramnamesList.add(nvpType.getName());
         }
         return paramnamesList;
@@ -835,6 +903,10 @@ public class ScriptUpdateProcessor
         Iterator<NVPType> it = paramList.iterator();
         while (it.hasNext())
         {
+            if (sb.length() > 0)
+            {
+                sb.append(",");
+            }
             NVPType nvpType = it.next();
             sb.append(nvpType.getName());
         }
@@ -919,14 +991,14 @@ public class ScriptUpdateProcessor
         if (isDeleted(ssu))
         {
             dateTime = new java.sql.Timestamp(Long.parseLong(ssu.getDeletionDetails().getDeletedDate())); //DateHelper.getTimestampUSFormat(DateHelper.fromStringTolong(
-                                                                                        //ssu.getDeletionDetails().getDeletedDate()));
+            //ssu.getDeletionDetails().getDeletedDate()));
         }
         //For Delivered Scripts
         if (isDelivered(ssu))
         {
             dateTime = new java.sql.Timestamp(Long.parseLong(ssu.getTransactionDetails().getTransactionDate()));
-                    //DateHelper.getTimestampUSFormat(DateHelper.fromStringTolong(
-                    //ssu.getTransactionDetails().getTransactionDate()));
+            //DateHelper.getTimestampUSFormat(DateHelper.fromStringTolong(
+            //ssu.getTransactionDetails().getTransactionDate()));
         }
         //If no status yet
         if (dateTime == null)
@@ -967,7 +1039,7 @@ public class ScriptUpdateProcessor
      * Returns true if current script order is less than the newly arrived script order.
      * <p/>
      * @param currentScriptOrder Current Business function recorded.
-     * @param arrivedScriptOrder  Newly arrived status via SriptStatusUpdate message alert.
+     * @param arrivedScriptOrder Newly arrived status via SriptStatusUpdate message alert.
      * <p/>
      * @return true as described above.
      */
@@ -1049,8 +1121,8 @@ public class ScriptUpdateProcessor
     private boolean hasScriptDeliveryStatus(ScriptStatusUpdate ssu)
     {
         boolean isDeliveryScript = ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELIVERED
-                || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.SENT;
-        //|| ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELETED;
+                || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.SENT
+                || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.RESENT;
         return isDeliveryScript && !DataUtil.isNull(ssu.getScriptDeliveryStatus());
     }
 
@@ -1061,37 +1133,42 @@ public class ScriptUpdateProcessor
     private void validateTransactionDetails(ScriptStatusUpdate ssu)
     {
         if (ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.SENT
+                || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.RESENT
                 || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELIVERED)
         {
             if (DataUtil.isNull(ssu.getTransactionDetails()))
             {
+                setErrorData("Transaction details");
                 isScriptValidationSuccessful = false;
-                throw new ScriptValidationException(getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
-                    getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
-                    getErrorCode(MsgConstant.DATA_ITEM_MISSING));
+                throw new ScriptValidationException(DataUtil.getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
+                                                    DataUtil.getErrorMessage(MsgConstant.MISSING_TRANSACTION_DETAILS),
+                                                    getErrorCode(MsgConstant.DATA_ITEM_MISSING));
             }
             else
             {
                 if (!DataUtil.isDate(ssu.getTransactionDetails().getTransactionDate()))
                 {
+                    setErrorData("Transaction date");
                     isScriptValidationSuccessful = false;
-                    throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
-                        getErrorMessage(MsgConstant.INVALID_DATA),
-                        getErrorCode(MsgConstant.INVALID_DATA));
+                    throw new ScriptValidationException(DataUtil.getErrorMessage(MsgConstant.INVALID_DATA),
+                                                        DataUtil.getErrorMessage(MsgConstant.INVALID_TRANSACTION_DATE),
+                                                        getErrorCode(MsgConstant.INVALID_DATA));
                 }
                 if (DataUtil.isEmpty(ssu.getTransactionDetails().getAtc()))
                 {
+                    setErrorData("ATC");
                     isScriptValidationSuccessful = false;
                     throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
-                        getErrorMessage(MsgConstant.INVALID_DATA),
-                        getErrorCode(MsgConstant.INVALID_DATA));
+                                                        getErrorMessage(MsgConstant.INVALID_TRANSACTION_ATC),
+                                                        getErrorCode(MsgConstant.INVALID_DATA));
                 }
                 if (DataUtil.isNull(ssu.getTransactionDetails().getScriptBytes()))
                 {
+                    setErrorData("Script bytes");
                     isScriptValidationSuccessful = false;
                     throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
-                        getErrorMessage(MsgConstant.INVALID_DATA),
-                        getErrorCode(MsgConstant.INVALID_DATA));
+                                                        getErrorMessage(MsgConstant.INVALID_TRANSACTION_SCRIPT_BYTES),
+                                                        getErrorCode(MsgConstant.INVALID_DATA));
                 }
             }
         }
@@ -1099,10 +1176,11 @@ public class ScriptUpdateProcessor
         {
             if (!DataUtil.isNull(ssu.getTransactionDetails()))
             {
+                setErrorData("Transaction details");
                 isScriptValidationSuccessful = false;
                 throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
-                        getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
-                        getErrorCode(MsgConstant.INVALID_DATA_ITEM_SUPPLIED));
+                                                    getErrorMessage(MsgConstant.TRANSACTION_DETAILS_DATA_NOT_EXPECTED),
+                                                    getErrorCode(MsgConstant.INVALID_DATA_ITEM_SUPPLIED));
             }
         }
         hasTransactionDetails = true;
@@ -1115,31 +1193,49 @@ public class ScriptUpdateProcessor
     private void validateDeviceDetails(ScriptStatusUpdate ssu)
     {
         if (ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.SENT
+                || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.RESENT
                 || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELIVERED)
         {
             if (DataUtil.isNull(ssu.getDeviceDetails()))
             {
+                setErrorData("Device Details");
                 isScriptValidationSuccessful = false;
                 throw new ScriptValidationException(getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
-                    getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
-                    getErrorCode(MsgConstant.DATA_ITEM_MISSING));
+                                                    DataUtil.getErrorMessage(MsgConstant.INVALID_DEVICE_DETAILS_SUPPLIED),
+                                                    getErrorCode(MsgConstant.DATA_ITEM_MISSING));
             }
             else
             {
+                //This is optional
                 if (DataUtil.isEmpty(ssu.getDeviceDetails().getDeviceCapabilities()))
                 {
-                    isScriptValidationSuccessful = false;
-                    throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
-                        getErrorMessage(MsgConstant.INVALID_DATA),
-                        getErrorCode(MsgConstant.INVALID_DATA));
+//                    setErrorData("Device Capabilities");
+//                    isScriptValidationSuccessful = false;
+//                    throw new ScriptValidationException(
+//                            getErrorMessage(MsgConstant.INVALID_DATA),
+//                                                        getErrorMessage(MsgConstant.INVALID_DEVICE_CAPABILITIES_SUPPLIED),
+//                                                        getErrorCode(MsgConstant.INVALID_DATA));
                 }
                 if (DataUtil.isNull(ssu.getDeviceDetails().getDeviceType()))
                 {
+                    setErrorData("Device Type");
                     isScriptValidationSuccessful = false;
                     throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
-                        getErrorMessage(MsgConstant.INVALID_DATA),
-                        getErrorCode(MsgConstant.INVALID_DATA));
+                                                        DataUtil.getErrorMessage(
+                            MsgConstant.INVALID_DEVICE_TYPE_SUPPLIED),
+                                                        getErrorCode(MsgConstant.INVALID_DATA));
                 }
+            }
+        }
+        else
+        {
+            if (!DataUtil.isNull(ssu.getDeviceDetails()))
+            {
+                setErrorData("Device Details");
+                isScriptValidationSuccessful = false;
+                throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
+                                                    getErrorMessage(MsgConstant.DEVICE_DETAILS_DATA_NOT_EXPECTED),
+                                                    getErrorCode(MsgConstant.INVALID_DATA_ITEM_SUPPLIED));
             }
         }
         hasDeviceDetails = true;
@@ -1148,34 +1244,40 @@ public class ScriptUpdateProcessor
     private void validateDeliveryStatus(ScriptStatusUpdate ssu)
     {
         if (ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.SENT
+                || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.RESENT
                 || ssu.getScriptUpdateStatus() == ScriptStatusUpdateType.DELIVERED)
         {
             if (DataUtil.isNull(ssu.getScriptDeliveryStatus()))
             {
                 isScriptValidationSuccessful = false;
+                setErrorData("Script Delivery status");
                 throw new ScriptValidationException(getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
-                    getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
-                    getErrorCode(MsgConstant.DATA_ITEM_MISSING));
+                                                    getErrorMessage(MsgConstant.MISSING_SCRIPT_DELIVERY_STATUS),
+                                                    getErrorCode(MsgConstant.DATA_ITEM_MISSING));
             }
             else
             {
                 if (DataUtil.isEmpty(ssu.getScriptDeliveryStatus().getDeliveryStatus()))
                 {
+                    setErrorData("Script Delivery status");
                     isScriptValidationSuccessful = false;
                     throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
-                        getErrorMessage(MsgConstant.INVALID_DATA),
-                        getErrorCode(MsgConstant.INVALID_DATA));
+                                                        getErrorMessage(MsgConstant.INVALID_SCRIPT_DELIVERY_STATUS_SUPPLIED),
+                                                        getErrorCode(MsgConstant.INVALID_DATA));
                 }
                 String delStatus = ssu.getScriptDeliveryStatus().getDeliveryStatus();
-                if(!SEMScriptDeliveryStatus.DELIVERY_FAILED.isIn(delStatus) ||
-                        !SEMScriptDeliveryStatus.DELIVERY_FAILED_SCRIPT_RESTAGED.isIn(delStatus) ||
-                        !SEMScriptDeliveryStatus.DELIVERY_SUCCEEDED.isIn(delStatus)
-                        )
+                if (!SEMScriptDeliveryStatus.DELIVERY_FAILED.isIn(delStatus)
+                        && !SEMScriptDeliveryStatus.DELIVERY_FAILED_SCRIPT_RESTAGED.isIn(delStatus)
+                        && !SEMScriptDeliveryStatus.DELIVERY_SUCCEEDED.isIn(delStatus)
+                        && !SEMScriptDeliveryStatus.UNKNOWN.isIn(delStatus))
                 {
+                    setErrorData("Script Delivery status");
                     isScriptValidationSuccessful = false;
-                    throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
-                        getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SCRIPT_DELIVERY_STATUS_SUPPLIED),
-                        getErrorCode(MsgConstant.INVALID_DATA_ITEM_SUPPLIED));
+                    throw new ScriptValidationException(getErrorMessage(
+                            MsgConstant.INVALID_DATA),
+                                                        getErrorMessage(
+                            MsgConstant.INVALID_SCRIPT_DELIVERY_STATUS_SUPPLIED),
+                                                        getErrorCode(MsgConstant.INVALID_DATA));
                 }
             }
         }
@@ -1183,10 +1285,11 @@ public class ScriptUpdateProcessor
         {
             if (!DataUtil.isNull(ssu.getScriptDeliveryStatus()))
             {
+                setErrorData("Script Delivery status");
                 isScriptValidationSuccessful = false;
                 throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
-                        getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
-                        getErrorCode(MsgConstant.INVALID_DATA_ITEM_SUPPLIED));
+                                                    getErrorMessage(MsgConstant.SCRIPT_DELIVERY_STATUS_DATA_NOT_EXPECTED),
+                                                    getErrorCode(MsgConstant.INVALID_DATA_ITEM_SUPPLIED));
             }
         }
         hasDeliveryStatus = true;
@@ -1198,19 +1301,21 @@ public class ScriptUpdateProcessor
         {
             if (DataUtil.isNull(ssu.getDeletionDetails()))
             {
+                setErrorData("Deletion details");
                 isScriptValidationSuccessful = false;
                 throw new ScriptValidationException(getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
-                    getErrorMessage(MsgConstant.DATA_ITEM_MISSING),
-                    getErrorCode(MsgConstant.DATA_ITEM_MISSING));
+                                                    getErrorMessage(MsgConstant.MISSING_DELETION_DETAILS),
+                                                    getErrorCode(MsgConstant.DATA_ITEM_MISSING));
             }
             else
             {
                 if (!DataUtil.isDate(ssu.getDeletionDetails().getDeletedDate()))
                 {
+                    setErrorData("Deletion date");
                     isScriptValidationSuccessful = false;
                     throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA),
-                        getErrorMessage(MsgConstant.INVALID_DATA),
-                        getErrorCode(MsgConstant.INVALID_DATA));
+                                                        getErrorMessage(MsgConstant.INVALID_DELETION_DATE),
+                                                        getErrorCode(MsgConstant.INVALID_DATA));
                 }
             }
         }
@@ -1218,10 +1323,12 @@ public class ScriptUpdateProcessor
         {
             if (!DataUtil.isNull(ssu.getDeletionDetails()))
             {
+                setErrorData("Deletion details");
                 isScriptValidationSuccessful = false;
                 throw new ScriptValidationException(getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
-                        getErrorMessage(MsgConstant.INVALID_DATA_ITEM_SUPPLIED),
-                        getErrorCode(MsgConstant.INVALID_DATA_ITEM_SUPPLIED));
+                                                    getErrorMessage(
+                        MsgConstant.SCRIPT_DELETION_DETAILS_DATA_NOT_EXPECTED),
+                                                    getErrorCode(MsgConstant.INVALID_DATA_ITEM_SUPPLIED));
             }
         }
         hasDeletionDetails = true;
@@ -1230,10 +1337,11 @@ public class ScriptUpdateProcessor
     private boolean isValidScriptUpdateStatus(ScriptStatusUpdate ssu)
     {
         ScriptStatusUpdateType ssut = ssu.getScriptUpdateStatus();
-        boolean isValidStatus = SEMScriptStatus.DELETED.isIn(ssut.toString()) ||
-        SEMScriptStatus.DELIVERED.isIn(ssut.toString())||
-        SEMScriptStatus.SENT.isIn(ssut.toString()) ||
-        SEMScriptStatus.STAGED.isIn(ssut.toString());
+        boolean isValidStatus = SEMScriptStatus.DELETED.isIn(ssut.toString())
+                || SEMScriptStatus.DELIVERED.isIn(ssut.toString())
+                || SEMScriptStatus.SENT.isIn(ssut.toString())
+                || SEMScriptStatus.RESENT.isIn(ssut.toString())
+                || SEMScriptStatus.STAGED.isIn(ssut.toString());
         return isValidStatus;
     }
 
@@ -1243,8 +1351,9 @@ public class ScriptUpdateProcessor
         Expression expTR = builder.get("trackingReference").equal(trackingRef);
         Expression expScope = builder.get("scopeOID").equal(scope.getPrimaryKey());
         Expression expAll = expTR.and(expScope);
-        String [] partialAttributes = null;
-        return GenericPersistentDAO.instance().executeReadQuery(expAll, ESPScriptUpdateStatus.class, null, partialAttributes);
+        String[] partialAttributes = null;
+        return GenericPersistentDAO.instance().executeReadQuery(expAll, ESPScriptUpdateStatus.class, null,
+                                                                partialAttributes);
     }
 
     /**
@@ -1264,10 +1373,12 @@ public class ScriptUpdateProcessor
 
         ExpressionBuilder builder = new ExpressionBuilder();
         Expression expPAN = builder.get("espApplicationDetail").get("pan").equal(ssu.getCard().getPAN());
-        Expression expPSN = builder.get("espApplicationDetail").get("panSequenceNumber").equal(ssu.getCard().getPANSequence());
+        Expression expPSN = builder.get("espApplicationDetail").get("panSequenceNumber").equal(
+                ssu.getCard().getPANSequence());
         Expression expTR = builder.get("trackingReference").equal(ssu.getTrackingReference());
         long expDate = generateExpiryDate(ssu);
-        Expression expEXPD = builder.get("espApplicationDetail").get("expiryDate").equal(DateHelper.getTimestampUSFormat(expDate));
+        Expression expEXPD = builder.get("espApplicationDetail").get("expiryDate").equal(DateHelper.getTimestampUSFormat(
+                expDate));
         Expression expScope = builder.get("espApplicationDetail").get("scopeOID").equal(scope.getPrimaryKey());
         Expression expScopeSU = builder.get("scopeOID").equal(scope.getPrimaryKey());
 
@@ -1289,8 +1400,9 @@ public class ScriptUpdateProcessor
             }
             builder = new ExpressionBuilder();
             expAll = expAll.and(builder.get("scriptOrder").equal(result.get("scriptOrder")));
-            String [] partialAttributes = null;
-            Vector essu = GenericPersistentDAO.instance().executeReadQuery(expAll, ESPScriptUpdateStatus.class, null, partialAttributes);
+            String[] partialAttributes = null;
+            Vector essu = GenericPersistentDAO.instance().executeReadQuery(expAll, ESPScriptUpdateStatus.class, null,
+                                                                           partialAttributes);
             if (essu.isEmpty())
             {
                 return null;
@@ -1309,10 +1421,12 @@ public class ScriptUpdateProcessor
 
         ExpressionBuilder builder = new ExpressionBuilder();
         Expression expPAN = builder.get("espApplicationDetail").get("pan").equal(ssu.getCard().getPAN());
-        Expression expPSN = builder.get("espApplicationDetail").get("panSequenceNumber").equal(ssu.getCard().getPANSequence());
-        //Expression expTR = builder.get("trackingReference").equal(ssu.getTrackingReference());
+        Expression expPSN = builder.get("espApplicationDetail").get("panSequenceNumber").equal(
+                ssu.getCard().getPANSequence());
+
         long expDate = generateExpiryDate(ssu);
-        Expression expEXPD = builder.get("espApplicationDetail").get("expiryDate").equal(DateHelper.getTimestampUSFormat(expDate));
+        Expression expEXPD = builder.get("espApplicationDetail").get("expiryDate").equal(DateHelper.getTimestampUSFormat(
+                expDate));
         Expression expScope = builder.get("espApplicationDetail").get("scopeOID").equal(scope.getPrimaryKey());
         Expression expScopeSU = builder.get("scopeOID").equal(scope.getPrimaryKey());
 
@@ -1321,7 +1435,6 @@ public class ScriptUpdateProcessor
         rq.addGrouping(builder.get("espApplicationDetail").get("pan"));
         rq.addGrouping(builder.get("espApplicationDetail").get("panSequenceNumber"));
         rq.addGrouping(builder.get("espApplicationDetail").get("expiryDate"));
-        //rq.addGrouping(builder.get("trackingReference"));
 
         Vector v = (Vector) GenericPersistentDAO.instance().executeReportQuery(rq);
         //Get ESPScriptUpdateStatus with max sxript order.
@@ -1334,8 +1447,58 @@ public class ScriptUpdateProcessor
             }
             builder = new ExpressionBuilder();
             expAll = expAll.and(builder.get("scriptOrder").equal(result.get("scriptOrder")));
-            String [] partialAttributes = null;
-            Vector essu = GenericPersistentDAO.instance().executeReadQuery(expAll, ESPScriptUpdateStatus.class, null, partialAttributes);
+            String[] partialAttributes = null;
+            Vector essu = GenericPersistentDAO.instance().executeReadQuery(expAll, ESPScriptUpdateStatus.class, null,
+                                                                           partialAttributes);
+            if (essu.isEmpty())
+            {
+                return null;
+            }
+            return (ESPScriptUpdateStatus) essu.get(0);
+        }
+        return null;
+    }
+
+    public ESPScriptUpdateStatus getScriptUpdateStatusByCardDataWithMatchingScriptOrderAndNoTR(ScriptStatusUpdate ssu)
+    {
+        //Get max script order
+        ReportQuery rq = new ReportQuery();
+        rq.setReferenceClass(ESPScriptUpdateStatus.class);
+        rq.addMaximum("scriptOrder");
+
+        ExpressionBuilder builder = new ExpressionBuilder();
+        Expression expPAN = builder.get("espApplicationDetail").get("pan").equal(ssu.getCard().getPAN());
+        Expression expPSN = builder.get("espApplicationDetail").get("panSequenceNumber").equal(
+                ssu.getCard().getPANSequence());
+
+        long expDate = generateExpiryDate(ssu);
+        Expression expEXPD = builder.get("espApplicationDetail").get("expiryDate").equal(DateHelper.getTimestampUSFormat(
+                expDate));
+        Expression expScope = builder.get("espApplicationDetail").get("scopeOID").equal(scope.getPrimaryKey());
+        Expression expScopeSU = builder.get("scopeOID").equal(scope.getPrimaryKey());
+        Expression expScriptOrder = builder.get("scriptOrder").equal(ssu.getScriptOrder());
+
+        Expression expAll = expPAN.and(expPSN).and(expEXPD).and(expScope).and(expScopeSU).and(expScriptOrder);
+        rq.setSelectionCriteria(expAll);
+        rq.addGrouping(builder.get("espApplicationDetail").get("pan"));
+        rq.addGrouping(builder.get("espApplicationDetail").get("panSequenceNumber"));
+        rq.addGrouping(builder.get("espApplicationDetail").get("expiryDate"));
+
+
+        Vector v = (Vector) GenericPersistentDAO.instance().executeReportQuery(rq);
+        //Get ESPScriptUpdateStatus with max sxript order.
+        if (v != null && !v.isEmpty())
+        {
+            ReportQueryResult result = (ReportQueryResult) v.get(0);
+            if (result.isEmpty())
+            {
+                return null;
+            }
+            builder = new ExpressionBuilder();
+            expAll = expAll.and(builder.get("scriptOrder").equal(result.get("scriptOrder")));
+            String[] partialAttributes = null;
+            Vector essu = GenericPersistentDAO.instance().executeReadQuery(expAll, ESPScriptUpdateStatus.class, null,
+                                                                           partialAttributes);
             if (essu.isEmpty())
             {
                 return null;
@@ -1355,15 +1518,46 @@ public class ScriptUpdateProcessor
     {
         Application app = this.app;
         Vector<ESPBusinessParameter> v = new Vector<ESPBusinessParameter>();
-
-        for(int i = 0; i < app.getBusinessParams().size(); i++)
+        List<String> duplicateList = new ArrayList<String>();
+        StringBuilder duplicateStr = new StringBuilder();
+        for (int i = 0; i < app.getBusinessParams().size(); i++)
         {
             ESPBusinessParameter param = (ESPBusinessParameter) app.getBusinessParams().get(i);
 
-            if(paramAliasList.contains(param.getAlias()))
+            if (paramAliasList.contains(param.getAlias()))
+            {
                 v.add(param);
+            }
         }
-
+        Iterator<String> paramAliasListIt = paramAliasList.iterator();
+        while(paramAliasListIt.hasNext())
+        {
+            String paramAlias = paramAliasListIt.next();
+            for (int i = 0; i < app.getBusinessParams().size(); i++)
+            {
+                ESPBusinessParameter param = (ESPBusinessParameter) app.getBusinessParams().get(i);                
+                if(paramAlias.equals(param.getAlias()))
+                {  
+                    if(duplicateList.contains(param.getAlias()))
+                    {
+                        if(duplicateStr.toString().trim().length() > 0)
+                        {
+                            duplicateStr.append(",");
+                        }
+                        duplicateStr.append(paramAlias);
+                    }                    
+                    duplicateList.add(paramAlias);
+                }   
+            }
+        }
+        if(duplicateStr.toString().trim().length() > 0)
+        {
+            isScriptValidationSuccessful = false;
+            errorData = duplicateStr.toString();
+            throw new ScriptValidationException(getErrorMessage(MsgConstant.DUPLICATE_DATA_ITEM_FOUND),
+                                                DataUtil.getErrorMessage(MsgConstant.DUPLICATE_DATA_ITEM_FOUND, errorData),
+                                                getErrorCode(MsgConstant.DUPLICATE_DATA_ITEM_FOUND));
+        }
         if (v.isEmpty())
         {
             return null;

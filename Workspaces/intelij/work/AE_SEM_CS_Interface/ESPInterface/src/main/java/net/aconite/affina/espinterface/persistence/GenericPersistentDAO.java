@@ -5,16 +5,20 @@
 package net.aconite.affina.espinterface.persistence;
 
 import com.platform7.pma.application.Application;
-import com.platform7.pma.card.manifestapplication.ManifestApplication;
 import com.platform7.pma.product.PMAProduct;
 import com.platform7.pma.product.PMAProductPart;
 import com.platform7.pma.product.PlatformDependentPart;
+import com.platform7.pma.request.emvscriptrequest.ESPApplicationDetail;
 import com.platform7.pma.request.emvscriptrequest.ESPBusinessFunction;
+import com.platform7.pma.request.emvscriptrequest.ESPCardSetup;
+import com.platform7.pma.request.emvscriptrequest.ESPStageScriptFilter;
 import com.platform7.standardinfrastructure.appconfig.AppConfig;
 import com.platform7.standardinfrastructure.database.*;
+import com.platform7.standardinfrastructure.distributedworkflow.*;
 import com.platform7.standardinfrastructure.multiissuer.Scope;
+import com.platform7.standardinfrastructure.multiissuer.ScopeNotFoundException;
 import java.math.BigDecimal;
-import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.*;
 
 import net.aconite.affina.espinterface.constants.*;
@@ -23,11 +27,10 @@ import net.aconite.affina.espinterface.factory.*;
 import net.aconite.affina.espinterface.validators.IStageScriptValidator;
 import net.aconite.affina.espinterface.validators.StageScriptValidator;
 import net.aconite.affina.espinterface.webservice.restful.common.FilterCriteria;
-import net.aconite.affina.espinterface.webservice.restful.common.PagingCriteria;
-import net.aconite.affina.espinterface.webservice.restful.service.model.StageScript;
 import org.eclipse.persistence.exceptions.OptimisticLockException;
 import org.eclipse.persistence.expressions.Expression;
 import org.eclipse.persistence.queries.ReadAllQuery;
+import org.eclipse.persistence.queries.ReadObjectQuery;
 import org.eclipse.persistence.queries.ReportQuery;
 import org.eclipse.persistence.sessions.UnitOfWork;
 import org.slf4j.*;
@@ -53,6 +56,7 @@ import org.slf4j.*;
  */
 public class GenericPersistentDAO implements Persistent
 {
+
     private static final Logger logger = LoggerFactory.getLogger(GenericPersistentDAO.class);
     private ThreadLocal<Workable> workable = new ThreadLocal<Workable>();
     /**
@@ -66,9 +70,7 @@ public class GenericPersistentDAO implements Persistent
     /**
      *
      */
-
     private final static Map<String, String> dbConnectionTypeMap = new HashMap<String, String>();
-
     private final static GenericPersistentDAO instance;
 
     static
@@ -165,7 +167,7 @@ public class GenericPersistentDAO implements Persistent
     {
         boolean transactionComplete = false;
 
-        while(!transactionComplete)
+        while (!transactionComplete)
         {
             try
             {
@@ -184,7 +186,7 @@ public class GenericPersistentDAO implements Persistent
             }
             catch (OptimisticLockException ex)
             {
-                logger.warn("Optimistic lock exception, will retry",  ex);
+                logger.warn("Optimistic lock exception, will retry", ex);
                 transactionComplete = false;
                 rollBack();
             }
@@ -199,10 +201,14 @@ public class GenericPersistentDAO implements Persistent
 
     private void rollBack()
     {
-        if(isInNonContainerTransaction())
+        if (isInNonContainerTransaction())
+        {
             sm.release();
-        else if(isInContainerTransaction())
+        }
+        else if (isInContainerTransaction())
+        {
             sm.getUnitOfWork().revertAndResume();
+        }
     }
 
     /**
@@ -211,15 +217,16 @@ public class GenericPersistentDAO implements Persistent
      */
     public UnitOfWork getUnitOfWork()
     {
-        if(!isInContainerTransaction() && !isInNonContainerTransaction())
-            // You must either be in a Container transaction (eg running in the Introduced Card container),
-            // or in a non-container manager transaction, eg running as a Workable in the GenericPersistentDAO.
-            // Any other attempts to use a UnitOfWork can result in a memory leak (unless you manage the UoW properly).
+        if (!isInContainerTransaction() && !isInNonContainerTransaction())
+        // You must either be in a Container transaction (eg running in the Introduced Card container),
+        // or in a non-container manager transaction, eg running as a Workable in the GenericPersistentDAO.
+        // Any other attempts to use a UnitOfWork can result in a memory leak (unless you manage the UoW properly).
+        {
             throw new RuntimeException("Attempting to access a UnitOfWork outside of a transaction");
-
-        return sm.getUnitOfWork();
-    }
-
+        }
+        UnitOfWork uow = sm.getUnitOfWork();      
+        return uow;
+    }  
     /**
      * This will create a new object and registers it with the current persistence manager cache so that the persistent
      * manager knows that it is something it should take care of when it comes to executing CRUD commands.
@@ -245,6 +252,38 @@ public class GenericPersistentDAO implements Persistent
         }
         return cls.cast(v);
     }
+    
+    public <R> boolean deleteAllObject(List<R> deleteObjects)
+    {
+        try
+        {            
+            getUnitOfWork().deleteAllObjects(deleteObjects);
+        }
+        catch (Exception ex)
+        {
+            final String errorMsg = "Error trying to delete all object with the ORM cache.";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+        return true;
+    }
+    
+    public <R> R deleteObject(R deleteObject)
+    {
+       
+        try
+        {            
+            return (R)getUnitOfWork().deleteObject(deleteObject);
+        }
+        catch (Exception ex)
+        {
+            final String errorMsg = "Error trying to delete object with the ORM cache.";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+       
+    }
+
 
     public com.platform7.standardinfrastructure.multiissuer.Scope getScope(String name)
     {
@@ -253,14 +292,14 @@ public class GenericPersistentDAO implements Persistent
             UnitOfWork uow = getUnitOfWork();
             return com.platform7.standardinfrastructure.multiissuer.Scope.locate(uow, name);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            final String errorMsg = "Error trying to fetch scope "+name;
+            final String errorMsg = "Error trying to fetch scope " + name;
             logger.error(errorMsg, ex);
             throw new PersistentException(errorMsg + " " + ex.toString(), ex);
         }
     }
-    
+
     /**
      *
      * @param selectionCriteria
@@ -273,6 +312,7 @@ public class GenericPersistentDAO implements Persistent
     public Vector executeReadQuery(Expression selectionCriteria, Class cls, Expression ordering,
                                    String... partialAttributes)
     {
+        UnitOfWork uow = getUnitOfWork();
         try
         {
             ReadAllQuery q = new ReadAllQuery();
@@ -291,13 +331,17 @@ public class GenericPersistentDAO implements Persistent
             {
                 q.addOrdering(ordering);
             }
-            return (Vector) getUnitOfWork().executeQuery(q);
+            return (Vector) uow.executeQuery(q);
         }
         catch (Exception ex)
         {
             final String errorMsg = "Error trying to query data.";
             logger.error(errorMsg, ex);
             throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+        finally
+        {
+            
         }
     }
 
@@ -309,9 +353,10 @@ public class GenericPersistentDAO implements Persistent
      */
     public Vector executeQuery(ReadAllQuery query)
     {
+        UnitOfWork uow = getUnitOfWork();
         try
         {
-            return (Vector) getUnitOfWork().executeQuery(query);
+            return (Vector) uow.executeQuery(query);
         }
         catch (Exception ex)
         {
@@ -319,8 +364,12 @@ public class GenericPersistentDAO implements Persistent
             logger.error(errorMsg, ex);
             throw new PersistentException(errorMsg + " " + ex.toString(), ex);
         }
+        finally
+        {
+           
+        }
     }
-
+    
     /**
      *
      * @param query < p/>
@@ -329,9 +378,10 @@ public class GenericPersistentDAO implements Persistent
      */
     public Object executeReportQuery(ReportQuery query)
     {
+        UnitOfWork uow = getUnitOfWork();
         try
         {
-            return getUnitOfWork().executeQuery(query);
+            return uow.executeQuery(query);
         }
         catch (Exception ex)
         {
@@ -339,35 +389,80 @@ public class GenericPersistentDAO implements Persistent
             logger.error(errorMsg, ex);
             throw new PersistentException(errorMsg + " " + ex.toString(), ex);
         }
+        finally
+        {
+            
+        }
     }
     
     
-     /////////////////////////////////////////////////////////////////////////////
+    ////////#############################################################///////
     //Temporary added here and need Mark's help to replace this
-    AffinaTOPLinkSessionManager ses=(AffinaTOPLinkSessionManager) AppConfig.getBean("sessionManager_pma");
-    /**
-     * This method returns list of scopes for selected filter parameters
-     * @param filter
-     * @return  List<Scope>
-     */
-    public List<Scope> getScopes(FilterCriteria filter)//, PagingCriteria paging)
-    {        
-        List<Scope> recordList=new ArrayList<Scope>();
-        UnitOfWork uow=null;
+    AffinaTOPLinkSessionManager ses = (AffinaTOPLinkSessionManager) AppConfig.getBean("sessionManager_pma");
+
+    
+    //////////////scope/////////////////////////////////////////////////////////
+    
+    public com.platform7.standardinfrastructure.multiissuer.Scope getScopeById(BigDecimal oid)
+    {
         try
         {
-            //uow = getUnitOfWork();
-            uow=ses.getUnitOfWork();
-            Iterator it=com.platform7.standardinfrastructure.multiissuer.Scope.locateAll(uow); 
-            uow.release();
-            while(it.hasNext())
-            {
-                recordList.add((Scope)it.next());
-            }
-            
-            return recordList;
+            UnitOfWork uow = getUnitOfWork();
+            return com.platform7.standardinfrastructure.multiissuer.Scope.locate(uow, oid);
         }
         catch(Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch scopeByOid "+oid;
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+    }
+    
+    public com.platform7.standardinfrastructure.multiissuer.Scope getScopeByName(String name)
+    {
+        try
+        {
+            UnitOfWork uow = getUnitOfWork();
+            return com.platform7.standardinfrastructure.multiissuer.Scope.locate(uow, name);
+        }
+        catch(ScopeNotFoundException ex)
+        {
+            logger.warn("Scope  not found", ex.getMessage());
+            return null;
+        }
+        catch(Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch scopeByName "+name;
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+    }
+    
+    /*
+     * This method returns list of scopes for selected filter parameters
+     * <p/>
+     * @param filter
+     * <p/>
+     * @return List<Scope>
+     */
+    public List<Scope> getScopes(FilterCriteria filter)//, PagingCriteria paging)
+    {
+        List<Scope> recordList = new ArrayList<Scope>();
+        UnitOfWork uow = null;
+        try
+        {
+            uow = getUnitOfWork();
+            //uow=ses.getUnitOfWork();
+            Iterator it=com.platform7.standardinfrastructure.multiissuer.Scope.locateAll(uow); 
+            
+            while (it.hasNext())
+            {
+                recordList.add((Scope) it.next());
+            }
+
+            return recordList;
+        }
+        catch (Exception ex)
         {
             final String errorMsg = "Error trying to fetch scopes ";
             logger.error(errorMsg, ex);
@@ -375,29 +470,50 @@ public class GenericPersistentDAO implements Persistent
         }
         finally
         {
-            if(uow!=null)
+            if (uow != null)
             {
-                uow.release();
+                //uow.release();
             }
         }
+    }
+    /////////////PMAProduct/////////////////////////////////////////////////////
+    
+    public PMAProduct getProductById(BigDecimal oid)
+    {
+        try
+        {
+            UnitOfWork uow = getUnitOfWork();
+            return PMAProduct.locate(uow, oid);
+        }
+        catch(Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch ProductById "+oid;
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+    }
+    
+    public PMAProduct getProductByName(String name)
+    {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public List<PMAProduct> getProducts(FilterCriteria filter)//, PagingCriteria paging)
     {
-        List<PMAProduct> recordList=null;//=new ArrayList<PMAProduct>();
-        UnitOfWork uow=null;
+        List<PMAProduct> recordList = null;//=new ArrayList<PMAProduct>();
+        UnitOfWork uow = null;
         try
         {
-            if(filter!=null && filter.getScopeId()!=null)
+            if (filter != null && filter.getScopeId() != null)
             {
-                //uow = getUnitOfWork();
-                uow=ses.getUnitOfWork();
+                uow = getUnitOfWork();
+                //uow=ses.getUnitOfWork();
                 recordList=PMAProduct.locateAllByScope(uow,new BigDecimal(filter.getScopeId().intValue())); 
-                uow.release();
-            }            
+                
+            }
             return recordList;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             final String errorMsg = "Error trying to fetch products ";
             logger.error(errorMsg, ex);
@@ -405,46 +521,54 @@ public class GenericPersistentDAO implements Persistent
         }
         finally
         {
-            if(uow!=null)
+            if (uow != null)
             {
-                uow.release();
+               //uow.release();
             }
         }
+    }
+
+    /////////////////ProductPart////////////////////////////////////////////////
+    
+    public PMAProductPart getProductPartById(BigDecimal oid)
+    {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public PMAProductPart getProductPartByName(String name)
+    {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
     public List<PMAProductPart> getProductParts(FilterCriteria filter)//, PagingCriteria paging)
     {
-        List<PMAProductPart> recordList=new ArrayList<PMAProductPart>();
-        UnitOfWork uow=null;
+        List<PMAProductPart> recordList = new ArrayList<PMAProductPart>();
+        UnitOfWork uow = null;
         try
         {
-            if(filter!=null && filter.getProductId()!=null)
+            if (filter != null && filter.getProductId() != null)
             {
-                //uow = getUnitOfWork();
-                uow=ses.getUnitOfWork();
-                
-                //Scope scope=Scope.locate(uow, new BigDecimal(filter.getScopeId().intValue()));               
-                //PMAProduct product=PMAProduct.locate(uow, new BigDecimal(filter.getProductId().intValue()));
-                
-                PMAProduct product=PMAProduct.locate(uow,new BigDecimal(filter.getProductId().intValue()));
-                
-                PMAProductPart[] partMandatory= product.getMandatoryPMAProductParts();
-                PMAProductPart[] partOptional= product.getOptionalPMAProductParts();
-                
-                for(int i=0; i<partMandatory.length;i++)
+                uow = getUnitOfWork();
+                //uow=ses.getUnitOfWork();
+
+                PMAProduct product = PMAProduct.locate(uow, new BigDecimal(filter.getProductId().intValue()));
+
+                PMAProductPart[] partMandatory = product.getMandatoryPMAProductParts();
+                PMAProductPart[] partOptional = product.getOptionalPMAProductParts();
+
+                for (int i = 0; i < partMandatory.length; i++)
                 {
                     recordList.add(partMandatory[i]);
                 }
-                for(int i=0; i<partOptional.length;i++)
+                for (int i = 0; i < partOptional.length; i++)
                 {
                     recordList.add(partOptional[i]);
-                }
-                
-                uow.release();
-            }            
+                }                
+
+            }
             return recordList;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             final String errorMsg = "Error trying to fetch productparts ";
             logger.error(errorMsg, ex);
@@ -452,54 +576,64 @@ public class GenericPersistentDAO implements Persistent
         }
         finally
         {
-            if(uow!=null)
+            if (uow != null)
             {
-                uow.release();
+                //uow.release();
             }
         }
     }
+
+    ////////////////Application/////////////////////////////////////////////////
     
+    public Application getApplicationById(BigDecimal oid)
+    {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Application getApplicationByName(String name)
+    {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     public List<Application> getApplications(FilterCriteria filter)//, PagingCriteria paging)
     {
-        IStageScriptValidator ssValidator=new StageScriptValidator();
-        List<Application> recordList=new ArrayList<Application>();
-        UnitOfWork uow=null;
+        IStageScriptValidator ssValidator = new StageScriptValidator();
+        List<Application> recordList = new ArrayList<Application>();
+        UnitOfWork uow = null;
         try
         {
-            if(filter!=null && filter.getProductPartId()!=null)
+            if (filter != null && filter.getProductPartId() != null)
             {
-                //uow = getUnitOfWork();
-                uow=ses.getUnitOfWork();
+                uow = getUnitOfWork();
+                //uow=ses.getUnitOfWork();
 
                 PMAProductPart productPart=PMAProductPart.locate(uow,new BigDecimal(filter.getProductPartId().intValue()));
                 
                 HashMap platformDependentPartList=productPart.getPlatformDependentParts();//getApplications();                
-                
-                uow.release();
-                
+                                                
                 Iterator it=platformDependentPartList.values().iterator();
                 
                 while(it.hasNext())
                 {
-                    PlatformDependentPart part=(PlatformDependentPart)it.next();                    
-                    
-                    ArrayList appList=part.getApplications();
-                    
-                    for(int j=0;j<appList.size();j++)
-                    {
-                        Application app=(Application)appList.get(j);
+                    PlatformDependentPart part = (PlatformDependentPart) it.next();
 
-                        if(ssValidator.isValidScriptableApplication(app))
+                    ArrayList appList = part.getApplications();
+
+                    for (int j = 0; j < appList.size(); j++)
+                    {
+                        Application app = (Application) appList.get(j);
+
+                        if (ssValidator.isValidScriptableApplication(app))
                         {
                             recordList.add(app);
                         }
                     }
                 }
-                
-            }            
+
+            }
             return recordList;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             final String errorMsg = "Error trying to fetch productparts ";
             logger.error(errorMsg, ex);
@@ -507,46 +641,54 @@ public class GenericPersistentDAO implements Persistent
         }
         finally
         {
-            if(uow!=null)
+            if (uow != null)
             {
-                uow.release();
+                //uow.release();
             }
         }
     }
+    /////////////////BusinessFunction///////////////////////////////////////////
     
+    public ESPBusinessFunction getBusinessFunctionById(BigDecimal oid)
+    {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public ESPBusinessFunction getBusinessFunctionByName(String name)
+    {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
    
     public List<ESPBusinessFunction> getBusinessFunctions(FilterCriteria filter)//, PagingCriteria paging)
     {
-        List<ESPBusinessFunction> recordList=new ArrayList<ESPBusinessFunction>();
-        UnitOfWork uow=null;
+        List<ESPBusinessFunction> recordList = new ArrayList<ESPBusinessFunction>();
+        UnitOfWork uow = null;
         try
         {
-            if(filter!=null && filter.getApplicationId()!=null)
+            if (filter != null && filter.getApplicationId() != null)
             {
-                //uow = getUnitOfWork();
-                uow=ses.getUnitOfWork();
+                uow = getUnitOfWork();
+                //uow=ses.getUnitOfWork();
 
-                Application application=Application.locate(uow,new BigDecimal(filter.getApplicationId().intValue()));
-                
-                uow.release();
-                
+                Application application=Application.locate(uow,BigDecimal.valueOf(filter.getApplicationId().longValue()));
+                                                
                 if(EspConstant.TRUE.equalsIgnoreCase(application.getScriptable()))
                 {
-                    Iterator it=application.getBusinessFunctions().iterator();
-                    while(it.hasNext())
+                    Iterator it = application.getBusinessFunctions().iterator();
+                    while (it.hasNext())
                     {
-                        ESPBusinessFunction busFunc=(ESPBusinessFunction)it.next();
-                        
-                        if(!EspConstant.PARAMETERIZED_BUSINESS_FUNCTION_NAME.equalsIgnoreCase(busFunc.getName()))
+                        ESPBusinessFunction busFunc = (ESPBusinessFunction) it.next();
+
+                        if (!EspConstant.PARAMETERIZED_BUSINESS_FUNCTION_NAME.equalsIgnoreCase(busFunc.getName()))
                         {
                             recordList.add(busFunc);
                         }
                     }
-                }                
-            }            
+                }
+            }
             return recordList;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             final String errorMsg = "Error trying to fetch productparts ";
             logger.error(errorMsg, ex);
@@ -554,36 +696,106 @@ public class GenericPersistentDAO implements Persistent
         }
         finally
         {
-            if(uow!=null)
+            if (uow != null)
             {
-                uow.release();
+                //uow.release();
             }
         }
     }
+    /////////////////StageScriptFilter///////////////////////////////////////////
     
-    
-    public List<StageScript> getApplicationInstances(FilterCriteria filter)
+    public ESPStageScriptFilter getStageScriptFiltersById(BigDecimal oid)//, PagingCriteria paging)
     {
-        List<StageScript> recordList=new ArrayList<StageScript>();
+        try
+        {
+            UnitOfWork uow = getUnitOfWork();
+            return ESPStageScriptFilter.locateFiltersByOID(uow, oid);
+        }
+        catch(Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch locateFiltersByStatus "+oid;
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+    }
+    
+    public ESPStageScriptFilter getStageScriptFiltersByTrackId(BigDecimal scopeOID,String trackId)//, PagingCriteria paging)
+    {
+        try
+        {
+            UnitOfWork uow = getUnitOfWork();
+            return ESPStageScriptFilter.locateFiltersByTrackId(uow,scopeOID, trackId);
+        }
+        catch(Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch locateFiltersByTrackId "+trackId+" for scopeOID "+scopeOID;
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+    }
+    
+        
+    public List<ESPStageScriptFilter> getStageScriptFiltersByStatusAndScope(FilterCriteria filter)//, PagingCriteria paging)
+    {
+        List<ESPStageScriptFilter> recordList=null;
         UnitOfWork uow=null;
         try
         {
-            if(filter!=null && filter.getApplicationId()!=null)
+            if(filter!=null && filter.getScopeId()!=null && filter.getStatus()!=null)
             {
-                //uow = getUnitOfWork();
-                uow=ses.getUnitOfWork();
-
-                
-                uow.release();
-                
-                recordList.add(new StageScript());
-
-            }            
+                uow = getUnitOfWork();
+                //uow=ses.getUnitOfWork();
+                recordList = ESPStageScriptFilter.locateFiltersByStatusAndScope(uow, BigDecimal.valueOf(filter.getScopeId().longValue()),filter.getStatus());
+            }    
+            else
+            {
+                logger.warn("Scope OID & Status must be exist to getList of filtersByStatusAndScope");
+            }
+            return recordList;
+        }
+        catch (Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch 'stage script filter' ";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+        finally
+        {
+            if (uow != null)
+            {
+               //uow.release();
+            }
+        }
+    }    
+    
+    public List<ESPStageScriptFilter> getStageScriptFiltersByCheckDuplicate(FilterCriteria filter)//, PagingCriteria paging)
+    {
+        List<ESPStageScriptFilter> recordList=null;
+        UnitOfWork uow=null;
+        try
+        {
+            if(filter!=null && filter.getScopeId()!=null && filter.getStatus()!=null && filter.getApplicationId()!=null && filter.getBusinessFunctionId()!=null)
+            {
+                uow = getUnitOfWork();  
+                if(filter.getCardId()!=null && filter.getCardId().length()>0)
+                {
+                    
+                    recordList = ESPStageScriptFilter.locateFiltersByCheckDuplicateWithCardId(uow, BigDecimal.valueOf(filter.getScopeId().longValue()),BigDecimal.valueOf(filter.getApplicationId().longValue()),BigDecimal.valueOf(filter.getBusinessFunctionId().longValue()),filter.getCardId(),filter.getStatus());
+                }
+                else
+                {
+                    recordList = ESPStageScriptFilter.locateFiltersByCheckDuplicateWithNullCardId(uow, BigDecimal.valueOf(filter.getScopeId().longValue()),BigDecimal.valueOf(filter.getApplicationId().longValue()),BigDecimal.valueOf(filter.getBusinessFunctionId().longValue()),filter.getStatus());
+                }
+            }    
+            else
+            {
+                logger.warn("Scope OID, Application OID, BusinessFucntionOID & Status must be exist to getList of filtersByStatusAndScope");
+            }
             return recordList;
         }
         catch(Exception ex)
         {
-            final String errorMsg = "Error trying to fetch productparts ";
+            final String errorMsg = "Error trying to fetch 'stage script filter' ";
             logger.error(errorMsg, ex);
             throw new PersistentException(errorMsg + " " + ex.toString(), ex);
         }
@@ -591,9 +803,123 @@ public class GenericPersistentDAO implements Persistent
         {
             if(uow!=null)
             {
-                uow.release();
+               //uow.release();
             }
         }
     }
+    
+     public ESPCardSetup getCardSetupDetailById(BigDecimal oid)
+     {
+        try
+        {
+            UnitOfWork uow = getUnitOfWork();
+            return ESPCardSetup.locateCardSetupByOID(uow, oid);
+        }
+        catch(Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch locateCardSetupByOID "+oid;
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+     }
+    
+    public List<ESPCardSetup> getCardSetupDetails(Scope scope, String aeTrackId)//, PagingCriteria paging)
+    {
+        List<ESPCardSetup> recordList=null;
+        UnitOfWork uow=null;
+        try
+        {
+            if(scope!=null && aeTrackId!=null && aeTrackId.length()>0)
+            {
+                uow = getUnitOfWork();  
+                recordList = ESPCardSetup.locateByScopeAndAeTRN(uow,scope,aeTrackId);
+            }    
+            else
+            {
+                logger.warn("Scope, aeTrackId must be exist to getList of locateByScopeAndAeTRN");
+            }
+            return recordList;
+        }
+        catch(Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch 'getCardSetupDetails' ";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+        finally
+        {
+            if(uow!=null)
+            {
+               //uow.release();
+            }
+        }
+    }
+    
+    public List<ESPCardSetup> getCardSetupDetailsBySemTrn(Scope scope, String semTrackId)//, PagingCriteria paging)
+    {
+        List<ESPCardSetup> recordList=null;
+        UnitOfWork uow=null;
+        try
+        {
+            if(scope!=null && semTrackId!=null && semTrackId.length()>0)
+            {
+                uow = getUnitOfWork();  
+                recordList = ESPCardSetup.locateByScopeAndSemTRN(uow,scope,semTrackId);
+            }    
+            else
+            {
+                logger.warn("Scope, semTrackId must be exist to getList of locateByScopeAndSemTRN");
+            }
+            return recordList;
+        }
+        catch(Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch 'getCardSetupDetailsBySemTrn' ";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+        finally
+        {
+            if(uow!=null)
+            {
+               //uow.release();
+            }
+        }
+    }
+    
+    public List<ESPApplicationDetail> getESPApplicationDetails(Scope scope, String pan,String psn,Long expDate)//, PagingCriteria paging)
+    {
+        List<ESPApplicationDetail> recordList=null;
+        UnitOfWork uow=null;
+        try
+        {
+            if(scope!=null && pan!=null && pan.length()>0 && psn!=null && psn.length()>0 && expDate!=null)
+            {
+                uow = getUnitOfWork();  
+                recordList.add(ESPApplicationDetail.locateByPanPsnExpDate(uow, pan, psn, new Timestamp(expDate),scope)); 
+            }    
+            else
+            {
+                logger.warn("Scope, pan,psn & expDate must be exist to locateByPanPsnExpDate");
+            }
+            return recordList;
+        }
+        catch(Exception ex)
+        {
+            final String errorMsg = "Error trying to fetch 'getESPApplicationDetail' ";
+            logger.error(errorMsg, ex);
+            throw new PersistentException(errorMsg + " " + ex.toString(), ex);
+        }
+        finally
+        {
+            if(uow!=null)
+            {
+               //uow.release();
+            }
+        }
+    }
+    
+    
+
     
 }

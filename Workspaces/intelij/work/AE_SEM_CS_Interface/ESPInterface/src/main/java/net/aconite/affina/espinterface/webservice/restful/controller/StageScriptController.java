@@ -1,9 +1,11 @@
 package net.aconite.affina.espinterface.webservice.restful.controller;
 
+import com.platform7.pma.request.emvscriptrequest.ESPStageScriptFilter;
 import java.text.ParseException;
 import java.util.logging.Level;
 import net.acointe.affina.esp.AffinaEspUtilException;
 import net.acointe.affina.esp.AffinaEspUtils;
+import net.aconite.affina.espinterface.exceptions.EspRestServiceValidationException;
 import net.aconite.affina.espinterface.webservice.restful.common.QueryResult;
 import net.aconite.affina.espinterface.webservice.restful.common.FilterCriteria;
 import net.aconite.affina.espinterface.webservice.restful.common.PagingCriteria;
@@ -54,7 +56,9 @@ public class StageScriptController
             filter.setBin(bin);
             filter.setCardId(cardId);
             
-            QueryResult<StageScript> queryResult = stageScriptService.getList(filter, null);
+            FilterCriteria vFilter=isValidFilter(filter);
+            
+            QueryResult<StageScript> queryResult = stageScriptService.getList(vFilter, null);
             
             int totalCount=queryResult.getTotalCount();
 
@@ -69,7 +73,7 @@ public class StageScriptController
         }
         catch (Exception e)
         {
-            logger.debug("There has been an error in running a task" + e.getMessage());
+            logger.debug("There has been an error in running a task" , e.getMessage());
             return new ResponseEntity<UIResponse>(new UIResponse(false,String.format("%s request has failed", applicationId)), HttpStatus.INTERNAL_SERVER_ERROR);
             
         }
@@ -77,7 +81,7 @@ public class StageScriptController
     
     @RequestMapping(value = "/submit", method = RequestMethod.GET)  
     @ResponseBody
-    public ResponseEntity<UIResponse> submitRequest(Integer id, String name,Integer scopeId,Integer productId,Integer productPartId,Integer applicationId,Integer bin,String cardId,Integer businessFunctionId,Integer maxRestageCount, String stageScriptStartDate,String stageScriptEndDate)
+    public ResponseEntity<UIResponse> submitRequest(Integer id, String name,Integer scopeId,Integer productId,Integer productPartId,Integer applicationId,String source,Integer bin,String cardId,Integer businessFunctionId,Integer maxRestageCount, String stageScriptStartDate,String stageScriptEndDate)
     {
         try
         {            
@@ -89,20 +93,27 @@ public class StageScriptController
             filter.setProductPartId(productPartId);
             filter.setApplicationId(applicationId);
             filter.setBusinessFunctionId(businessFunctionId);
+            filter.setSource(source);
             filter.setBin(bin);
             filter.setCardId(cardId);
+            
+            FilterCriteria vFilter=isValidFilter(filter);
             
             Long ssStartDate=convertDateFromString2Long(stageScriptStartDate,false);
             
             Long ssEndDate=convertDateFromString2Long(stageScriptEndDate,true);
                                 
-            long refernceId = stageScriptService.submit(filter, maxRestageCount,ssStartDate,ssEndDate);
+            StageScript submitObject = stageScriptService.submit(vFilter, maxRestageCount,ssStartDate,ssEndDate);
             
             //int totalCount=123;//queryResult.getTotalCount();
 
-            if(refernceId>0)
+            if(submitObject!=null && submitObject.getIsDuplicate())
             {
-                return new ResponseEntity<UIResponse>(new UIResponse(true,String.format("%s Request Successfully Submitted", refernceId)), HttpStatus.OK);
+                return new ResponseEntity<UIResponse>(new UIResponse(true,String.format("Duplicate request found and cannot be Submitted.")), HttpStatus.OK);
+            }
+            else if(submitObject!=null && submitObject.getTrackId()!=null)
+            {
+                return new ResponseEntity<UIResponse>(new UIResponse(true,String.format("Request Successfully Submitted. Reference is %s", submitObject.getTrackId())), HttpStatus.OK);
             }
             else
             {
@@ -113,7 +124,7 @@ public class StageScriptController
         catch (Exception ex)
         {
             logger.error("Request Sumbmission failed:" + ex.getMessage(),ex);
-            return new ResponseEntity<UIResponse>(new UIResponse(false,String.format("%s Request Sumbmission failed", "")), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<UIResponse>(new UIResponse(false,String.format("Request Sumbmission failed. %s", ex.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
             
         }
     } 
@@ -241,6 +252,45 @@ public class StageScriptController
                 logger.warn(ex.getMessage());
             } 
             return longDate;
-        }        
+        }  
+        
+        
+        private FilterCriteria isValidFilter(FilterCriteria filter) throws EspRestServiceValidationException
+        {
+            if(filter==null)
+            {
+                throw new EspRestServiceValidationException("FilterCriteria must be defined");
+            }            
+            if(filter.getScopeId()==null)
+            {
+                throw new EspRestServiceValidationException("Scope must be defined");
+            }
+            
+            if(filter.getApplicationId()==null)
+            {
+                throw new EspRestServiceValidationException("Application must be defined");
+            }
+            
+            if(filter.getBusinessFunctionId()==null)
+            {
+                throw new EspRestServiceValidationException("Business Function must be defined");
+            }  
+            
+            if(filter.getStatus()==null)
+            {
+                String defaultStatus=AffinaEspUtils.STATUS_INITIAL;
+                logger.warn("Status is not defined and set to ",defaultStatus);
+                filter.setStatus(defaultStatus);
+            }   
+                        
+            if(filter.getSource()==null || filter.getSource().trim().length()==0)
+            {
+                String defaultSource=ESPStageScriptFilter.sources.REST_SERVICE.name();
+                logger.warn("Source is not defined and set to ",defaultSource);
+                filter.setSource(defaultSource);
+            }
+            
+        return filter;
+        }
         
 }

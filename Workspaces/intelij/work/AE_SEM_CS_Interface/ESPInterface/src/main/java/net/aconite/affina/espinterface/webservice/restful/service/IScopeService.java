@@ -8,6 +8,8 @@ import net.aconite.affina.espinterface.webservice.restful.common.PagingCriteria;
 public interface IScopeService
 {        
     Scope getById(Integer id);
+    
+    Scope getByName(String name); 
 
     Integer getTotalCount(FilterCriteria filter);
 

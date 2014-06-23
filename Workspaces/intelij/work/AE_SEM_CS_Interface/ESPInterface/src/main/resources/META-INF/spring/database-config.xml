@@ -105,5 +105,7 @@
 
     <!-- The default Non-Tx Session Manager (PMA in this container) -->
     <alias name="sessionManager_pma" alias="sessionManager_default_Tx"/>
+	
+	<bean id="transactionManager" class="org.springframework.batch.support.transaction.ResourcelessTransactionManager"/>
 
 </beans>

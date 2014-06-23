@@ -5,7 +5,7 @@
 package net.aconite.affina.espinterface.factory;
 
 import net.aconite.affina.espinterface.cardselection.*;
-import net.aconite.affina.espinterface.persistence.Persistent;
+import net.aconite.affina.espinterface.model.ScriptableCard;
 
 /**
  *
@@ -13,8 +13,12 @@ import net.aconite.affina.espinterface.persistence.Persistent;
  */
 public class CardGeneratorFactory
 {
-    public static CardGenerator getCardgenerator()
+    /**
+     * Factory method to get the instance of CardGenerator.
+     * @return 
+     */
+    public static CardGenerator<ScriptableCard> getCardgenerator()
     {
-        return new SelectableCardGenerator();
+        return SelectableCardGenerator.getInstance();
     }
 }

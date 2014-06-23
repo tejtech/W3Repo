@@ -26,8 +26,8 @@ public class CardSetupRequestSplitter
         MessageHeaders headers = message.getHeaders();
         Object payload = message.getPayload();
 
-        LOGGER.debug("Incoming Message header: ", headers);
-        LOGGER.debug("Message payload: ", payload);
+        LOGGER.debug("Incoming Message header: {}", headers);
+        LOGGER.debug("Message payload: {}", payload);
 
         ((CardSetupRequest) message.getPayload()).setTrackingReference("Helllloo");
         List<Message> outMessages = new ArrayList<Message>();

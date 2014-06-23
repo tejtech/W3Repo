@@ -12,10 +12,12 @@
 	<context:annotation-config/>
     <context:component-scan base-package="net.aconite.affina.espinterface.handler.message"/>
 	<context:component-scan base-package="net.aconite.affina.espinterface.handler.feedback"/>
-	<context:component-scan base-package="net.aconite.affina.espinterface.security"/>
+	<context:component-scan base-package="net.aconite.affina.espinterface.helper"/>
+    <context:component-scan base-package="net.aconite.affina.espinterface.security"/>
 	<context:component-scan base-package="net.aconite.affina.espinterface.scripting.statusupdate"/>
 	<context:component-scan base-package="net.aconite.affina.espinterface.config"/>
-	<context:component-scan base-package="net.aconite.common.util"/>
+	<context:component-scan base-package="net.aconite.affina.espinterface.dao"/>
+	<context:component-scan base-package="net.aconite.affina.espinterface.webservice.restful.service"/>
 						   
     <!-- //////////////////////// -->
     <bean id="startServiceHandler" class="net.aconite.affina.espinterface.context.StartServiceHandler"/>
@@ -67,8 +69,7 @@
 	<bean id="headerValidatorCustServEsp" class="net.aconite.affina.espinterface.validators.MessageHeaderValidator">
         <property name="jmsTypes">
 		  <list>
-            <value>CardSetupRequest</value>
-			<value>StageScriptRequest</value>
+            <value>SendScriptRequest</value>
 		   </list>            
         </property>		
     </bean>
@@ -79,7 +80,7 @@
         <constructor-arg value="#{appProperties['from.affina.to.esp.pci.decryptKeyAlias']}"/>
         <constructor-arg value="#{appProperties['from.esp.to.affina.pci.doEncrypt']}"/>
         <constructor-arg value="#{appProperties['from.esp.to.affina.pci.encryptKeyAlias']}"/>
-        <constructor-arg value="#{appProperties['esp.encryiption.encoding']}"/>
+        <constructor-arg value="#{appProperties['esp.encryption.encoding']}"/>
     </bean>
 
     <bean id="pciEnforcerSemEsp" class="net.aconite.affina.espinterface.security.PCIEnforcer">
@@ -87,17 +88,17 @@
         <constructor-arg value="#{appProperties['from.sem.to.esp.pci.decryptKeyAlias']}"/>
         <constructor-arg value="#{appProperties['from.esp.to.sem.pci.doEncrypt']}"/>
         <constructor-arg value="#{appProperties['from.esp.to.sem.pci.encryptKeyAlias']}"/>
-        <constructor-arg value="#{appProperties['esp.encryiption.encoding']}"/>
+        <constructor-arg value="#{appProperties['esp.encryption.encoding']}"/>
     </bean>
-
-    <bean id="pciEnforcerCustServEsp" class="net.aconite.affina.espinterface.security.PCIEnforcer">
+	
+	<bean id="pciEnforcerCustServEsp" class="net.aconite.affina.espinterface.security.PCIEnforcer">
         <constructor-arg value="#{appProperties['from.custserv.to.esp.pci.doDecrypt']}"/>
         <constructor-arg value="#{appProperties['from.custserv.to.esp.pci.decryptKeyAlias']}"/>
         <constructor-arg value="#{appProperties['from.esp.to.custserv.pci.doEncrypt']}"/>
         <constructor-arg value="#{appProperties['from.esp.to.custserv.pci.encryptKeyAlias']}"/>
-        <constructor-arg value="#{appProperties['esp.encryiption.encoding']}"/>
+        <constructor-arg value="#{appProperties['esp.encryption.encoding']}"/>
     </bean>
-
+    
     <!-- To Handle alerts from AFFINA to ESP here-->
     <bean id="cardSetupAlertHandler" class="net.aconite.affina.espinterface.handler.message.CardSetupAlertHandler">
 		<property name="espScope" value="#{appProperties['esp.application.scope']}"/>
@@ -114,16 +115,25 @@
     <bean id="stageScriptResponseHandler" class="net.aconite.affina.espinterface.handler.message.StageScriptResponseHandler">
 		<property name="espScope" value="#{appProperties['esp.application.scope']}"/>
 	</bean>
-	
+	<bean id="propertyHelper" class="net.aconite.affina.espinterface.helper.PropertyHelper">        	
+        <property name="espScope" value="#{appProperties['esp.application.scope']}"/>
+    </bean>
     <bean id="scriptStatusRequestHandler" class="net.aconite.affina.espinterface.handler.message.ScriptStatusRequestHandler">
 		<property name="espScope" value="#{appProperties['esp.application.scope']}"/>
 	</bean>
+	
+	<!-- To Handle Request from CS to ESP here -->
+	<bean id="sendScriptRequestHandler" class="net.aconite.affina.espinterface.handler.message.SendScriptRequestHandler">
+		<property name="espScope" value="#{appProperties['esp.application.scope']}"/>
+	</bean>
+
+	
 
     <!-- To Handle Error and Progress messages here-->
     <bean id="errorHandler" class="net.aconite.affina.espinterface.handler.feedback.EspErrorHandler">
 		<constructor-arg ref="feedbackHeader"/>		
     </bean>
-	
+    
     <bean id="progressHandler" class="net.aconite.affina.espinterface.handler.feedback.EspProgressHandler">
         <constructor-arg ref="feedbackHeader"/>		
     </bean>
@@ -147,7 +157,9 @@
                 <prop key="ScriptStatusResponse">#{appProperties['show.progress.message.scriptstatusresponse']}</prop>
 				<!-- inward messages-->
                 <prop key="CardSetupResponse">#{appProperties['show.progress.message.cardsetupresponse']}</prop>
-                <prop key="StageScriptResponse">#{appProperties['show.progress.message.stagescriptresponse']}</prop>                
+                <prop key="StageScriptResponse">#{appProperties['show.progress.message.stagescriptresponse']}</prop>
+				<!-- other validation-->
+				<prop key="ConfigImportAlert">#{appProperties['show.progress.message.configimportalert']}</prop>                
             </props>
         </property>		
 		<property name="showValidationErrors">
@@ -157,11 +169,13 @@
 				<!-- inward validation-->
                 <prop key="CardSetupResponse">#{appProperties['show.validation.error.cardsetupresponse']}</prop>
                 <prop key="StageScriptResponse">#{appProperties['show.validation.error.stagescriptresponse']}</prop>
+				<!-- other validation-->
+				<prop key="ConfigImportAlert">#{appProperties['show.validation.error.configimportalert']}</prop>
             </props>
         </property>
     </bean>
 
-	
+    
 	<!-- Script status update beans-->	
 <!-- 	<bean id="scriptProcessable" factory-method="getProcessable" class="net.aconite.affina.espinterface.scripting.statusupdate.ScriptUpdateProcessor"/>	
 	<bean id="scriptStatusUpdateEventHandler" class="net.aconite.affina.espinterface.scripting.statusupdate.ScriptStatusUpdateEventHandler">

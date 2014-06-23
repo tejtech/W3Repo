@@ -37,4 +37,9 @@ public class ScriptValidationException extends ScriptProcessingRuntimeException
         super(message, eReason, errCode);
 
     }
+    
+    public ScriptValidationException(String message, String eReason, String errCode, int errType)
+    {
+        super(message, eReason, errCode, errType);        
+    }
 }

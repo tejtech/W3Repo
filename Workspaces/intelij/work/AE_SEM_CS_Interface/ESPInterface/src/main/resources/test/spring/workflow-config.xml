@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+						   http://www.springframework.org/schema/beans/spring-beans.xsd
+						   http://www.springframework.org/schema/context
+						   http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+	<context:annotation-config/>
+    <context:component-scan base-package="net.aconite.affina.espinterface.workflow.service"/>
+    <context:component-scan base-package="net.aconite.affina.espinterface.workflow.process"/>
+    <context:component-scan base-package="net.aconite.affina.espinterface.workflow.action"/>
+    <context:component-scan base-package="net.aconite.affina.espinterface.jms"/>
+
+	<!--############################################################################################-->
+	<!--++++++++++++++++++++++ DEFINE WORKFLOWS HERE ++++++++++++++++++++++++++++++++++++++++++++++-->
+
+    <bean id='espStandardWorkflow'  class='net.aconite.affina.espinterface.workflow.engine.StandardWorkflow'>
+        <property name='workflowActions'>
+            <map>
+                <!-- <entry key='<CID>_action'><ref bean='<CID>_action'/></entry>-->
+                <!-- OEVBS -->
+                <entry key='FilterProcessing_Action'>
+                    <ref bean='stageScriptFilterProcessingActions' />
+                </entry>                
+                <!-- WPV -->
+                <entry key='PingProcessing_Action'>
+                    <ref bean='pingProcessingActions' />
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+	<!--############################################################################################-->
+	<!--++++++++++++++++++++++ DEFINE WORKFLOWS ACTIONS HERE +++++++++++++++++++++++++++++++++++++++-->
+	
+    <bean id='stageScriptFilterProcessingActions' class='java.util.ArrayList'>
+        <constructor-arg>
+            <!-- List of Actions -->
+            <list value-type='net.aconite.affina.espinterface.workflow.service.IWorkflowAction' >
+                <ref local='generateStageScriptAlert'/>  				
+            </list>
+        </constructor-arg>
+    </bean>
+		
+    <bean id='pingProcessingActions' class='java.util.ArrayList'>
+        <constructor-arg>
+            <!-- List of Actions -->
+            <list value-type='net.aconite.affina.espinterface.workflow.service.IWorkflowAction' >
+                <!-- 
+				<ref local='ping1Action'/>
+                <ref local='ping2Action'/>
+                <ref bean='ping3Action'/> 
+				-->
+            </list>
+        </constructor-arg>
+    </bean>
+
+	<!--############################################################################################-->
+	<!--++++++++++++++++++++++ DEFINE WORKFLOWS ACTIONS BEANS HERE +++++++++++++++++++++++++++++++++++++++-->
+	
+    <bean id="generateStageScriptAlert" class="net.aconite.affina.espinterface.workflow.action.GenerateStageScriptAlert"/>   	
+    
+</beans>

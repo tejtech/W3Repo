@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ScriptStatusUpdate source="string" target="string" datePublished="1475276399999" scriptUpdateStatus="SENT"
+		scriptSequenceNumber="200" autoRetryCount="200">
+	<TrackingReference>PRM000191</TrackingReference>
+	<Card PAN="5888490010000006" PANSequence="00" expirationYear="2016" expirationMonth="09"/>
+	<BusinessFunction FunctionName="Apply Risk Profile 1x"/>
+	<ScriptOrder>1</ScriptOrder>
+	<!--Optional:-->
+	<deletionDetails deletedDate="1475276399999" deletionReason="string"/>
+	<!--Optional:-->
+	<transactionDetails atc="string" transactionDate="1475276399999" scriptBytes="6765726F"/>
+	<!--Optional:-->
+	<deviceDetails deviceType="100" deviceCapabilities="anySimpleType"/>
+	<!--Optional:-->
+	<scriptDeliveryStatus deliveryStatus="STAGED"/>
+	<ScriptDataItem name="LCOL" value="04"/>
+	<ScriptDataItem name="UCOL" value="09"/>
+</ScriptStatusUpdate>
+
+<!-- C:\JDrive\modules\Affina\AE_SEM_CS_Interface\ESPInterfaceGenerate\src\main\resources\xml\sem -->

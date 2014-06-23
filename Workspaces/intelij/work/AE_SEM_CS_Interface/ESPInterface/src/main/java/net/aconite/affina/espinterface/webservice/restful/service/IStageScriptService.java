@@ -1,5 +1,6 @@
 package net.aconite.affina.espinterface.webservice.restful.service;
 
+import com.platform7.pma.request.emvscriptrequest.ESPStageScriptFilter;
 import net.aconite.affina.espinterface.webservice.restful.common.QueryResult;
 import net.aconite.affina.espinterface.webservice.restful.common.FilterCriteria;
 import net.aconite.affina.espinterface.webservice.restful.common.PagingCriteria;
@@ -7,7 +8,7 @@ import net.aconite.affina.espinterface.webservice.restful.service.model.StageScr
 
 public interface IStageScriptService
 {   
-    long submit(FilterCriteria filter, Integer maxRestageCount, Long stageScriptStartDate,Long stageScriptEndDate);
+    StageScript submit(FilterCriteria filter, Integer maxRestageCount, Long stageScriptStartDate,Long stageScriptEndDate);
     
     StageScript getById(Integer id);
 
@@ -15,10 +16,10 @@ public interface IStageScriptService
 
     QueryResult<StageScript> getList(FilterCriteria filter,PagingCriteria paging);
     
-    void save(StageScript saveobj);
+    Boolean save(StageScript saveobj);
 
-    boolean update(StageScript updateobj);
+    Boolean update(StageScript updateobj);
 
-    boolean delete(Integer id);
+    Boolean delete(Integer id);
     
 }

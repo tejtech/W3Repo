@@ -23,12 +23,12 @@
     <!-- In Channels with Decryptor-->
     <int:channel id="fromAffinaToEspJMSChannel"/>
     <int:channel id="fromSemToEspJMSChannel"/>
-    <!-- <int:channel id="fromCustServToEspJMSChannel"/> -->
+    <int:channel id="fromCustServToEspJMSChannel"/>
 
     <!-- Out Channels -->
     <int:channel id="fromEspToAffinaJMSChannel"/>
     <int:channel id="fromEspToSemJMSChannel"/>
-    <!-- <int:channel id="fromEspToCustServJMSChannel"/>-->
+    <int:channel id="fromEspToCustServJMSChannel"/>
 
     <!-- Out Error/Progress Channels -->
     <int:channel id="fromEspToAffinaErrorChannel"/>
@@ -145,6 +145,62 @@
         </property>
     </bean>
 
+	<!--###################### CUSTSERV-ESP IN/OUT JMS Channels ###################################-->
+		
+	<int:service-activator input-channel="fromCustServToEspJMSChannel" ref="headerValidatorCustServEsp" method="validateMessageHeader"
+                           output-channel="fromCustServToEspJMSValidatorChannel"/>
+
+    <!--from CustServ to ESP Message Decryptor -->
+	<int:channel id="fromCustServToEspJMSValidatorChannel"/>
+    <int:service-activator input-channel="fromCustServToEspJMSValidatorChannel" ref="pciEnforcerCustServEsp" method="decryptMessage"
+                           output-channel="fromCustServToEspUnmarshallerChannel"/>
+
+
+    <!--from CustServ to ESP unmarshaller -->
+    <int:channel id="fromCustServToEspUnmarshallerChannel"/>
+    <int-xml:unmarshalling-transformer id="custServEspUnmarshaller"
+                                       input-channel="fromCustServToEspUnmarshallerChannel"
+                                       output-channel="fromCustServToEspRouterChannel"
+                                       unmarshaller="fromCustServToEspUnmarshaller"/>
+
+    <bean id="fromCustServToEspUnmarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+        <property name="contextPath" value="net.aconite.affina.espinterface.xmlmapping.cs"/>
+		<property name="schema" value="classpath:/net/aconite/affina/espinterface/xmlmapping/cs/AllInOneIn.xsd" />
+    </bean>
+
+    <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+    <!--from ESP to CustServ Message Encryptor -->
+    <int:channel id="fromEspToCustServPCIChannel"/>
+    <int:service-activator input-channel="fromEspToCustServPCIChannel" ref="pciEnforcerCustServEsp" method="encryptMessage"
+                           output-channel="fromEspToCustServJMSChannel"/>
+
+    <!-- from Esp to CustServ marshaller -->
+    <int:channel id="toCustServMarshallerChannel"/>
+    <int-xml:marshalling-transformer
+            input-channel="toCustServMarshallerChannel"
+            output-channel="fromEspToCustServPCIChannel"
+            marshaller="fromEspToCustServJaxbMarshaller"
+            result-transformer="custServEspResultTransformer"/>
+
+    <bean id="fromEspToCustServJaxbMarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+        <property name="contextPath" value="net.aconite.affina.espinterface.xmlmapping.cs"/>
+        <property name="marshallerProperties">
+            <map>
+                <entry key="jaxb.encoding" value="#{appProperties['esp.xml.encoding']}"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="custServEspResultTransformer"
+          class="org.springframework.integration.xml.transformer.ResultToStringTransformer">
+        <property name="outputProperties">
+            <value>
+                encoding=#{appProperties['esp.xml.encoding']}
+            </value>
+        </property>
+    </bean>
+	
     <!--###################### ERROR HANDLING ############################################-->
 
     <int:channel id="errorChannel">
@@ -203,7 +259,11 @@
     <int:payload-type-router input-channel="fromAffinaToEspRouterChannel" timeout="1000">
         <int:mapping channel="toCardSetupAlertChannel"
                      type="net.aconite.affina.espinterface.xmlmapping.affina.CardSetupAlert"/>
-        <int:mapping channel="toStageScriptAlertChannel"
+		<!--This will execute stagescriptrequest on fly -->
+        <!--  <int:mapping channel="toStageScriptAlertChannel"
+                     type="net.aconite.affina.espinterface.xmlmapping.affina.StageScriptAlert"/> -->
+		<!--This will execute stagescriptrequest as a batch and this channel is defined on workflow-integration.xml -->
+		<int:mapping channel="toStageScriptJobExecutionEndChannel"
                      type="net.aconite.affina.espinterface.xmlmapping.affina.StageScriptAlert"/>
     </int:payload-type-router>
 
@@ -214,9 +274,17 @@
                      type="net.aconite.affina.espinterface.xmlmapping.sem.CardSetupResponse"/>
         <int:mapping channel="toStageScriptResponseChannel"
                      type="net.aconite.affina.espinterface.xmlmapping.sem.StageScriptResponse"/>
-        <int:mapping channel="toScriptStatusUpdateChannel"
+        <int:mapping channel="toScriptStatusUpdateValidateChannel"
                      type="net.aconite.affina.espinterface.xmlmapping.sem.ScriptStatusUpdate"/>
     </int:payload-type-router>
+	
+    <!-- Msg from CustServ to ESP router -->
+    <int:channel id="fromCustServToEspRouterChannel"/>
+    <int:payload-type-router input-channel="fromCustServToEspRouterChannel" timeout="1000">
+        <int:mapping channel="toSendScriptRequestChannel"
+                     type="net.aconite.affina.espinterface.xmlmapping.cs.SendScriptRequest"/>        
+    </int:payload-type-router>
+	
     <!-- 
 	<int:payload-type-router input-channel="fromAffinaToEspRouterChannel">
         <int:mapping type="com.platform7.affinainterface.sds.DeliveryPackageFile" channel="toDeliveryPackageFileSplitter" />
@@ -236,10 +304,25 @@
     <int:channel id="toCardSetupAlertChannel"/>
     <int:splitter id="cardSetupAlertHandlingSplitter" input-channel="toCardSetupAlertChannel"
                   ref="cardSetupAlertHandler" output-channel="toRecipientListSemChannel"/>
-
+	
+	<!-- This will be invoked only for direct stagescriptrequest without chunking -->
     <int:channel id="toStageScriptAlertChannel"/>
     <int:splitter id="stageScriptAlertHandlingSplitter" input-channel="toStageScriptAlertChannel"
                   ref="stageScriptAlertHandler" output-channel="toRecipientListSemChannel"/>
+
+	<int:channel id="toSendScriptRequestChannel"/>
+    <int:splitter id="sendScriptRequestHandlingSplitter" input-channel="toSendScriptRequestChannel"
+                  ref="sendScriptRequestHandler" output-channel="fromCustServToEsp2WayRouterChannel"/>
+				  
+	<!-- Message Routing-->
+    <!-- Msg from CustServ to ESP router -->
+    <int:channel id="fromCustServToEsp2WayRouterChannel"/>
+    <int:payload-type-router input-channel="fromCustServToEsp2WayRouterChannel" timeout="1000">
+        <int:mapping channel="toRecipientListSemChannel"
+                     type="net.aconite.affina.espinterface.xmlmapping.sem.StageScriptRequest"/> 
+		<int:mapping channel="toCustServMarshallerChannel"
+                     type="net.aconite.affina.espinterface.xmlmapping.cs.SendScriptResponse"/> 
+    </int:payload-type-router>
 
 
     <!--###################### MESSAGE TRANSFORMER ############################################-->
@@ -250,19 +333,46 @@
 
     <!-- <int:channel id="toStageScriptAlertChannel" /> -->
     <!-- <int:transformer input-channel="toStageScriptAlertChannel" ref="stageScriptAlertHandler" output-channel="toSemMarshallerChannel" /> -->
+	
+	<int:channel id="toScriptStatusUpdateValidateChannel"/>
+    <int:recipient-list-router input-channel="toScriptStatusUpdateValidateChannel"
+                               default-output-channel="toDestinationChannel"
+                               timeout="1000">  
+        <int:recipient channel="toScriptStatusUpdateChannel" selector-expression="${esp.enable.scriptupdate.request.from.sem}==true"/>        
+    </int:recipient-list-router>
+	
 
     <int:channel id="toScriptStatusUpdateChannel"/>
-    <int:transformer input-channel="toScriptStatusUpdateChannel" ref="scriptStatusRequestHandler"
-                     output-channel="toRecipientListSemChannel"/>
+    <int:splitter input-channel="toScriptStatusUpdateChannel" ref="scriptStatusRequestHandler"
+                     output-channel="toRecipientListSSUChannel"/>
+    
+    <int:channel id="toRecipientListSSUChannel"/>
+    <int:recipient-list-router input-channel="toRecipientListSSUChannel"
+                               default-output-channel="toRecipientListSemChannel"
+                               timeout="1000">  <!--ignore-send-failures="true"   apply-sequence="true"-->
+        <int:recipient channel="toSemMarshallerChannel" selector-expression="headers.get('msg_dest')=='msg_sem'"/>
+        <int:recipient channel="progressChannel" selector-expression="headers.get('msg_dest')=='msg_affina'"/>        
+    </int:recipient-list-router>
+
 
     <!--from ESP to AFFINA Message processor -->
     <int:channel id="toCardSetupResponseChannel"/>
     <int:transformer input-channel="toCardSetupResponseChannel" ref="cardSetupResponseHandler"
                      output-channel="progressChannel"/>
-
+      
     <int:channel id="toStageScriptResponseChannel"/>
-    <int:transformer input-channel="toStageScriptResponseChannel" ref="stageScriptResponseHandler"
-                     output-channel="progressChannel"/>
+    <int:splitter id="stageScriptResponseHandlingSplitter" input-channel="toStageScriptResponseChannel" 
+				  ref="stageScriptResponseHandler"  output-channel="fromEspToCustServ2WayRouterChannel"/>
+	
+	<!-- Message Routing-->
+    <!-- Msg from CustServ to ESP router -->
+    <int:channel id="fromEspToCustServ2WayRouterChannel"/>
+    <int:payload-type-router input-channel="fromEspToCustServ2WayRouterChannel" 
+							 default-output-channel="progressChannel" 
+							 timeout="1000">        
+		<int:mapping channel="toCustServMarshallerChannel"
+                     type="net.aconite.affina.espinterface.xmlmapping.cs.SendScriptResponse"/> 
+    </int:payload-type-router>
 
 
     <!--###################### MESSAGE RECIPIENTS ############################################-->

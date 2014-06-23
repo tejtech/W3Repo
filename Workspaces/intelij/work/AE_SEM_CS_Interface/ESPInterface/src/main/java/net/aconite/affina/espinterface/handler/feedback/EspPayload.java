@@ -79,7 +79,12 @@ public class EspPayload implements Serializable
     @Override
     public String toString() 
     {
-        return "EspPayload{ header="+header+", message=" + message + ", isError=" + isError + "}";
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nHeader  : ").append(header);
+        sb.append("\nMessage : ").append(message);
+        sb.append("\nIsError : ").append(isError);
+        sb.append("\n");
+        return sb.toString();
     }
     
     

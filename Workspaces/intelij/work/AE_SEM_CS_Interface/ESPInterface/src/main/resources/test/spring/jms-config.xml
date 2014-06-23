@@ -51,11 +51,11 @@
     <bean id="semEspTxManager" class="org.springframework.jms.connection.JmsTransactionManager">
         <property name="connectionFactory" ref="affinaCachedMQConnectionFactory"></property>
     </bean>
-    <!--
+	
     <bean id="custServEspTxManager" class="org.springframework.jms.connection.JmsTransactionManager">
         <property name="connectionFactory" ref="affinaCachedMQConnectionFactory"></property>
     </bean>
-     -->
+
     <!-- /////////////Defining Message Queues////////////////////////////////////////////////////////////////////////-->
     <!-- Affina-ESP Queues -->
     <bean id="fromAffinaToEsp" class="com.ibm.mq.jms.MQQueue">
@@ -92,21 +92,21 @@
     </bean>
 	-->
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-    <!-- CustomerService-ESP Queues
+    <!-- CustomerService-ESP Queues -->
     <bean id="fromCustServToEsp" class="com.ibm.mq.jms.MQQueue">
         <constructor-arg value="#{appProperties['from.custserv.to.esp.queue.name']}" />
         <property name="targetClient">
             <util:constant static-field="com.ibm.msg.client.wmq.common.CommonConstants.WMQ_CLIENT_JMS_COMPLIANT" />
         </property>
     </bean>
-
+	<!-- 
     <bean id="fromEspToCustServ" class="com.ibm.mq.jms.MQQueue">
         <constructor-arg value="#{appProperties['from.esp.to.custserv.queue.name']}" />
         <property name="targetClient">
             <util:constant static-field="com.ibm.msg.client.wmq.common.CommonConstants.WMQ_CLIENT_JMS_COMPLIANT" />
         </property>
     </bean>
-    -->
+     -->
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- /////////////Defining Message Topics////////////////////////////////////////////////////////////////////////-->
     <!-- Affina-ESP Topics -->
@@ -188,17 +188,17 @@
 
     <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
     <!-- FROM Customer Service TO ESP -->
-    <!-- <int-jms:message-driven-channel-adapter
+    <int-jms:message-driven-channel-adapter
             id="jmsFromCustServToEsp"
             destination="fromCustServToEsp"
-            channel="fromCustServToEspUnmarshallerChannel"
+            channel="fromCustServToEspJMSChannel"
             connection-factory="affinaCachedMQConnectionFactory"
+			error-channel="errorChannel"
             header-mapper="priorityHeaderMapper"
             acknowledge="transacted"
-            transaction-manager="affinaEspTxManager"
-			concurrent-consumers="5" 
-			max-concurrent-consumers="5"
-			/> -->
+            transaction-manager="custServEspTxManager"
+			concurrent-consumers="#{appProperties['custServEsp.concurrent.consumers']}" 
+			max-concurrent-consumers="#{appProperties['custServEsp.max.concurrent.consumers']}"/>
 
     <!-- FROM ESP TO Customer Service -->
     <!-- <int-jms:outbound-channel-adapter
@@ -206,8 +206,15 @@
             destination="fromEspToCustServ"
             channel="fromEspToCustServJMSChannel"
             connection-factory="affinaCachedMQConnectionFactory"
-            header-mapper="priorityHeaderMapper"/> -->
-			
+            header-mapper="priorityHeaderMapper"/>
+			 -->
+	<!-- it is required to overwrite header-mapper & jms-template to pass JMSPriority to JMS message-->
+	<!-- https://jira.springsource.org/browse/INT-3259 -->
+	<int-jms:outbound-channel-adapter 
+			id="jmsFromEspToCustServ"			
+			channel="fromEspToCustServJMSChannel"
+			header-mapper="priorityHeaderMapper"
+			jms-template="fromEspToCustServOutboundPriorityJmsTemplate"/>
 	
 	<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
 	<!-- ~~~~~~~~Error / progress Adaptor~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
@@ -251,6 +258,16 @@
 		<!-- <property name="destinationResolver" ref="jmsDestinationResolver"/> -->
 		<property name="pubSubDomain" value="false"/>
 		<property name="receiveTimeout" value="#{appProperties['from.esp.to.sem.queue.receive.timeout']}"/>
+		<property name="sessionTransacted" value="true" />
+		<property name="explicitQosEnabled" value="true" />
+	</bean>
+	
+	<bean id="fromEspToCustServOutboundPriorityJmsTemplate" class="net.aconite.affina.espinterface.jms.PriorityJmsTemplate">
+		<property name="connectionFactory" ref="affinaCachedMQConnectionFactory" />
+		<property name="defaultDestinationName" value="#{appProperties['from.esp.to.custserv.queue.name']}"/>
+		<!-- <property name="destinationResolver" ref="jmsDestinationResolver"/> -->
+		<property name="pubSubDomain" value="false"/>
+		<property name="receiveTimeout" value="#{appProperties['from.esp.to.custserv.queue.receive.timeout']}"/>
 		<property name="sessionTransacted" value="true" />
 		<property name="explicitQosEnabled" value="true" />
 	</bean>

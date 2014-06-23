@@ -14,7 +14,12 @@ public class ScriptProcessingRuntimeException extends RuntimeException
     static final long serialVersionUID = -3387516993124229943L;
     private String errorCode;
     private String errReason;
+    public final static int ERROR_APPLICATION = 1;
+    public final static int ERROR_VALIDATION = 2;
+    private int errorType;
     protected ScriptProcessingRuntimeException ex;
+    private boolean isBusinessError = true;
+    
 
     public ScriptProcessingRuntimeException()
     {
@@ -43,6 +48,13 @@ public class ScriptProcessingRuntimeException extends RuntimeException
         this(message, errCode);
         errReason = eReason;
     }
+    
+    public ScriptProcessingRuntimeException(String message, String eReason, String errCode, int errType)
+    {
+        this(message, errCode);
+        errReason = eReason;
+        errorType = errType;
+    }
 
     public String getErrorCode()
     {
@@ -54,4 +66,18 @@ public class ScriptProcessingRuntimeException extends RuntimeException
         return errReason;
     }  
     
+    public int getErrorType()
+    {
+        return errorType;
+    }   
+
+    public boolean isBusinessError()
+    {
+        return isBusinessError;
+    }
+
+    public void setBusinessError(boolean isBusinessError)
+    {
+        this.isBusinessError = isBusinessError;
+    } 
 }

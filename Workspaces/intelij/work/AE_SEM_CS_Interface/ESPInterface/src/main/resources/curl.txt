@@ -23,14 +23,21 @@ curl -X PUT -H "Content-Type: application/json"  --data {\"id\":15,\"name\":\"wa
 curl -X DELETE -H "Content-Type: application/json"  "http://localhost:20013/esp-interface-web/services/api/product/2"
 
 
-curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/test"
+curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/ping"
 curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/scope"
 curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/product?scopeId=51"
 curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/productpart?productId=51"
 curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/application?productPartId=56"
-curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/stagescript/summary?applicationId=52"
-curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/stagescript/submit?applicationId=52"
-curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/stagescript/submit?applicationId=52&businessFunctionId=53"
+xcurl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/stagescript/summary?applicationId=52"
+xcurl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/stagescript/submit?applicationId=52"
+xcurl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/stagescript/submit?applicationId=52&businessFunctionId=53"
+curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/stagescript/submit?applicationId=52&businessFunctionId=53&scopeId=51"
+curl  --header "Accept: application/json" "http://192.168.0.27:20013/esp-interface-web/services/api/stagescript/submit?applicationId=52&businessFunctionId=53&scopeId=51"
+curl  --header "Accept: application/json" "http://192.168.0.27:20013/esp-interface-web/services/api/stagescript/submit?applicationId=52&businessFunctionId=51&scopeId=51"
+
+curl  --header "Accept: application/json" "http://localhost:20013/esp-interface-web/services/api/stagescript/submit?applicationId=52&businessFunctionId=53&scopeId=51&cardId="
+
+C:\APP\curl-7.24.0\bin
 -------------------------------------------------
 
 http://www.webdevdoor.com/jquery/cross-domain-browser-json-ajax/
@@ -63,6 +70,8 @@ curl  --header "Accept: application/json" "http://localhost:14013/Operations/ser
 curl  --header "Accept: application/json" "http://localhost:14013/Operations/services/api/application?productPartId=56"
 curl  --header "Accept: application/json" "http://localhost:14013/Operations/services/api/stagescript/summary?applicationId=52"
 curl  --header "Accept: application/json" "http://localhost:14013/Operations/services/api/stagescript/submit?applicationId=52"
+curl  --header "Accept: application/json" "http://localhost:14013/Operations/services/api/stagescript/submit?applicationId=52&businessFunctionId=53&scopeId=51&source=OpConsole"
+
 
 
 web.xml

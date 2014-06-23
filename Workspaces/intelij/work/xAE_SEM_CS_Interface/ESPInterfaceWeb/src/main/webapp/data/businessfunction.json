@@ -1,0 +1,21 @@
+{
+	"totalCount" : "4",
+	"recordName" : "businessfunction",
+	"records" : [{
+			id : "1",
+			name : "BUSFUNUC1"
+			}, 
+			{
+			id : "2",
+			name : "BUSFUNUC2"
+			}, 
+			{
+			id : "3",
+			name : "BUSFUNUC3"
+			}, 
+			{
+			id : "4",
+			name : "BUSFUNUC4"
+			}, 
+	]
+}

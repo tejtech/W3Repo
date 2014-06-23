@@ -7,6 +7,7 @@ package net.aconite.affina.espinterface.handler.feedback;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import net.acointe.affina.esp.AffinaEspUtils;
 import net.aconite.affina.espinterface.constants.EspConstant;
 import net.aconite.affina.espinterface.helper.DateHelper;
 import org.apache.velocity.app.VelocityEngine;
@@ -32,6 +33,7 @@ public class EspFeedbackHeader
     
     private Properties showProgressMessages;
     private Properties showValidationErrors; 
+    private Properties showWarningMessages;
     
     public EspFeedbackHeader(VelocityEngine velocityEngine)
     {
@@ -41,10 +43,10 @@ public class EspFeedbackHeader
     public String generateMessageHeader()
     {
         Map<String, Object> props = new HashMap<String, Object>();
-        props.put(EspConstant.VT_CURRENT_DATETIME, DateHelper.getFormattedCurrentDate());
-        props.put(EspConstant.VT_MODULE_NAME, getEspAppModuleName());
-        props.put(EspConstant.VT_SERVICE_NAME, getEspAppServiceName());
-        props.put(EspConstant.VT_APPSERVER_SUFFIX, getEspAppServiceSuffix());
+        props.put(EspConstant.VT_CURRENT_DATETIME, AffinaEspUtils.getEmptyIfNull(DateHelper.getFormattedCurrentDate()));
+        props.put(EspConstant.VT_MODULE_NAME, AffinaEspUtils.getEmptyIfNull(getEspAppModuleName()));
+        props.put(EspConstant.VT_SERVICE_NAME, AffinaEspUtils.getEmptyIfNull(getEspAppServiceName()));
+        props.put(EspConstant.VT_APPSERVER_SUFFIX, AffinaEspUtils.getEmptyIfNull(getEspAppServiceSuffix()));
         
         StringBuffer sb = new StringBuffer();
         sb.append(VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "/messageHeader.vm", getEspMessageEncoding(), props));
@@ -133,6 +135,16 @@ public class EspFeedbackHeader
         this.showValidationErrors = showValidationErrors;
     }
     
+    public Properties getShowWarningMessages() 
+    {
+        return showWarningMessages;
+    }
+    
+    public void setShowWarningMessages(Properties showWarningMessages) 
+    {
+        this.showWarningMessages = showWarningMessages;
+    }  
+    
     public boolean isShowProgressMessage(String key) 
     {
         boolean isShow=false;
@@ -154,4 +166,17 @@ public class EspFeedbackHeader
         }
         return isShow;
     }
+    
+    public boolean isShowWarningMessages(String key) 
+    {
+        boolean isShow=false;
+        
+        if(showWarningMessages!=null && !showWarningMessages.isEmpty())
+        {
+            isShow=(EspConstant.TRUE.equalsIgnoreCase(showWarningMessages.getProperty(key)));
+}
+        return isShow;
+    }
+    
+    
 }

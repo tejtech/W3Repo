@@ -4,18 +4,18 @@
  */
 package net.aconite.affina.espinterface.model;
 
-import com.platform7.pma.application.Application;
 import com.platform7.pma.card.SoftCard;
 import com.platform7.pma.request.emvscriptrequest.*;
+import java.sql.Timestamp;
 import java.util.Iterator;
 
 /**
  *
  * @author thushara.pethiyagoda
  */
-public class ScriptableCard
+public class ScriptableCard extends AbstractModel
 {
-
+    protected static final long serialVersionUID = -3317516993124225943L; 
     /**
      * Application that this card can contain.
      */
@@ -55,6 +55,11 @@ public class ScriptableCard
     private SoftCard softCard;
     private ScriptableApplication application;
     private ESPApplicationDetail easpAppDetails;
+    private BusinessFunction businessFunction;
+    private String businessFunctionName;
+    private Timestamp scriptStartDate;
+    private Timestamp scriptEndDate;
+    
 
     /**
      *
@@ -85,7 +90,52 @@ public class ScriptableCard
         application = scriptableApplication;
         easpAppDetails = appData;
     }
+    /**
+     * 
+     * @param softCard
+     * @param scriptableApplication 
+     */
+    public ScriptableCard(SoftCard softCard, 
+                          ScriptableApplication scriptableApplication)
+    {       
+        this.softCard = softCard;
+        application = scriptableApplication;
+    }
+    /**
+     * 
+     * @param softCard
+     * @param scriptableApplication
+     * @param busFunction 
+     */
+    public ScriptableCard(SoftCard softCard, 
+                          ScriptableApplication scriptableApplication,
+                          String busFunction)
+    {       
+        this.softCard = softCard;
+        application = scriptableApplication;   
+        businessFunctionName = busFunction;
+    }
+    
+    public ScriptableCard(SoftCard softCard, 
+                          ScriptableApplication scriptableApplication,
+                          BusinessFunction busFunction)
+    {       
+        this.softCard = softCard;
+        application = scriptableApplication;   
+        businessFunction = busFunction;
+    }
 
+    public BusinessFunction getBusinessFunction()
+    {
+        return businessFunction;
+    }
+
+    public String getBusinessFunctionName()
+    {
+        return businessFunctionName;
+    }
+     
+    
     public Iterator<ScriptableProduct> getScriptableProducts()
     {
         return scriptableProducts;
@@ -99,6 +149,26 @@ public class ScriptableCard
     public long getAccountId()
     {
         return accountId;
+    }
+
+    public Timestamp getScriptStartDate()
+    {
+        return scriptStartDate;
+    }
+
+    public void setScriptStartDate(Timestamp scriptStartDat)
+    {
+        this.scriptStartDate = scriptStartDat;
+    }
+
+    public Timestamp getScriptEndDate()
+    {
+        return scriptEndDate;
+    }
+
+    public void setScriptEndDate(Timestamp scriptEndDat)
+    {
+        this.scriptEndDate = scriptEndDat;
     }
 
     public String getPlasticNumber()

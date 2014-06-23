@@ -9,17 +9,17 @@
             <list>
                 <!-- Setup of the queues encryption/decryption on ESP Interface -->
 				<!-- #AFFINA-ESP -->
-                <value>from.affina.to.esp.pci.doDecrypt=${MESSAGE_ENCRYPTION_FROM_PMA}</value>
+                <value>from.affina.to.esp.pci.doDecrypt=true</value>
                 <value>from.affina.to.esp.pci.decryptKeyAlias=AES</value>
                 <value>from.esp.to.affina.pci.doEncrypt=${MESSAGE_ENCRYPTION_TO_PMA}</value>
                 <value>from.esp.to.affina.pci.encryptKeyAlias=${MESSAGE_KEY_ALIAS_TO_PMA}</value>                
                 <!-- #SEM-ESP : SEM_TO_AFF means SEM to ESPInteface -->
-                <value>from.sem.to.esp.pci.doDecrypt=${MESSAGE_ENCRYPTION_FROM_SEM_TO_AFF}</value>
+                <value>from.sem.to.esp.pci.doDecrypt=true</value>
                 <value>from.sem.to.esp.pci.decryptKeyAlias=AES</value>
                 <value>from.esp.to.sem.pci.doEncrypt=${MESSAGE_ENCRYPTION_FROM_AFF_TO_SEM}</value>
                 <value>from.esp.to.sem.pci.encryptKeyAlias=${MESSAGE_KEY_ALIAS_FROM_AFF_TO_SEM}</value>                
                 <!-- #CS-ESP : CS_TO_AFF means Customer Service/Thrird Party Issuer to ESPInteface-->
-                <value>from.custserv.to.esp.pci.doDecrypt=${MESSAGE_ENCRYPTION_FROM_CS_TO_AFF}</value>
+                <value>from.custserv.to.esp.pci.doDecrypt=true</value>
                 <value>from.custserv.to.esp.pci.decryptKeyAlias=AES</value>
                 <value>from.esp.to.custserv.pci.doEncrypt=${MESSAGE_ENCRYPTION_FROM_AFF_TO_CS}</value>
                 <value>from.esp.to.custserv.pci.encryptKeyAlias=${MESSAGE_KEY_ALIAS_FROM_AFF_TO_CS}</value>
@@ -54,6 +54,8 @@
 				<value>affinaEsp.max.concurrent.consumers=15</value>
 				<value>semEsp.concurrent.consumers=15</value> 
 				<value>semEsp.max.concurrent.consumers=15</value>
+				<value>custServEsp.concurrent.consumers=5</value> 
+				<value>custServEsp.max.concurrent.consumers=5</value>
 				
                 <value>mq.cacheSize=20</value>
                 <value>topic.cacheSize=20</value>
@@ -69,8 +71,13 @@
 
                 <!-- Container specific properties -->
                 <value>database.showSQL=false</value>
+				
+				<!-- enable ESPInterface to accept alert Messages from Affina -->
                 <value>esp.enable.cardsetup.alert.from.affina=${ENABLE_CARD_SETUP_ALERT_MESSAGE}</value>
 				<value>esp.enable.stagescript.alert.from.affina=false</value>
+				
+				 <!-- enable ESPInterface to accept request Messages from Sem -->
+				<value>esp.enable.scriptupdate.request.from.sem=true</value>
 
 				<value>esp.application.module.name=espInterface</value>
 				<value>esp.application.service.name=${SERVICE_NAME}</value>
@@ -82,10 +89,23 @@
 				<value>show.progress.message.stagescriptrequest=false</value>
 				<value>show.progress.message.cardsetupresponse=false</value>
 				<value>show.progress.message.stagescriptresponse=false</value>
+				<value>show.progress.message.configimportalert=false</value>
 								
+                <value>show.warning.message.scriptstatusresponse=true</value>
+                                
 				<value>show.validation.error.cardsetupresponse=true</value>
 				<value>show.validation.error.scriptstatusresponse=false</value>
 				<value>show.validation.error.stagescriptresponse=false</value>
+				<value>show.validation.error.configimportalert=false</value>
+				
+				<!--Workflow specific properties -->
+				<!-- <value>esp.workflow.cron.expression=1 * * * * ?</value> -->
+				<!-- This is to suspend workflow by setting it to execute evey mid night on xmass day if it is sunday-->
+				<value>esp.workflow.cron.expression=0 0 0 25 12 1</value>
+				
+				<!--Workbacth specific properties -->
+				<value>esp.chunck.size.stagescript=1000</value>
+				<value>esp.chunck.commit.interval.stagescript=1</value>
 
             </list>
         </property>

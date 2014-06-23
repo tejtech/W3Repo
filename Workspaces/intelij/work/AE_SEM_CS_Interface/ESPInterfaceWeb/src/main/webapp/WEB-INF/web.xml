@@ -4,6 +4,11 @@
          version="2.4" id="WebApp">
 
     <display-name>ESP Interface Web</display-name>
+	
+	<context-param>
+        <param-name>encryption.keySet</param-name>
+        <param-value>${ENCRYPTION_KEY_SET}</param-value>
+    </context-param>
 
     <resource-ref id="ResourceRef_AffinaDataSource_pma">
         <description>The Affina DataSource</description>

@@ -5,6 +5,7 @@
 package net.aconite.affina.espinterface.scripting.statusupdate;
 
 import net.aconite.affina.espinterface.helper.Result;
+import net.aconite.affina.espinterface.model.AbstractModel;
 import net.aconite.affina.espinterface.scripting.generic.*;
 
 /**
@@ -15,13 +16,13 @@ public class ScriptStatusUpdateEventHandler implements ScriptEventListener<Scrip
 {
 
     /** The script processor.*/
-    private ScriptProcessable<ScriptStatusUpdateDataHolder> scriptProcessable;
+    private ScriptProcessable<ScriptStatusUpdateDataHolder, AbstractModel> scriptProcessable;
     
     /**
      * 
      * @param sProcessable 
      */
-    public ScriptStatusUpdateEventHandler(ScriptProcessable<ScriptStatusUpdateDataHolder> sProcessable)
+    public ScriptStatusUpdateEventHandler(ScriptProcessable<ScriptStatusUpdateDataHolder, AbstractModel> sProcessable)
     {
         scriptProcessable = sProcessable;
     }

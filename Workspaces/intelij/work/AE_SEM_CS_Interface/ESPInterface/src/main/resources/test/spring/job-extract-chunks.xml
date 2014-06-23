@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xsi:schemaLocation="http://www.springframework.org/schema/batch
+		http://www.springframework.org/schema/batch/spring-batch-2.2.xsd
+		http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/util 
+		http://www.springframework.org/schema/util/spring-util-3.2.xsd 
+		http://www.springframework.org/schema/integration 
+		http://www.springframework.org/schema/integration/spring-integration.xsd">
+		
+	<!--############################################################################################-->
+	<!--++++++++++++++++++++++ DEFINE BATCH JOB HERE +++++++++++++++++++++++++++++++++++++++++++++++-->
+	
+    <job id="stageScriptRequestChunkJob" xmlns="http://www.springframework.org/schema/batch">
+        <step id="step">
+            <tasklet>                
+                <chunk reader="pagingItemReader" writer="gatewayWriter" commit-interval="#{appProperties['esp.chunck.commit.interval.stagescript']}"/>                
+            </tasklet>
+        </step>
+    </job>
+	
+	<!--############################################################################################-->
+	<!--++++++++++++++++++++++ DEFINE CHUNK READERS HERE +++++++++++++++++++++++++++++++++++++++++++-->
+	
+	<bean id="pagingItemReader"
+          class="org.springframework.batch.item.database.JdbcPagingItemReader"
+          scope="step">
+        <property name="dataSource" ref="dataSource_pma"/>
+        <property name="queryProvider">
+            <bean class="org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean">
+                <property name="dataSource" ref="dataSource_pma"/>                
+                <property name="selectClause" value="select ssd.trackAlias,ssd.pan,ssd.psn,ssd.expDate,ssd.appType,ssd.appVersion,ssd.busFuncAlias,ssd.stageStartDate,ssd.stageEndDate,ssd.stageMaxcount,ssd.scriptableManifestOID,ssd.stageScriptFilterOID,ssd.cardId,ssd.scopeOID,ssd.filterTrackId,ssd.scopeName,ssd.appId,ssd.stageScriptDetailOID,ssd.busFuncOID,ssd.manifestAppOID,ssd.softCardOID,ssd.appOID"/>
+                <property name="fromClause" value="from STAGE_SCRIPT_CHUNK_VIEW ssd"/>				
+                <property name="whereClause" value="where ssd.scopeName=:myScopeName and ssd.filterTrackId=:myFilterTrackId"/>
+                <property name="sortKey" value="scriptableManifestOID"/>
+            </bean>
+        </property>
+        <property name="parameterValues">
+            <map>                
+				<entry key="myScopeName" value="#{jobParameters['espScopeName']}"/>
+				<entry key="myFilterTrackId" value="#{jobParameters['espFilterTrackId']}"/>
+            </map>
+        </property>
+        <property name="pageSize" value="#{appProperties['esp.chunck.size.stagescript']}"/>
+        <property name="rowMapper">
+            <bean class="net.aconite.affina.espinterface.workbatch.mapper.StageScriptChunkRowMapper"/>
+        </property>
+    </bean>
+    
+	<!--############################################################################################-->
+	<!--++++++++++++++++++++++ DEFINE CHUNK WRITERS HERE +++++++++++++++++++++++++++++++++++++++++++-->
+	
+    <int:gateway id="gatewayWriter"
+                         service-interface="org.springframework.batch.item.ItemWriter"
+                         default-request-channel="toStageScriptChunkProcessorChannel" />
+						 
+	
+	<!--############################################################################################-->
+	<!--++++++++++++++++++++++ DEFINE CHUNK OUTPUT CHANNELS/PROCESSORS HERE ++++++++++++++++++++++++-->
+						 
+	<int:channel id="toStageScriptChunkProcessorChannel"/>
+	<!--This process will generate stagescriptrequest and forward to toRecipientListSemChannel which is defined in spring-integration-config.xml -->
+	<int:splitter id="stageScriptChunkProcessorSplitter" ref="stageScriptChunkProcessor" 
+				 input-channel="toStageScriptChunkProcessorChannel" 
+                 output-channel="toRecipientListSemChannel"/>
+	
+	
+	<!--############################################################################################-->
+	<!--++++++++++++++++++++++ DEFINE CHUNK OUTPUT PROCESSORS BEAN HERE ++++++++++++++++++++++++++++-->
+	
+    <bean id="stageScriptChunkProcessor" class="net.aconite.affina.espinterface.workbatch.process.StageScriptChunkProcessor"/>
+		
+	
+	<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+	
+	<!-- <job id="xtestJob" xmlns="http://www.springframework.org/schema/batch">
+        <step id="step">
+            <tasklet> -->
+                <!--<chunk reader="xitemReader" writer="xitemWriter" commit-interval="1"/>-->
+                <!-- <chunk reader="xpagingItemReader" writer="xgatewayWriter" commit-interval="1"/> -->
+                <!-- <chunk reader="xpagingItemReader" writer="xitemWriter" commit-interval="1"/> -->
+				<!-- <chunk reader="xpagingItemReader" writer="xflatFileItemWriter" commit-interval="1"/> -->
+            <!-- </tasklet>
+        </step>
+    </job> -->
+	
+	<!-- <bean id="xitemReader"
+          class="org.springframework.batch.item.database.JdbcCursorItemReader"
+          scope="step">
+        <property name="dataSource" ref="dataSource_pma"/>
+        <property name="sql"
+                  value="select OID, USER_LOGIN, NAME, AGE from XUSERS where age > #{jobParameters['age']}"/>
+        <property name="rowMapper">
+            <bean class="net.aconite.affina.espinterface.workbatch.UserRowMapper"/>
+        </property>
+    </bean> -->
+
+    <!-- <bean id="xpagingItemReader"
+          class="org.springframework.batch.item.database.JdbcPagingItemReader"
+          scope="step">
+        <property name="dataSource" ref="dataSource_pma"/>
+        <property name="queryProvider">
+            <bean class="org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean">
+                <property name="dataSource" ref="dataSource_pma"/>                
+                <property name="selectClause" value="select u.oid, u.user_login, u.user_pass, u.age , g.description"/>
+                <property name="fromClause" value="from xusers u inner join (select oid as ageId, description from xages) g on u.age=g.ageId"/>
+                <property name="whereClause" value="where u.age > :name"/>
+                <property name="sortKey" value="oid"/>
+            </bean>
+        </property>
+        <property name="parameterValues">
+            <map>                
+                <entry key="name" value="#{jobParameters['age']}"/>
+            </map>
+        </property>
+        <property name="pageSize" value="1000"/>
+        <property name="rowMapper">
+            <bean class="net.aconite.affina.espinterface.workbatch.UserRowMapper"/>
+        </property>
+    </bean> -->
+	<!-- 
+	<bean id="xitemWriter" class="org.springframework.batch.item.xml.StaxEventItemWriter">
+        <property name="resource" value="file:xml/outputs/users.xml"/>
+        <property name="marshaller" ref="userUnmarshaller"/>
+        <property name="rootTagName" value="users"/>
+    </bean> -->
+
+    <!-- <bean id="userUnmarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
+        <property name="aliases">
+            <util:map id="aliases">
+                <entry key="user" value="net.aconite.affina.espinterface.workbatch.User"/>
+            </util:map>
+        </property>
+    </bean>
+ -->
+    <!-- csv file writer 
+    <bean id="xflatFileItemWriter" class="org.springframework.batch.item.file.FlatFileItemWriter">
+        <property name="resource" value="file:csv/outputs/users.all.csv"/>
+        <property name="appendAllowed" value="true"/>
+        <property name="lineAggregator">
+            <bean class="org.springframework.batch.item.file.transform.DelimitedLineAggregator">
+                <property name="delimiter" value=","/>
+                <property name="fieldExtractor">
+                    <bean class="org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor">
+                        <property name="names" value="id, username, password, age"/>
+                    </bean>
+                </property>
+            </bean>
+        </property>
+    </bean>-->
+	<!-- 
+	
+	<int:gateway id="xgatewayWriter"
+                         service-interface="org.springframework.batch.item.ItemWriter"
+                         default-request-channel="toRequestChannel" />						 
+		
+    <int:channel id="toRequestChannel"/>
+	<int:splitter id="mySplitter" ref="xstageScriptChunkProcessor" input-channel="toRequestChannel" output-channel="replies"/>
+	
+	<int:channel id="replies"/>
+	
+	<bean id="xstageScriptChunkProcessor" class="net.aconite.affina.espinterface.workbatch.process.StageScriptChunkProcessor"/>
+	 -->
+    <!--<int:service-activator input-channel="toRequestChannel" output-channel="replies" ref="xchunkHandler" />-->
+    <!--<int:service-activator input-channel="toRequestChannel" output-channel="replies" method="process" ref="xstageScriptChunkProcessor" /> -->
+    
+<!-- 
+    <bean id="xchunkHandler" class="net.aconite.affina.espinterface.workbatch.chunk.ChunkProcessorChunkHandler">
+        <property name="chunkProcessor">
+            <bean class="org.springframework.batch.core.step.item.SimpleChunkProcessor">
+                <property name="itemWriter">
+                    <bean class="net.aconite.affina.espinterface.workbatch.chunk.TestItemWriter" />
+                </property>
+                <property name="itemProcessor">
+                    <bean class="org.springframework.batch.item.support.PassThroughItemProcessor" />
+                </property>
+            </bean>
+        </property>
+    </bean>
+ -->
+
+
+
+</beans>

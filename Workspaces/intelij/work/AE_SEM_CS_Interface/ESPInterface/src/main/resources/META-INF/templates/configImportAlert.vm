@@ -1,0 +1,8 @@
+##parse("messageHeader.vm")
+#set( $isError = (${status} == "ERROR"))
+#set( $isErrorCode = (${errorCode} != ""))
+#if ($isError)
+Config Import Error [Desc : ${errorDescription}#if($isErrorCode), Code : ${errorCode}#end]
+#else
+Config Import Warning [Desc : ${warningDescription}]
+#end

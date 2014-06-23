@@ -37,8 +37,8 @@ public class StageScriptAlertHandler implements IEspMessageHandler
         MessageHeaders inHeaders = inMessage.getHeaders();
         StageScriptAlert inPayload = (StageScriptAlert) inMessage.getPayload();
 
-        logger.debug("process : Incoming Message header: ", inHeaders);
-        logger.debug("process : Message payload: ", inPayload);
+        logger.debug("process : Incoming Message header: {}", inHeaders);
+        logger.debug("process : Message payload: {}", inPayload);
                
         String inTrackId = inPayload.getTrackingReference();
         MessageContent messageContent = new MessageContent(EspConstant.STAGE_SCRIPT_ALERT, inTrackId);
@@ -79,7 +79,7 @@ public class StageScriptAlertHandler implements IEspMessageHandler
 
     private Message<StageScriptRequest> generateStageScriptRequestMessage(MessageHeaders headers, StageScriptRequest sourceData)
     {
-        logger.info("Created StageScriptRequest Message : " + sourceData.getTrackingReference());
+        logger.info("Created StageScriptRequest Message : {}" , sourceData.getTrackingReference());
 
         return MessageBuilder.withPayload(sourceData)
                 .copyHeaders(headers)

@@ -4,7 +4,7 @@
 #set( $isErrorData = (${errorData} != ""))
 #if ($isError)
 Card setup response with error
-    Tracking Reference : ${trackingReference}, Error [Desc : ${errorDescription}#if($isErrorCode), Code : ${errorCode}#end#if($isErrorData), Data : ${errorData}#end]
+  Tracking Reference : ${trackingReference}, Error [Desc : ${errorDescription}#if($isErrorCode), Code : ${errorCode}#end#if($isErrorData), Data : ${errorData}#end]
 #else
 Card setup response received
   Type : ${responseType}

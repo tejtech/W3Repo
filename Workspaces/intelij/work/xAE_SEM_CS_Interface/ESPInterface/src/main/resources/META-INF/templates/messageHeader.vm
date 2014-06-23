@@ -1,0 +1,1 @@
+${currentDateTime} [${moduleName}${serviceName}_${appServerSuffix}] 

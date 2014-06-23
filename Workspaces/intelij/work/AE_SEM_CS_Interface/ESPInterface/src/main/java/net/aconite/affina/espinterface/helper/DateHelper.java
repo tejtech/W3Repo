@@ -6,8 +6,12 @@ package net.aconite.affina.espinterface.helper;
 
 import java.text.*;
 import java.util.*;
+import java.util.logging.*;
+import javax.xml.datatype.*;
 import net.acointe.affina.esp.AffinaEspUtils;
 import net.aconite.affina.espinterface.constants.*;
+import net.aconite.affina.espinterface.exceptions.*;
+import net.aconite.affina.espinterface.model.*;
 import org.apache.log4j.Logger;
 
 /**
@@ -291,27 +295,20 @@ public class DateHelper
     }
 
     /**
-     *
-     * @param date
-     * <
-     * p/>
-     * @return
+     * 
      */
-    //This method has already defined in AffinaEspUtils(Infrastructure.jar)
-    /*
-    public static long getMonthendEndTime(Date date)
+    public static XMLGregorianCalendar getGeorgianDate()
     {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.add(Calendar.MONTH, 1); //Beware, month start at 0, not 1
-        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), 1);
-        cal.set(Calendar.HOUR, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        //cal.add(Calendar.MILLISECOND, -1);
-
-        return cal.getTimeInMillis();
-    }
-    */
+        try
+        {
+            GregorianCalendar c = new GregorianCalendar();
+            c.setTime(new Date());
+            XMLGregorianCalendar gc = DatatypeFactory.newInstance().newXMLGregorianCalendar(c);   
+            return gc;
+        }
+        catch (DatatypeConfigurationException ex)
+        {
+            throw new GeorgianDateGenerationException(ex.getMessage());
+        }
+    } 
 }

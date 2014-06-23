@@ -98,4 +98,34 @@ if(varEnvironment=='DEV_BACKEND')
 
 }
 
+if(varEnvironment=='LIVE')
+{
+	//////////URLs////////////////////
+	//serverURL = 'http://localhost:8080/';
+	serverURL='../../../';
+	contextPath = 'esp-interface-web';
+	bundleName = '';
+	//////////////////////////////////////////
+	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	
+	//Scope	
+	urlScopeData 				= serverURL + contextPath + bundleName+ '/services/api/scope';		
+	//Product	
+	urlProductData 				= serverURL + contextPath + bundleName+ '/services/api/product';		
+	//ProductPart	
+	urlProductPartData 			= serverURL + contextPath + bundleName+ '/services/api/productpart';		
+	//Application	
+	urlApplicationData 			= serverURL + contextPath + bundleName+ '/services/api/application';		
+	//BusinessFunction	
+	urlBusinessFunctionData 	= serverURL + contextPath + bundleName+ '/services/api/businessfunction';	
+	//ScriptableAppSummary
+	urlScriptableAppSummary  	= serverURL + contextPath + bundleName+ '/services/api/stagescript/summary';	
+	//StageScriptRequest
+	urlStageScriptRequest  		= serverURL + contextPath + bundleName+ '/services/api/stagescript/submit';
+	
+	
+	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@	    
+
+}
+
 

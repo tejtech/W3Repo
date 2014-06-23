@@ -6,7 +6,7 @@ package net.aconite.affina.espinterface.cardselection;
 
 import java.util.Iterator;
 import net.aconite.affina.espinterface.model.BusinessFunction;
-import net.aconite.affina.espinterface.model.EmvParameter;
+import net.aconite.affina.espinterface.model.BusinessParameter;
 import net.aconite.affina.espinterface.model.ScriptableApplication;
 import net.aconite.affina.espinterface.model.ScriptableProduct;
 
@@ -30,7 +30,7 @@ public interface CardContentsSelectable
      * Returns a list of parameters that canbe changes
      * @return 
      */
-    public Iterator<EmvParameter> getScriptableParameters(BusinessFunction busFunction);
+    public Iterator<BusinessParameter> getScriptableParameters(BusinessFunction busFunction);
     /**
      * Returns a set of Business Functions defined per Scriptable Application.
      * @return 

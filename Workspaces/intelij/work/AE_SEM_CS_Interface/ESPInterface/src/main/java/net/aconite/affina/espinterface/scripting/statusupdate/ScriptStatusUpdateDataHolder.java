@@ -31,8 +31,8 @@ public class ScriptStatusUpdateDataHolder extends ScriptDataHolder<ScriptStatusU
      * @return ScriptStatusUpdate
      */
     @Override
-    public ScriptStatusUpdate getScriptStatusUpdate()
+    public ScriptStatusUpdate getScriptData()
     {
-        return super.getScriptStatusUpdate();
+        return super.getScriptData();
     }
 }

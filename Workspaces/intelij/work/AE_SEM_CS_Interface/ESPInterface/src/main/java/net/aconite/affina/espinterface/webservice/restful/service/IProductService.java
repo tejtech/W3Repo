@@ -1,7 +1,6 @@
 package net.aconite.affina.espinterface.webservice.restful.service;
 
 import com.platform7.pma.product.PMAProduct;
-import com.platform7.standardinfrastructure.multiissuer.Scope;
 import net.aconite.affina.espinterface.webservice.restful.common.QueryResult;
 import net.aconite.affina.espinterface.webservice.restful.common.FilterCriteria;
 import net.aconite.affina.espinterface.webservice.restful.common.PagingCriteria;

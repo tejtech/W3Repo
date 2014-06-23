@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SendScriptRequest>
+    <User Id="TP" Scope="NIMC">
+        <Role Id="MGR" Scope="NIMC"/>
+    </User>
+    <DataContext Id="NIMC" Scope="NIMC"/>
+    <TrackingRef>TR</TrackingRef>
+    <CardId>12345678</CardId>
+    <BusinessApplication id="VISA"/>
+    <ScriptStartDate>2014-03-11</ScriptStartDate>
+    <ScriptEndDate>2014-03-11</ScriptEndDate>
+    <ScriptFunction Function="CARDBLOCK"/>
+    <Restage>0</Restage>
+</SendScriptRequest>
+
+<!-- C:\JDrive\modules\Affina\AE_SEM_CS_Interface\ESPInterfaceGenerate\src\main\resources\xml\cs\SendScriptRequest.xml-->

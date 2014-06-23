@@ -6,14 +6,12 @@ package net.aconite.affina.espinterface.security;
 
 import com.platform7.standardinfrastructure.utilities.encryption.EncryptionUtils;
 import com.platform7.standardinfrastructure.utilities.encryption.exception.EncryptionException;
-import net.aconite.affina.espinterface.constants.EspConstant;
 import net.aconite.affina.espinterface.exceptions.EspMessageSecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.Message;
 import org.springframework.integration.MessageHeaders;
 import org.springframework.integration.annotation.ServiceActivator;
-import org.springframework.integration.jms.JmsHeaders;
 import org.springframework.integration.support.MessageBuilder;
 
 import java.util.Arrays;
@@ -59,12 +57,9 @@ public class PCIEnforcer implements IPCIEnforcer
         MessageHeaders inHeaders = inMessage.getHeaders();
         Object inPayload = inMessage.getPayload();
 
-        if(logger.isDebugEnabled())
-        {
-            logger.debug("DecryptMessage : Incoming Message header: ", inHeaders);
-            logger.debug("DecryptMessage : Message payload: ", inPayload);
-            logger.debug(toString());
-        }
+        logger.debug("DecryptMessage : Incoming Message header: {}", inHeaders);
+        logger.debug("DecryptMessage : Message payload: {}", inPayload);
+        logger.debug(toString());
 
         Message outMessage;
 
@@ -100,7 +95,7 @@ public class PCIEnforcer implements IPCIEnforcer
         {
             throw new EspMessageSecurityException("Invalid JMS Message received!");
         }
-        logger.debug("Message Received : "+outMessage.toString());
+        logger.debug("Message Received : {}",outMessage.toString());
         return outMessage;
     }
 
@@ -114,12 +109,9 @@ public class PCIEnforcer implements IPCIEnforcer
         MessageHeaders inHeaders = inMessage.getHeaders();
         Object inPayload = inMessage.getPayload();
 
-        if(logger.isDebugEnabled())
-        {
-            logger.debug("EncryptMessage : Incoming Message header: ", inHeaders);
-            logger.debug("EncryptMessage : Message payload: ", inPayload);
-            logger.debug(toString());
-        }
+        logger.debug("EncryptMessage : Incoming Message header: {}", inHeaders);
+        logger.debug("EncryptMessage : Message payload: {}", inPayload);
+        logger.debug(toString());
 
         Message outMessage;
 
@@ -145,7 +137,7 @@ public class PCIEnforcer implements IPCIEnforcer
 
     private Message<String> generateDecryptedMessage(MessageHeaders headers, String sourceData)
     {
-        logger.debug("DecryptedMessage body : ", sourceData);
+        logger.debug("DecryptedMessage body : {}", sourceData);
 
         return MessageBuilder.withPayload(sourceData)
                 .copyHeaders(headers)
@@ -157,8 +149,7 @@ public class PCIEnforcer implements IPCIEnforcer
 
     private Message<byte[]> generateEncryptedMessage(MessageHeaders headers, byte[] sourceData)
     {
-        if(logger.isDebugEnabled())
-            logger.debug("EncryptedMessage body : " + Arrays.toString(sourceData));
+        logger.debug("EncryptedMessage body : {}", Arrays.toString(sourceData));
 
         // Set the correlation id to original fileName.
         return MessageBuilder.withPayload(sourceData)

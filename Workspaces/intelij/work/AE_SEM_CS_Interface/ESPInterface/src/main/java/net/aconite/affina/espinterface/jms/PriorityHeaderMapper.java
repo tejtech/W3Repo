@@ -43,8 +43,16 @@ public class PriorityHeaderMapper extends DefaultJmsHeaderMapper
             try 
             {
                 String jmsPriority= String.valueOf(headers.get(EspConstant.JMS_Priority));
-                int priority = Integer.parseInt(jmsPriority); // missing catch for numeric exception
-                jmsMessage.setJMSPriority(priority); 
+                logger.debug("jmsPriority:|{}|",jmsPriority);
+                if(jmsPriority !=null && jmsPriority.trim().length()>0 && !EspConstant.NULL.equalsIgnoreCase(jmsPriority.trim()))
+                {
+                    int priority = Integer.parseInt(jmsPriority); // missing catch for numeric exception
+                    jmsMessage.setJMSPriority(priority);
+                }
+                else
+                {
+                    logger.warn("valid jms priority is not found in the jms message");
+                }
             } 
             catch (NumberFormatException e) 
             {

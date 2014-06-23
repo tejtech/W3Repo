@@ -2,18 +2,19 @@ package net.aconite.affina.espinterface.webservice.restful.service.impl;
 
 import com.platform7.pma.request.emvscriptrequest.ESPBusinessFunction;
 import java.util.List;
-import net.aconite.affina.espinterface.persistence.GenericPersistentDAO;
+import net.aconite.affina.espinterface.dao.BusinessFunctionDao;
 import net.aconite.affina.espinterface.webservice.restful.common.QueryResult;
 import net.aconite.affina.espinterface.webservice.restful.common.FilterCriteria;
 import net.aconite.affina.espinterface.webservice.restful.common.PagingCriteria;
 import net.aconite.affina.espinterface.webservice.restful.service.IBusinessFunctionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("businessFunctionService")
 public class BusinessFunctionService implements IBusinessFunctionService
 {       
-    //@Autowired
-    //private PMAProductDao pmaProductDao;
+    @Autowired
+    private BusinessFunctionDao businessFunctionDao;
     
     public ESPBusinessFunction getById(Integer id) 
     {
@@ -33,7 +34,7 @@ public class BusinessFunctionService implements IBusinessFunctionService
         //List<PMAProduct> recordList = pmaProductDao.getListPMAProducts(filter,pagingCriteria);
         //Integer totalCount = pmaProductDao.getTotalCount(filter);
         
-        List<ESPBusinessFunction> recordList =  GenericPersistentDAO.instance().getBusinessFunctions(filter);//, paging);
+        List<ESPBusinessFunction> recordList =  businessFunctionDao.getList(filter, paging);
         
         Integer totalCount;
         if(recordList!=null)

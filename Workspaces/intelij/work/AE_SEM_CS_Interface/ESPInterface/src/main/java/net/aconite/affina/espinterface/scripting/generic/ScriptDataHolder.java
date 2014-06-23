@@ -32,7 +32,7 @@ public abstract class ScriptDataHolder<T>
      * Returns a ScriptStatusUpdate object.
      * @return ScriptStatusUpdate
      */
-    public T getScriptStatusUpdate()
+    public T getScriptData()
     {
         return ssUpdate;
     }

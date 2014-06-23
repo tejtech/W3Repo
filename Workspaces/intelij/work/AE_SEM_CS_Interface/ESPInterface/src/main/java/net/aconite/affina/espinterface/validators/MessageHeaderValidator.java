@@ -5,9 +5,7 @@
 package net.aconite.affina.espinterface.validators;
 
 import java.util.List;
-import net.aconite.affina.espinterface.exceptions.EspMessageSecurityException;
 import net.aconite.affina.espinterface.exceptions.EspMessageValidationException;
-import org.globalplatform.namespaces.systems_profiles._1_1.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.Message;
@@ -36,18 +34,18 @@ public class MessageHeaderValidator  implements IJMSValidator
 
         if(logger.isDebugEnabled())
         {
-            logger.debug("DecryptMessage : Incoming Message header: ", inHeaders);
-            logger.debug("DecryptMessage : Message payload: ", inPayload);
+            logger.debug("DecryptMessage : Incoming Message header: {}", inHeaders);
+            logger.debug("DecryptMessage : Message payload: {}", inPayload);
             logger.debug(toString());
         }
 
-        logger.info("JMSType read from MQ message: "+ inHeaders.get(JmsHeaders.TYPE));
+        logger.info("JMSType read from MQ message: {}", inHeaders.get(JmsHeaders.TYPE));
 
         if(jmsTypes!=null && !jmsTypes.isEmpty())
         {
            if(!jmsTypes.contains(inHeaders.get(JmsHeaders.TYPE)))
            {
-               logger.debug("received invalid jms_type : "+ inHeaders.get(JmsHeaders.TYPE));
+               logger.debug("received invalid jms_type : {}", inHeaders.get(JmsHeaders.TYPE));
                throw new EspMessageValidationException("Invalid JMS Type received {"+JmsHeaders.TYPE+" : "+inHeaders.get(JmsHeaders.TYPE)+"}");
            }
         }

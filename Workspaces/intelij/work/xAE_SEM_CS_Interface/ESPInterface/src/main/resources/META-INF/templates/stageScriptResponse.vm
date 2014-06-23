@@ -1,0 +1,13 @@
+##parse("messageHeader.vm")
+#set( $isError = (${status} == "ERROR"))
+#set( $isErrorCode = (${errorCode} != ""))
+#set( $isErrorData = (${errorData} != ""))
+#if ($isError)
+Stage script response with error
+    Tracking Reference : ${trackingReference}, Error [Desc : ${errorDescription}#if($isErrorCode), Code : ${errorCode}#end#if($isErrorData), Data : ${errorData}#end]
+#else
+Stage script response received
+  Type : ${responseType}
+  Tracking Reference : ${trackingReference}
+  Status : ${status}
+#end

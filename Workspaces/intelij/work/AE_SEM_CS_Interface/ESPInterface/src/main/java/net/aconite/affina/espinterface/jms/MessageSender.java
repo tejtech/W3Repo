@@ -19,11 +19,11 @@ public class MessageSender
 
     private static MessageSenderService stgReqSender = (MessageSenderService)AppConfig.getBean("stgReqSender");
     
-    public static void sendStageScriptFilterMessage(String trackId) 
+    public static void sendStageScriptAlertMessage(String trackId) 
     {        
         logger.debug(" sendStageScriptMessage()");
         String stageScriptMsg = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><StageScriptAlert><TrackingReference>"+trackId+"</TrackingReference></StageScriptAlert>";
-        logger.debug(" StageScript Msg :" + stageScriptMsg);
+        logger.debug(" StageScript Msg : {}" , stageScriptMsg);
         stgReqSender.sendMessage(stageScriptMsg, "StageScriptAlert");
         logger.debug(" message sent");
 

@@ -64,7 +64,12 @@ public class UIApplication
 	@Override
 	public String toString() 
         {
-		return "Application [name=" + name + ", id=" + id + "]";
+            StringBuilder sb = new StringBuilder();
+            sb.append("\nName  : ").append(name);
+            sb.append("\nId  : ").append(id);            
+            sb.append("\n");
+            return sb.toString();        
+		
 	}
 	
 	

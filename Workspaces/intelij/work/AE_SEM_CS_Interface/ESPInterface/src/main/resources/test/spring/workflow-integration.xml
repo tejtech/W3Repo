@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd 
+			http://www.springframework.org/schema/integration
+			http://www.springframework.org/schema/integration/spring-integration.xsd
+			http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--############################################################################################-->
+	<!--++++++++++++++++++++++ WORKFLOW CRON PRODUCER ++++++++++++++++++++++++++++++++++++++++++++++-->
+	
+    <int:inbound-channel-adapter id="espWorkflowCronProducer" expression="'espWorkflowCronExpression'" channel="toCheckImportProcessorChannel">
+        <int:poller cron="#{appProperties['esp.workflow.cron.expression']}"/>
+    </int:inbound-channel-adapter>
+	
+	<!--############################################################################################-->
+	<!--++++++++++++++++++++++ DEFINE VALIDATION TO CHECK IMPORT EXIST PROCESSOR +++++++++++++++++++++++++++++-->
+	
+	<int:channel id="toCheckImportProcessorChannel"/>    
+    <int:service-activator  ref="checkImportProcessor"  method="process" 
+							input-channel="toCheckImportProcessorChannel"  
+							output-channel="toConfigImportRouterChannel"/>
+	
+	
+	<int:channel id="toConfigImportRouterChannel"/>
+    <int:recipient-list-router input-channel="toConfigImportRouterChannel"
+                               default-output-channel="toRecipientListEspWorkflowChannel"
+                               timeout="1000">  <!--ignore-send-failures="true"   apply-sequence="true"-->
+        <int:recipient channel="progressChannel" selector-expression="headers.get('any_scopes_notexist')==true"/>
+        <int:recipient channel="progressChannel" selector-expression="headers.get('current_scope_notexist')==true"/>        
+    </int:recipient-list-router>
+	
+
+	<!--############################################################################################-->
+	<!--++++++++++++++++++++++ MESSAGE RECIPIENTS ++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+    <!-- Here we need to send a msg to both sides. -->	
+	<int:channel id="toRecipientListEspWorkflowChannel"/>
+    <int:recipient-list-router input-channel="toRecipientListEspWorkflowChannel">
+        <int:recipient channel="toFilterProcessorChannel"/>        
+    </int:recipient-list-router>
+	
+	<!--############################################################################################-->
+	<!--++++++++++++++++++++++ DEFINE WORKFLOW JOB INVOKING PROCESSORS +++++++++++++++++++++++++++++-->
+
+    <int:channel id="toFilterProcessorChannel"/>
+    <int:splitter id="filterProcessorSplitter" ref="filterProcessor" 
+				 input-channel="toFilterProcessorChannel" 
+                 output-channel="toStageScriptJobExecutionEndChannel"/>
+	
+	<!--++++++++++++++++++++++ DEFINE WORKFLOW JOB EXECUTION PROCESSORS HERE ++++++++++++++++++++++++++++++++++++++++++++-->
+	
+	<int:channel id="toStageScriptJobExecutionEndChannel"/>    
+    <int:service-activator input-channel="toStageScriptJobExecutionEndChannel"  method="process"  ref="stageScriptJobExecutionEndProcessor"/>
+
+
+	<!--############################################################################################-->
+	<!--++++++++++++++++++++++ DEFINE WORKFLOW JOB INVOKING PROCESS BEANs HERE +++++++++++++++++++++-->
+	
+    <!-- Define Workflow job invoking Processor here -->	
+    <bean id="filterProcessor" class="net.aconite.affina.espinterface.workflow.process.FilterProcessor">
+		<property name="espScope" value="#{appProperties['esp.application.scope']}"/>
+	</bean>
+	
+	<!--++++++++++++++++++++++ DEFINE WORKFLOW JOB EXECUTION BEANs HERE ++++++++++++++++++++++++++++++++++++++++++++-->
+	
+	<!-- Define Workflow Job Execution End Processor here -->	
+	<bean id="stageScriptJobExecutionEndProcessor" class="net.aconite.affina.espinterface.workbatch.process.StageScriptJobExecutionEndProcessor">
+		<property name="espScope" value="#{appProperties['esp.application.scope']}"/>
+	</bean>
+	
+	<!--############################################################################################-->
+	<!--++++++++++++++++++++++ DEFINE WORKFLOW END PROCESS HERE ++++++++++++++++++++++++++++++++++++-->	
+	
+	<int:channel id="toWorkflowDestinationChannel"/>
+	<int:service-activator input-channel="toWorkflowDestinationChannel"  method="process"  ref="workflowEndProcessor"/>
+	
+    <bean id="workflowEndProcessor" class="net.aconite.affina.espinterface.workflow.process.WorkflowEndProcessor">
+		<property name="espScope" value="#{appProperties['esp.application.scope']}"/>
+	</bean>
+	
+	<bean id="checkImportProcessor" class="net.aconite.affina.espinterface.workflow.process.CheckImportProcessor">
+		<property name="espScope" value="#{appProperties['esp.application.scope']}"/>
+	</bean>
+	
+</beans>

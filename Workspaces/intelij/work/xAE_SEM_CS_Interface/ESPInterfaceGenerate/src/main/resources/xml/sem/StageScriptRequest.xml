@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StageScriptRequest>
+    <TrackingReference>CTH00112M1006492895</TrackingReference>
+    <Card PAN="0129002312" PANSequence="01" expirationYear="2017" expirationMonth="03"/>
+    <BusinessFunction FunctionName="Parameter Script"/>
+	<ScriptDataItem name="LCOL" value="0x01"/>
+    <ScriptDataItem name="UCOL" value="0x06"/>
+    <ScriptDataItem name="UCOTA" value="0x000000000006"/>
+	<action startDate="1389789723234" endDate="1399789723234" restageAutomatically="5"/>
+</StageScriptRequest>

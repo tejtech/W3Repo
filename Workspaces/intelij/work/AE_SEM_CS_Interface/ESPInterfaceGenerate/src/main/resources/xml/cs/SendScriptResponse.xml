@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SendScriptResponse>
+  <TrackingReference Id="TR" Scope="NIMC"/>
+</SendScriptResponse>
+
+<!-- C:\JDrive\modules\Affina\AE_SEM_CS_Interface\ESPInterfaceGenerate\src\main\resources\xml\cs\SendScriptResponse.xml-->

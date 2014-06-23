@@ -36,7 +36,7 @@ public class StageScriptValidator implements IStageScriptValidator
         isValid=(isScriptable && isAppTypeExist && isAppVersionExist);
         if(!isValid)
         {
-            logger.debug("Invalid scriptable application found! > {isScriptable:"+isScriptable+", isAppTypeExist:"+isAppTypeExist+", isAppVersionExist:"+isAppVersionExist+"}");
+            logger.debug("Invalid scriptable application found! > {isScriptable:{}, isAppTypeExist:{}, isAppVersionExist:{}}",isScriptable,isAppTypeExist,isAppVersionExist);
         }
         
         return isValid;                
@@ -66,7 +66,7 @@ public class StageScriptValidator implements IStageScriptValidator
             
             if(!isValid)
             {
-                logger.debug("Invalid scriptable card found! > {isCardExist:"+isCardExist+", isNotExpired:"+isNotExpired+", isCardStatusOk:"+isCardStatusOk+", isCardPending:"+isCardPending+"}");
+                logger.debug("Invalid scriptable card found! > {isCardExist: {}, isNotExpired:{}, isCardStatusOk:{}, isCardPending:{}}",isCardExist,isNotExpired,isCardStatusOk,isCardPending);
             }
         } 
         catch (AffinaEspUtilException ex) 

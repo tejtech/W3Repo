@@ -43,8 +43,8 @@ public class EspDestinationHandler implements IEspFeedbackHandler
         MessageHeaders inHeaders = inMessage.getHeaders();
         Object inPayload = inMessage.getPayload();
 
-        logger.debug("process : Incoming Message header: ", inHeaders);
-        logger.debug("process : Message payload: ", inPayload);
+        logger.debug("process : Incoming Message header: {}", inHeaders);
+        logger.debug("process : Message payload: {}", inPayload);
 
         Message outMessage = inMessage;
 

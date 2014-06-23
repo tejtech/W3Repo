@@ -63,7 +63,11 @@ public class UIBusinessFunction
 	@Override
 	public String toString() 
         {
-		return "BusinessFunction [name=" + name + ", id=" + id + "]";
+            StringBuilder sb = new StringBuilder();
+            sb.append("\nName  : ").append(name);
+            sb.append("\nId  : ").append(id);            
+            sb.append("\n");
+            return sb.toString();  
 	}
 	
 	

@@ -9,6 +9,14 @@
     <import resource="spring-integration-config.xml"/>
 
     <import resource="spring-config.xml"/>
+	
+	<import resource="workflow-integration.xml"/>
+	
+	<import resource="workflow-config.xml"/>
+	
+	<import resource="batch-context.xml"/>
+	
+    <import resource="job-extract-chunks.xml"/>
 
 
 </beans>

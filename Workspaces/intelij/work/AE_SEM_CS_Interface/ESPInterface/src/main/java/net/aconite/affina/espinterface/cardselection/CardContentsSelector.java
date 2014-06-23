@@ -27,7 +27,7 @@ public class CardContentsSelector implements CardContentsSelectable
     }
 
     @Override
-    public Iterator<EmvParameter> getScriptableParameters(BusinessFunction busFunction)
+    public Iterator<BusinessParameter> getScriptableParameters(BusinessFunction busFunction)
     {
         return null;
     }

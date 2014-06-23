@@ -4,7 +4,6 @@
  */
 package net.aconite.affina.espinterface.webservice.restful.service.model;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import org.apache.log4j.Logger;
@@ -33,6 +32,11 @@ public class StageScript //implements Serializable
     private BigDecimal softcardOID;
     private BigDecimal scriptableManifestAppOID;
     private BigDecimal manifestApplicationOID;
+    
+    private String message;    
+    private String trackId;    
+    private long totalCount;
+    private boolean isDuplicate;
     
 
     public StageScript()
@@ -158,5 +162,84 @@ public class StageScript //implements Serializable
     {
         this.manifestApplicationOID = manifestApplicationOID;
     }
+
+    public BigDecimal getoID()
+    {
+        return oID;
+    }
+
+    public void setoID(BigDecimal oID)
+    {
+        this.oID = oID;
+    }
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    public void setMessage(String message)
+    {
+        this.message = message;
+    }
+
+    public String getTrackId()
+    {
+        return trackId;
+    }
+
+    public void setTrackId(String trackId)
+    {
+        this.trackId = trackId;
+    }
+
+    public long getTotalCount()
+    {
+        return totalCount;
+    }
+
+    public void setTotalCount(long totalCount)
+    {
+        this.totalCount = totalCount;
+    }
+
+    public boolean getIsDuplicate()
+    {
+        return isDuplicate;
+    }
+
+    public void setIsDuplicate(boolean isDuplicate)
+    {
+        this.isDuplicate = isDuplicate;
+    }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nOID          : ").append(oID);
+        sb.append("\nName         : ").append(name);
+        sb.append("\nExpiryDate   : ").append(expiryDate);   
+        sb.append("\nBusFunName   : ").append(businessFunctionName);    
+        sb.append("\nScopeName    : ").append(scopeName); 
+        sb.append("\nBusFunOID    : ").append(businessFunctionOID);  
+        sb.append("\nScopeOID     : ").append(scopeOID);    
+        sb.append("\nSoftcardOID  : ").append(softcardOID); 
+        sb.append("\nScrManAppOID : ").append(scriptableManifestAppOID); 
+        sb.append("\nManAppOID    : ").append(manifestApplicationOID); 
+        sb.append("\nMessage      : ").append(message); 
+        sb.append("\nTrackId      : ").append(trackId); 
+        sb.append("\nTotalCount   : ").append(totalCount); 
+        sb.append("\nIsDuplicate  : ").append(isDuplicate); 
+        sb.append("\n");
+        return sb.toString(); 
+        
+    }
+    
+    
+
+    
+    
+    
     
 }
