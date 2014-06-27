@@ -23,6 +23,7 @@
         <slf4j.version>1.7.5</slf4j.version>
         <log4j.version>1.2.17</log4j.version>
         <junit.version>4.11</junit.version>
+        <guava.version>17.0</guava.version>
         <maven.cobertura.plugin.version>2.6</maven.cobertura.plugin.version>
         <org.apache.velocity.version>1.7</org.apache.velocity.version>
         <org.codehaus.jackson.version>1.9.13</org.codehaus.jackson.version> 
@@ -223,6 +224,12 @@
                <artifactId>jackson-mapper-asl</artifactId>        
                <version>${org.codehaus.jackson.version}</version>
            </dependency>
+		   
+		   <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
 
         </dependencies>
     </dependencyManagement>
