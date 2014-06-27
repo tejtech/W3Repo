@@ -5,7 +5,6 @@
 package wak.test.sort;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 
 
@@ -29,43 +28,54 @@ public class FindTopValuesImpl implements FindTopValues
         Arrays.sort(anyOldOrderValues);//, Collections.reverseOrder()
         
         return Arrays.copyOfRange(anyOldOrderValues,anyOldOrderValues.length-n,anyOldOrderValues.length);
+                
     }
     
+    public int findMaxValue(Integer[] anyOldOrderValues)
+    {
+        Arrays.sort(anyOldOrderValues, new ReverseComparator());
+        return anyOldOrderValues[0];
+    }
+    
+    public int[] findTopNValues1(int[] anyOldOrderValues, int n)
+    {  
+       Arrays.sort(anyOldOrderValues);
+       
+       int[] xx=Arrays.copyOfRange(anyOldOrderValues,anyOldOrderValues.length-n,anyOldOrderValues.length);
+        
+       return xx;
+                
+    }
+    
+   
     
     public static void main(String[] args) 
     {
-        FindTopValuesImpl x=new FindTopValuesImpl();
-       int[] anyOldOrderValues = {120, 5, 0, 999, 77,-999,55,34,-2,65,2,-1};
-        
-       Arrays.sort(anyOldOrderValues);
-       System.out.println(Arrays.toString(anyOldOrderValues));
+       FindTopValuesImpl x=new FindTopValuesImpl();
+       Integer[] anyOldOrderValues = {120, 5, 0, 999, 77,-999,55,34,-2,65,2,-1};
        
-       System.out.println(x.findMaxValue(anyOldOrderValues));        
+       //x.findMaxValue(anyOldOrderValues, 5);
+       //x.findTopNValuesGuava(anyOldOrderValues, 5);
         
-       System.out.println(Arrays.toString(x.findTopNValues(anyOldOrderValues, 5)));
+       //Arrays.sort(anyOldOrderValues);
+       //System.out.println(Arrays.toString(anyOldOrderValues));
+       
+       //System.out.println(x.findMaxValue(anyOldOrderValues));        
+        
+       //System.out.println(Arrays.toString(x.findTopNValues(anyOldOrderValues, 5)));
     }
 
     
 }
 
-class MyComparator implements Comparator<Integer>
+
+class ReverseComparator<T> implements Comparator<Comparable<Object>>
 {
 
     @Override
-    public int compare(Integer o1, Integer o2)
-    {
-        
-        if(o2 > o1)
-        {
-            return 1;
-        }
-        else
-        {
-            return 0;
-        }
-           
+    public int compare(Comparable<Object> c1, Comparable<Object> c2)
+    {        
+        return c2.compareTo(c1);           
     }
-
-    
     
 }
