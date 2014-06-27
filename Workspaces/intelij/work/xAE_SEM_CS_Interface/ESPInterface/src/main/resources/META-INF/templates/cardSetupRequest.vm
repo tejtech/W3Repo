@@ -1,5 +1,0 @@
-##parse("messageHeader.vm")
-Card Setup Request sent
-  Type : ${responseType}
-  Tracking Reference : ${trackingReference}
-  Status : ${status}
